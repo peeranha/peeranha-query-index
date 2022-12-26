@@ -1,0 +1,9 @@
+region: 'us-east-2'
+environment:
+  ENV: 'test'
+  REGION: 'us-east-2'
+  AWS_ACCOUNT_ID: '939077196930'
+
+  SECURITY_GROUP_ID: 'sg-b90a3dde'
+  SUBNET_ID_1: 'subnet-f4be9c8e'
+  SUBNET_ID_2: 'subnet-0b05f160'

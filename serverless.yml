@@ -1,0 +1,47 @@
+service: peeranha-query-index
+
+custom:
+  stage: ${opt:stage, 'offline'}
+  region: ${file(./stages/${self:custom.stage}.yml):region}
+  webpack:
+    webpackConfig: 'webpack.config.js'
+  serverless-offline:
+    httpPort: 4000
+    noPrependStageInUrl: true
+    ignoreJWTSignature: true
+
+provider:
+  name: aws
+  region: ${self:custom.region}
+  runtime: nodejs16.x
+  environment: ${file(./stages/${self:custom.stage}.yml):environment}
+  memorySize: 512
+  timeout: 10
+  logRetentionInDays: 90
+  lambdaHashingVersion: 20201221 # https://www.serverless.com/framework/docs/deprecations/#LAMBDA_HASHING_VERSION_V2
+  logs:
+    httpApi: true
+  httpApi:
+    cors: true
+
+
+functions:
+  graphql:
+    handler: src/handlers/graphql.handler
+    events:
+      - httpApi:
+          path: '/graphql'
+          method: 'POST'
+    vpc:
+      securityGroupIds:
+        - ${self:provider.environment.SECURITY_GROUP_ID}
+      subnetIds:
+        - ${self:provider.environment.SUBNET_ID_1}
+        - ${self:provider.environment.SUBNET_ID_2}
+
+package:
+  individually: true
+
+plugins:
+  - serverless-webpack
+  - serverless-offline

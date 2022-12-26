@@ -1,0 +1,18 @@
+sources:
+  - name: Peeranha
+    handler:
+      mysql:
+        host: {{host}}
+        port: {{port}}
+        user: {{user}}
+        password: {{password}}
+        database: {{database}}
+transforms:
+  - filterSchema:
+      mode: bare | wrap
+      filters:
+        - Mutation.!*
+        - Type.!{knex_migrations, knex_migrations_lock}
+        - Query.!{count_knex_migrations, count_knex_migrations_lock}
+serve:
+  endpoint: /graphql

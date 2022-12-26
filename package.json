@@ -1,0 +1,48 @@
+{
+  "name": "peeranha-query-index",
+  "version": "1.0.0",
+  "scripts": {
+    "prepare:offline": "mustache config/offline.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
+    "prepare:dev1": "mustache config/dev1.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
+    "prepare:test": "mustache config/test.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
+    "dev": "cross-env sls offline start --stage offline",
+    "deploy:test": "cross-env sls deploy --stage test",
+    "remove:test": "sls remove --stage test",
+    "deploy:dev1": "cross-env sls deploy --stage dev1",
+    "remove:dev1": "sls remove --stage dev1",
+    "deploy:dev2": "cross-env sls deploy --stage dev2",
+    "remove:dev2": "sls remove --stage dev2",
+    "deploy:dev3": "cross-env sls deploy --stage dev3",
+    "remove:dev3": "sls remove --stage dev3",
+    "deploy:staging": "cross-env sls deploy --stage staging",
+    "remove:staging": "sls remove --stage staging",
+    "deploy:prod": "cross-env sls deploy --stage prod",
+    "remove:prod": "sls remove --stage prod"
+  },
+  "dependencies": {
+    "@graphql-mesh/cli": "^0.82.6",
+    "@graphql-mesh/mysql": "^0.19.2",
+    "@graphql-mesh/transform-filter-schema": "^0.15.5",
+    "cross-fetch": "^3.1.5"
+  },
+  "devDependencies": {
+    "@babel/plugin-proposal-class-properties": "^7.18.6",
+    "@babel/plugin-proposal-nullish-coalescing-operator": "^7.18.6",
+    "@babel/plugin-proposal-optional-chaining": "^7.18.9",
+    "@babel/plugin-transform-runtime": "^7.19.6",
+    "@babel/preset-env": "^7.20.2",
+    "babel-loader": "^9.1.0",
+    "babel-plugin-source-map-support": "^2.2.0",
+    "cross-env": "^7.0.3",
+    "fork-ts-checker-webpack-plugin": "^7.2.13",
+    "graphql-tag": "^2.12.6",
+    "mustache": "^4.2.0",
+    "serverless": "^3.26.0",
+    "serverless-offline": "^12.0.2",
+    "serverless-webpack": "^5.11.0",
+    "ts-loader": "^9.4.2",
+    "tsconfig-paths-webpack-plugin": "^4.0.0",
+    "typescript": "^4.9.4",
+    "webpack": "^5.75.0"
+  }
+}
