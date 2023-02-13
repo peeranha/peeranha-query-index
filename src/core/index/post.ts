@@ -455,6 +455,10 @@ export async function updatePostContent(
       );
     }
 
+    if (post.postType === peeranhaPost.postType) {
+      promises.push(updatePostUsersRatings(post));
+    }
+
     postForSave.communityId = peeranhaPost.communityId;
     promises.push(updatePostUsersRatings(postForSave));
   }
