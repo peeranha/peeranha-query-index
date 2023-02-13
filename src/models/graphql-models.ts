@@ -1,4 +1,4 @@
-import { BadRequestError } from '../errors';
+import { BadRequestError } from '../core/errors';
 
 export class ExecuteQueryRequest {
   public query: string;

@@ -146,8 +146,7 @@ function getPlugins() {
     new webpack.IgnorePlugin({
       resourceRegExp: /^\.\/locale$/,
       contextRegExp: /moment$/,
-    }),
-    new webpack.HotModuleReplacementPlugin()
+    })
   );
 
   return plugins;

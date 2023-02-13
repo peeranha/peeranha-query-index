@@ -13,3 +13,5 @@ jspm_packages
 
 config/*
 !config/offline.json
+
+.env

@@ -1,15 +1,15 @@
 import * as querystring from 'querystring';
 
 import fetch from 'cross-fetch';
+
+import { log, LogLevel } from './logger';
 import {
   UnauthorizedError,
   BadRequestError,
   NotFoundError,
   ForbiddenError,
   BadRequestErrorWithBody,
-} from './errors';
-
-import { log, LogLevel } from './logger';
+} from '../errors';
 
 global.fetch = fetch;
 
@@ -129,7 +129,7 @@ export function getHttpResponse(
         ? JSON.stringify(responseObj)
         : responseObj,
     headers: {
-      'Access-Control-Allow-Origin': process.env.CORS_ALLOW_ORIGIN,
+      'Access-Control-Allow-Origin': '*',
       'Access-Control-Allow-Methods': '*',
       'Content-Type': (() => {
         if (responseType === ResponseType.HTML) return ResponseTypeHeaders.HTML;
@@ -188,34 +188,5 @@ export async function handleRequest(
   event: any,
   responseType: ResponseType = ResponseType.JSON
 ): Promise<any> {
-  return baseHandleRequest(
-    RequestModelType,
-    handlerFunc,
-    event,
-    responseType
-  );
-}
-
-export async function handleWeb3AuthenticatedRequest(
-  RequestModelType: new (req: any) => any,
-  handlerFunc: (params: any) => any,
-  event: any
-): Promise<any> {
-  return baseHandleRequest(
-    RequestModelType,
-    handlerFunc,
-    event
-  );
-}
-
-export async function handleDashboardAuthenticatedRequest(
-  RequestModelType: new (req: any) => any,
-  handlerFunc: (params: any) => any,
-  event: any
-): Promise<any> {
-  return baseHandleRequest(
-    RequestModelType,
-    handlerFunc,
-    event
-  );
+  return baseHandleRequest(RequestModelType, handlerFunc, event, responseType);
 }

@@ -10,34 +10,34 @@ type Query {
   count_comment(where: comment_WhereInput): Int
   community(limit: Int, offset: Int, where: community_WhereInput, orderBy: community_OrderByInput): [community]
   count_community(where: community_WhereInput): Int
-  communityDocumentation(limit: Int, offset: Int, where: communityDocumentation_WhereInput, orderBy: communityDocumentation_OrderByInput): [communityDocumentation]
-  count_communityDocumentation(where: communityDocumentation_WhereInput): Int
-  contractInfo(limit: Int, offset: Int, where: contractInfo_WhereInput, orderBy: contractInfo_OrderByInput): [contractInfo]
-  count_contractInfo(where: contractInfo_WhereInput): Int
+  communitydocumentation(limit: Int, offset: Int, where: communitydocumentation_WhereInput, orderBy: communitydocumentation_OrderByInput): [communitydocumentation]
+  count_communitydocumentation(where: communitydocumentation_WhereInput): Int
+  contractinfo(limit: Int, offset: Int, where: contractinfo_WhereInput, orderBy: contractinfo_OrderByInput): [contractinfo]
+  count_contractinfo(where: contractinfo_WhereInput): Int
   history(limit: Int, offset: Int, where: history_WhereInput, orderBy: history_OrderByInput): [history]
   count_history(where: history_WhereInput): Int
   period(limit: Int, offset: Int, where: period_WhereInput, orderBy: period_OrderByInput): [period]
   count_period(where: period_WhereInput): Int
   post(limit: Int, offset: Int, where: post_WhereInput, orderBy: post_OrderByInput): [post]
   count_post(where: post_WhereInput): Int
-  postTag(limit: Int, offset: Int, where: postTag_WhereInput, orderBy: postTag_OrderByInput): [postTag]
-  count_postTag(where: postTag_WhereInput): Int
+  posttag(limit: Int, offset: Int, where: posttag_WhereInput, orderBy: posttag_OrderByInput): [posttag]
+  count_posttag(where: posttag_WhereInput): Int
   reply(limit: Int, offset: Int, where: reply_WhereInput, orderBy: reply_OrderByInput): [reply]
   count_reply(where: reply_WhereInput): Int
   tag(limit: Int, offset: Int, where: tag_WhereInput, orderBy: tag_OrderByInput): [tag]
   count_tag(where: tag_WhereInput): Int
   user(limit: Int, offset: Int, where: user_WhereInput, orderBy: user_OrderByInput): [user]
   count_user(where: user_WhereInput): Int
-  userAchievement(limit: Int, offset: Int, where: userAchievement_WhereInput, orderBy: userAchievement_OrderByInput): [userAchievement]
-  count_userAchievement(where: userAchievement_WhereInput): Int
-  userCommunity(limit: Int, offset: Int, where: userCommunity_WhereInput, orderBy: userCommunity_OrderByInput): [userCommunity]
-  count_userCommunity(where: userCommunity_WhereInput): Int
-  userCommunityRating(limit: Int, offset: Int, where: userCommunityRating_WhereInput, orderBy: userCommunityRating_OrderByInput): [userCommunityRating]
-  count_userCommunityRating(where: userCommunityRating_WhereInput): Int
-  userPermission(limit: Int, offset: Int, where: userPermission_WhereInput, orderBy: userPermission_OrderByInput): [userPermission]
-  count_userPermission(where: userPermission_WhereInput): Int
-  userReward(limit: Int, offset: Int, where: userReward_WhereInput, orderBy: userReward_OrderByInput): [userReward]
-  count_userReward(where: userReward_WhereInput): Int
+  userachievement(limit: Int, offset: Int, where: userachievement_WhereInput, orderBy: userachievement_OrderByInput): [userachievement]
+  count_userachievement(where: userachievement_WhereInput): Int
+  usercommunity(limit: Int, offset: Int, where: usercommunity_WhereInput, orderBy: usercommunity_OrderByInput): [usercommunity]
+  count_usercommunity(where: usercommunity_WhereInput): Int
+  usercommunityrating(limit: Int, offset: Int, where: usercommunityrating_WhereInput, orderBy: usercommunityrating_OrderByInput): [usercommunityrating]
+  count_usercommunityrating(where: usercommunityrating_WhereInput): Int
+  userpermission(limit: Int, offset: Int, where: userpermission_WhereInput, orderBy: userpermission_OrderByInput): [userpermission]
+  count_userpermission(where: userpermission_WhereInput): Int
+  userreward(limit: Int, offset: Int, where: userreward_WhereInput, orderBy: userreward_OrderByInput): [userreward]
+  count_userreward(where: userreward_WhereInput): Int
 }
 
 type achievement {
@@ -50,10 +50,10 @@ type achievement {
   description: String
   image: String
   attributes: String
-  userAchievement(limit: Int, offset: Int, where: userAchievement_WhereInput, orderBy: userAchievement_OrderByInput): [userAchievement]
+  userachievement(limit: Int, offset: Int, where: userachievement_WhereInput, orderBy: userachievement_OrderByInput): [userachievement]
 }
 
-type userAchievement {
+type userachievement {
   id: String!
   userId: String!
   achievementId: Int!
@@ -107,11 +107,11 @@ type user {
   history(limit: Int, offset: Int, where: history_WhereInput, orderBy: history_OrderByInput): [history]
   post(limit: Int, offset: Int, where: post_WhereInput, orderBy: post_OrderByInput): [post]
   reply(limit: Int, offset: Int, where: reply_WhereInput, orderBy: reply_OrderByInput): [reply]
-  userAchievement(limit: Int, offset: Int, where: userAchievement_WhereInput, orderBy: userAchievement_OrderByInput): [userAchievement]
-  userCommunity(limit: Int, offset: Int, where: userCommunity_WhereInput, orderBy: userCommunity_OrderByInput): [userCommunity]
-  userCommunityRating(limit: Int, offset: Int, where: userCommunityRating_WhereInput, orderBy: userCommunityRating_OrderByInput): [userCommunityRating]
-  userPermission(limit: Int, offset: Int, where: userPermission_WhereInput, orderBy: userPermission_OrderByInput): [userPermission]
-  userReward(limit: Int, offset: Int, where: userReward_WhereInput, orderBy: userReward_OrderByInput): [userReward]
+  userachievement(limit: Int, offset: Int, where: userachievement_WhereInput, orderBy: userachievement_OrderByInput): [userachievement]
+  usercommunity(limit: Int, offset: Int, where: usercommunity_WhereInput, orderBy: usercommunity_OrderByInput): [usercommunity]
+  usercommunityrating(limit: Int, offset: Int, where: usercommunityrating_WhereInput, orderBy: usercommunityrating_OrderByInput): [usercommunityrating]
+  userpermission(limit: Int, offset: Int, where: userpermission_WhereInput, orderBy: userpermission_OrderByInput): [userpermission]
+  userreward(limit: Int, offset: Int, where: userreward_WhereInput, orderBy: userreward_OrderByInput): [userreward]
 }
 
 type comment {
@@ -122,13 +122,11 @@ type comment {
   rating: Int
   postTime: Int!
   postId: String!
-  parentReplyId: String
+  parentReplyId: Int
   content: String!
   isDeleted: Int
   post(where: post_WhereInput, orderBy: post_OrderByInput, limit: Int, offset: Int): [post]
-  reply(where: reply_WhereInput, orderBy: reply_OrderByInput, limit: Int, offset: Int): [reply]
   user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
-  history(limit: Int, offset: Int, where: history_WhereInput, orderBy: history_OrderByInput): [history]
 }
 
 type post {
@@ -149,11 +147,13 @@ type post {
   isDeleted: Int
   officialReply: Int
   bestReply: Int
+  handle: String
+  messengerType: Int
   comment(limit: Int, offset: Int, where: comment_WhereInput, orderBy: comment_OrderByInput): [comment]
   history(limit: Int, offset: Int, where: history_WhereInput, orderBy: history_OrderByInput): [history]
   community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
   user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
-  postTag(limit: Int, offset: Int, where: postTag_WhereInput, orderBy: postTag_OrderByInput): [postTag]
+  posttag(limit: Int, offset: Int, where: posttag_WhereInput, orderBy: posttag_OrderByInput): [posttag]
   reply(limit: Int, offset: Int, where: reply_WhereInput, orderBy: reply_OrderByInput): [reply]
 }
 
@@ -193,9 +193,7 @@ type history {
   eventName: String
   actionUser: String!
   timeStamp: Int!
-  comment(where: comment_WhereInput, orderBy: comment_OrderByInput, limit: Int, offset: Int): [comment]
   post(where: post_WhereInput, orderBy: post_OrderByInput, limit: Int, offset: Int): [post]
-  reply(where: reply_WhereInput, orderBy: reply_OrderByInput, limit: Int, offset: Int): [reply]
   user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
 }
 
@@ -217,6 +215,8 @@ input post_WhereInput {
   isDeleted: String
   officialReply: String
   bestReply: String
+  handle: String
+  messengerType: String
 }
 
 input post_OrderByInput {
@@ -237,52 +237,8 @@ input post_OrderByInput {
   isDeleted: OrderBy
   officialReply: OrderBy
   bestReply: OrderBy
-}
-
-type reply {
-  id: String!
-  ipfsHash: String
-  ipfsHash2: String
-  author: String!
-  rating: Int
-  postTime: Int!
-  postId: String!
-  parentReplyId: Int!
-  content: String!
-  commentCount: Int
-  isDeleted: Int
-  isOfficialReply: Int
-  isBestReply: Int
-  isFirstReply: Int
-  isQuickReply: Int
-  comment(limit: Int, offset: Int, where: comment_WhereInput, orderBy: comment_OrderByInput): [comment]
-  history(limit: Int, offset: Int, where: history_WhereInput, orderBy: history_OrderByInput): [history]
-  post(where: post_WhereInput, orderBy: post_OrderByInput, limit: Int, offset: Int): [post]
-  user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
-}
-
-input history_WhereInput {
-  id: String
-  transactionHash: String
-  postId: String
-  replyId: String
-  commentId: String
-  eventEntity: String
-  eventName: String
-  actionUser: String
-  timeStamp: String
-}
-
-input history_OrderByInput {
-  id: OrderBy
-  transactionHash: OrderBy
-  postId: OrderBy
-  replyId: OrderBy
-  commentId: OrderBy
-  eventEntity: OrderBy
-  eventName: OrderBy
-  actionUser: OrderBy
-  timeStamp: OrderBy
+  handle: OrderBy
+  messengerType: OrderBy
 }
 
 input user_WhereInput {
@@ -315,40 +271,28 @@ input user_OrderByInput {
   ipfsHash2: OrderBy
 }
 
-input reply_WhereInput {
+input history_WhereInput {
   id: String
-  ipfsHash: String
-  ipfsHash2: String
-  author: String
-  rating: String
-  postTime: String
+  transactionHash: String
   postId: String
-  parentReplyId: String
-  content: String
-  commentCount: String
-  isDeleted: String
-  isOfficialReply: String
-  isBestReply: String
-  isFirstReply: String
-  isQuickReply: String
+  replyId: String
+  commentId: String
+  eventEntity: String
+  eventName: String
+  actionUser: String
+  timeStamp: String
 }
 
-input reply_OrderByInput {
+input history_OrderByInput {
   id: OrderBy
-  ipfsHash: OrderBy
-  ipfsHash2: OrderBy
-  author: OrderBy
-  rating: OrderBy
-  postTime: OrderBy
+  transactionHash: OrderBy
   postId: OrderBy
-  parentReplyId: OrderBy
-  content: OrderBy
-  commentCount: OrderBy
-  isDeleted: OrderBy
-  isOfficialReply: OrderBy
-  isBestReply: OrderBy
-  isFirstReply: OrderBy
-  isQuickReply: OrderBy
+  replyId: OrderBy
+  commentId: OrderBy
+  eventEntity: OrderBy
+  eventName: OrderBy
+  actionUser: OrderBy
+  timeStamp: OrderBy
 }
 
 type community {
@@ -368,15 +312,14 @@ type community {
   followingUsers: Int
   ipfsHash: String
   ipfsHash2: String
-  communityDocumentation(limit: Int, offset: Int, where: communityDocumentation_WhereInput, orderBy: communityDocumentation_OrderByInput): [communityDocumentation]
+  communitydocumentation(limit: Int, offset: Int, where: communitydocumentation_WhereInput, orderBy: communitydocumentation_OrderByInput): [communitydocumentation]
   post(limit: Int, offset: Int, where: post_WhereInput, orderBy: post_OrderByInput): [post]
-  postTag(limit: Int, offset: Int, where: postTag_WhereInput, orderBy: postTag_OrderByInput): [postTag]
   tag(limit: Int, offset: Int, where: tag_WhereInput, orderBy: tag_OrderByInput): [tag]
-  userCommunity(limit: Int, offset: Int, where: userCommunity_WhereInput, orderBy: userCommunity_OrderByInput): [userCommunity]
-  userCommunityRating(limit: Int, offset: Int, where: userCommunityRating_WhereInput, orderBy: userCommunityRating_OrderByInput): [userCommunityRating]
+  usercommunity(limit: Int, offset: Int, where: usercommunity_WhereInput, orderBy: usercommunity_OrderByInput): [usercommunity]
+  usercommunityrating(limit: Int, offset: Int, where: usercommunityrating_WhereInput, orderBy: usercommunityrating_OrderByInput): [usercommunityrating]
 }
 
-type communityDocumentation {
+type communitydocumentation {
   id: Int!
   documentationJSON: String
   ipfsHash: String
@@ -421,39 +364,16 @@ input community_OrderByInput {
   ipfsHash2: OrderBy
 }
 
-input communityDocumentation_WhereInput {
+input communitydocumentation_WhereInput {
   id: String
   documentationJSON: String
   ipfsHash: String
 }
 
-input communityDocumentation_OrderByInput {
+input communitydocumentation_OrderByInput {
   id: OrderBy
   documentationJSON: OrderBy
   ipfsHash: OrderBy
-}
-
-type postTag {
-  id: String!
-  postId: String!
-  communityId: Int!
-  tagId: Int!
-  community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
-  post(where: post_WhereInput, orderBy: post_OrderByInput, limit: Int, offset: Int): [post]
-}
-
-input postTag_WhereInput {
-  id: String
-  postId: String
-  communityId: String
-  tagId: String
-}
-
-input postTag_OrderByInput {
-  id: OrderBy
-  postId: OrderBy
-  communityId: OrderBy
-  tagId: OrderBy
 }
 
 type tag {
@@ -465,7 +385,16 @@ type tag {
   deletedPostCount: Int
   ipfsHash: String
   ipfsHash2: String
+  posttag(limit: Int, offset: Int, where: posttag_WhereInput, orderBy: posttag_OrderByInput): [posttag]
   community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
+}
+
+type posttag {
+  id: String!
+  postId: String!
+  tagId: String!
+  post(where: post_WhereInput, orderBy: post_OrderByInput, limit: Int, offset: Int): [post]
+  tag(where: tag_WhereInput, orderBy: tag_OrderByInput, limit: Int, offset: Int): [tag]
 }
 
 input tag_WhereInput {
@@ -490,7 +419,19 @@ input tag_OrderByInput {
   ipfsHash2: OrderBy
 }
 
-type userCommunity {
+input posttag_WhereInput {
+  id: String
+  postId: String
+  tagId: String
+}
+
+input posttag_OrderByInput {
+  id: OrderBy
+  postId: OrderBy
+  tagId: OrderBy
+}
+
+type usercommunity {
   id: String!
   userId: String!
   communityId: Int!
@@ -498,19 +439,19 @@ type userCommunity {
   user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
 }
 
-input userCommunity_WhereInput {
+input usercommunity_WhereInput {
   id: String
   userId: String
   communityId: String
 }
 
-input userCommunity_OrderByInput {
+input usercommunity_OrderByInput {
   id: OrderBy
   userId: OrderBy
   communityId: OrderBy
 }
 
-type userCommunityRating {
+type usercommunityrating {
   id: String!
   communityId: Int!
   rating: Int
@@ -519,52 +460,114 @@ type userCommunityRating {
   user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
 }
 
-input userCommunityRating_WhereInput {
+input usercommunityrating_WhereInput {
   id: String
   communityId: String
   rating: String
   userId: String
 }
 
-input userCommunityRating_OrderByInput {
+input usercommunityrating_OrderByInput {
   id: OrderBy
   communityId: OrderBy
   rating: OrderBy
   userId: OrderBy
 }
 
-input userAchievement_WhereInput {
+type reply {
+  id: String!
+  ipfsHash: String
+  ipfsHash2: String
+  author: String!
+  rating: Int
+  postTime: Int!
+  postId: String!
+  parentReplyId: Int!
+  content: String!
+  commentCount: Int
+  isDeleted: Int
+  isOfficialReply: Int
+  isBestReply: Int
+  isFirstReply: Int
+  isQuickReply: Int
+  handle: String
+  messengerType: Int
+  post(where: post_WhereInput, orderBy: post_OrderByInput, limit: Int, offset: Int): [post]
+  user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
+}
+
+input reply_WhereInput {
+  id: String
+  ipfsHash: String
+  ipfsHash2: String
+  author: String
+  rating: String
+  postTime: String
+  postId: String
+  parentReplyId: String
+  content: String
+  commentCount: String
+  isDeleted: String
+  isOfficialReply: String
+  isBestReply: String
+  isFirstReply: String
+  isQuickReply: String
+  handle: String
+  messengerType: String
+}
+
+input reply_OrderByInput {
+  id: OrderBy
+  ipfsHash: OrderBy
+  ipfsHash2: OrderBy
+  author: OrderBy
+  rating: OrderBy
+  postTime: OrderBy
+  postId: OrderBy
+  parentReplyId: OrderBy
+  content: OrderBy
+  commentCount: OrderBy
+  isDeleted: OrderBy
+  isOfficialReply: OrderBy
+  isBestReply: OrderBy
+  isFirstReply: OrderBy
+  isQuickReply: OrderBy
+  handle: OrderBy
+  messengerType: OrderBy
+}
+
+input userachievement_WhereInput {
   id: String
   userId: String
   achievementId: String
 }
 
-input userAchievement_OrderByInput {
+input userachievement_OrderByInput {
   id: OrderBy
   userId: OrderBy
   achievementId: OrderBy
 }
 
-type userPermission {
+type userpermission {
   id: String!
   userId: String!
   permission: String!
   user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
 }
 
-input userPermission_WhereInput {
+input userpermission_WhereInput {
   id: String
   userId: String
   permission: String
 }
 
-input userPermission_OrderByInput {
+input userpermission_OrderByInput {
   id: OrderBy
   userId: OrderBy
   permission: OrderBy
 }
 
-type userReward {
+type userreward {
   id: String!
   periodId: Int!
   userId: String!
@@ -579,10 +582,10 @@ type period {
   startPeriodTime: Int!
   endPeriodTime: Int!
   isFinished: Int!
-  userReward(limit: Int, offset: Int, where: userReward_WhereInput, orderBy: userReward_OrderByInput): [userReward]
+  userreward(limit: Int, offset: Int, where: userreward_WhereInput, orderBy: userreward_OrderByInput): [userreward]
 }
 
-input userReward_WhereInput {
+input userreward_WhereInput {
   id: String
   periodId: String
   userId: String
@@ -590,7 +593,7 @@ input userReward_WhereInput {
   isPaid: String
 }
 
-input userReward_OrderByInput {
+input userreward_OrderByInput {
   id: OrderBy
   periodId: OrderBy
   userId: OrderBy
@@ -612,26 +615,29 @@ input period_OrderByInput {
   isFinished: OrderBy
 }
 
-type contractInfo {
+type contractinfo {
   id: String!
   deployTime: Int!
   periodLength: Int!
   lastUpdatePeriod: Int
 }
 
-input contractInfo_WhereInput {
+input contractinfo_WhereInput {
   id: String
   deployTime: String
   periodLength: String
   lastUpdatePeriod: String
 }
 
-input contractInfo_OrderByInput {
+input contractinfo_OrderByInput {
   id: OrderBy
   deployTime: OrderBy
   periodLength: OrderBy
   lastUpdatePeriod: OrderBy
 }
+
+"Integers that will have a value of 0 or more."
+scalar UnsignedInt
 
 "The javascript `Date` as integer. Type represents date and time as number of milliseconds from start of UNIX epoch."
 scalar Timestamp
@@ -694,7 +700,7 @@ input comment_InsertInput {
   rating: Int
   postTime: Int!
   postId: String!
-  parentReplyId: String
+  parentReplyId: Int
   content: String!
   isDeleted: Int
 }
@@ -707,7 +713,7 @@ input comment_UpdateInput {
   rating: Int
   postTime: Int
   postId: String
-  parentReplyId: String
+  parentReplyId: Int
   content: String
   isDeleted: Int
 }
@@ -750,26 +756,26 @@ input community_UpdateInput {
   ipfsHash2: String
 }
 
-input communityDocumentation_InsertInput {
+input communitydocumentation_InsertInput {
   id: Int!
   documentationJSON: String
   ipfsHash: String
 }
 
-input communityDocumentation_UpdateInput {
+input communitydocumentation_UpdateInput {
   id: Int
   documentationJSON: String
   ipfsHash: String
 }
 
-input contractInfo_InsertInput {
+input contractinfo_InsertInput {
   id: String!
   deployTime: Int!
   periodLength: Int!
   lastUpdatePeriod: Int
 }
 
-input contractInfo_UpdateInput {
+input contractinfo_UpdateInput {
   id: String
   deployTime: Int
   periodLength: Int
@@ -801,26 +807,26 @@ input history_UpdateInput {
 }
 
 input knex_migrations_InsertInput {
-  id: Int!
+  id: UnsignedInt!
   name: String
   batch: Int
   migration_time: Timestamp
 }
 
 input knex_migrations_UpdateInput {
-  id: Int
+  id: UnsignedInt
   name: String
   batch: Int
   migration_time: Timestamp
 }
 
 input knex_migrations_lock_InsertInput {
-  index: Int!
+  index: UnsignedInt!
   is_locked: Int
 }
 
 input knex_migrations_lock_UpdateInput {
-  index: Int
+  index: UnsignedInt
   is_locked: Int
 }
 
@@ -856,6 +862,8 @@ input post_InsertInput {
   isDeleted: Int
   officialReply: Int
   bestReply: Int
+  handle: String
+  messengerType: Int
 }
 
 input post_UpdateInput {
@@ -876,20 +884,20 @@ input post_UpdateInput {
   isDeleted: Int
   officialReply: Int
   bestReply: Int
+  handle: String
+  messengerType: Int
 }
 
-input postTag_InsertInput {
+input posttag_InsertInput {
   id: String!
   postId: String!
-  communityId: Int!
-  tagId: Int!
+  tagId: String!
 }
 
-input postTag_UpdateInput {
+input posttag_UpdateInput {
   id: String
   postId: String
-  communityId: Int
-  tagId: Int
+  tagId: String
 }
 
 input reply_InsertInput {
@@ -908,6 +916,8 @@ input reply_InsertInput {
   isBestReply: Int
   isFirstReply: Int
   isQuickReply: Int
+  handle: String
+  messengerType: Int
 }
 
 input reply_UpdateInput {
@@ -926,6 +936,8 @@ input reply_UpdateInput {
   isBestReply: Int
   isFirstReply: Int
   isQuickReply: Int
+  handle: String
+  messengerType: Int
 }
 
 input tag_InsertInput {
@@ -980,57 +992,57 @@ input user_UpdateInput {
   ipfsHash2: String
 }
 
-input userAchievement_InsertInput {
+input userachievement_InsertInput {
   id: String!
   userId: String!
   achievementId: Int!
 }
 
-input userAchievement_UpdateInput {
+input userachievement_UpdateInput {
   id: String
   userId: String
   achievementId: Int
 }
 
-input userCommunity_InsertInput {
+input usercommunity_InsertInput {
   id: String!
   userId: String!
   communityId: Int!
 }
 
-input userCommunity_UpdateInput {
+input usercommunity_UpdateInput {
   id: String
   userId: String
   communityId: Int
 }
 
-input userCommunityRating_InsertInput {
+input usercommunityrating_InsertInput {
   id: String!
   communityId: Int!
   rating: Int
   userId: String!
 }
 
-input userCommunityRating_UpdateInput {
+input usercommunityrating_UpdateInput {
   id: String
   communityId: Int
   rating: Int
   userId: String
 }
 
-input userPermission_InsertInput {
+input userpermission_InsertInput {
   id: String!
   userId: String!
   permission: String!
 }
 
-input userPermission_UpdateInput {
+input userpermission_UpdateInput {
   id: String
   userId: String
   permission: String
 }
 
-input userReward_InsertInput {
+input userreward_InsertInput {
   id: String!
   periodId: Int!
   userId: String!
@@ -1038,7 +1050,7 @@ input userReward_InsertInput {
   isPaid: Int
 }
 
-input userReward_UpdateInput {
+input userreward_UpdateInput {
   id: String
   periodId: Int
   userId: String

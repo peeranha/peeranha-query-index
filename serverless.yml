@@ -5,8 +5,9 @@ custom:
   region: ${file(./stages/${self:custom.stage}.yml):region}
   webpack:
     webpackConfig: 'webpack.config.js'
+    includeModules: true
   serverless-offline:
-    httpPort: 4000
+    httpPort: 5000
     noPrependStageInUrl: true
     ignoreJWTSignature: true
 
@@ -17,13 +18,25 @@ provider:
   environment: ${file(./stages/${self:custom.stage}.yml):environment}
   memorySize: 512
   timeout: 10
-  logRetentionInDays: 90
-  lambdaHashingVersion: 20201221 # https://www.serverless.com/framework/docs/deprecations/#LAMBDA_HASHING_VERSION_V2
+  logRetentionInDays: 30
+  lambdaHashingVersion: 20201221
   logs:
     httpApi: true
   httpApi:
     cors: true
-
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - secretsmanager:GetSecretValue
+          Resource: "*"
+  vpc:
+    securityGroupIds:
+      - ${self:provider.environment.SECURITY_GROUP_ID}
+    subnetIds:
+      - ${self:provider.environment.SUBNET_ID_1}
+      - ${self:provider.environment.SUBNET_ID_2}
 
 functions:
   graphql:
@@ -32,12 +45,20 @@ functions:
       - httpApi:
           path: '/graphql'
           method: 'POST'
-    vpc:
-      securityGroupIds:
-        - ${self:provider.environment.SECURITY_GROUP_ID}
-      subnetIds:
-        - ${self:provider.environment.SUBNET_ID_1}
-        - ${self:provider.environment.SUBNET_ID_2}
+
+  blockchain-db-period-trigger:
+    handler: src/handlers/blockchain-db-period-trigger.handler
+    timeout: 300
+    events:
+      - schedule:
+          name: blockchain-db-period-trigger-${self:custom.stage}
+          rate: rate(5 minutes)    
+
+  indexing-queue:
+    handler: src/handlers/indexing-queue.handler
+    timeout: 50
+    events:
+      - sqs: arn:aws:sqs:${self:custom.region}:${self:provider.environment.AWS_ACCOUNT_ID}:${self:provider.environment.QUEUE_NAME}
 
 package:
   individually: true
@@ -45,3 +66,4 @@ package:
 plugins:
   - serverless-webpack
   - serverless-offline
+  - serverless-dotenv-plugin
