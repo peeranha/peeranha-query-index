@@ -96,6 +96,10 @@ export async function handleConfigureNewAchievement(
 }
 
 export async function handleTransfer(eventModel: TransferEventModel) {
+  if (eventModel.contractAddress === process.env.TOKEN_CONTRACT_ADDRESS) {
+    return;
+  }
+
   const { timestamp } = eventModel;
   const to = eventModel.to.toLowerCase();
   const tokenId = Math.floor(Number(eventModel.tokenId.hex) / POOL_NFT + 1);
