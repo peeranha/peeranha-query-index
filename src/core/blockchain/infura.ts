@@ -48,7 +48,7 @@ export async function getDelegateUserSigner(
   log(`Use the last resort account to submit meta transaction`, LogLevel.WARN);
 
   const wallet = new ethers.Wallet(
-    await getSecretValue(`DELEGATE_USER_PRIVATE_KEY_${walletsCount}`)
+    await getSecretValue(`${DELEGATE_USER_PRIVATE_KEY}${walletsCount}`)
   );
   return wallet;
 }

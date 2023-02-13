@@ -30,8 +30,6 @@ export async function indexingPeriods() {
     contractInfo.lastUpdatePeriod += 1;
   }
 
-  const userRewardsPromises: Promise<void>[] = [];
-
   const period = Math.min(
     await getPeriod(),
     contractInfo.lastUpdatePeriod + 5 * (process.env.ENV === 'prod' ? 1 : 10)
@@ -58,7 +56,7 @@ export async function indexingPeriods() {
     const previousPeriod = lastUpdatePeriod - 2;
     if (previousPeriod >= 0) {
       const timestamp = startPeriodTime - contractInfo.periodLength * 2;
-      userRewardsPromises.push(indexingUserReward(previousPeriod, timestamp));
+      await indexingUserReward(previousPeriod, timestamp);
 
       const previousPeriodEntity = await periodRepository.get(previousPeriod);
       if (previousPeriodEntity) {
@@ -68,8 +66,6 @@ export async function indexingPeriods() {
       }
     }
   }
-
-  await Promise.all(userRewardsPromises);
 
   await contractInfoRepository.update(USER_CONTRACT_ADDRESS, {
     lastUpdatePeriod: period,
