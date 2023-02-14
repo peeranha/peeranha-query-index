@@ -1,6 +1,6 @@
-import { handleListenSecondWebhook } from 'src/controllers/event-listener-controller';
+import { handleListenWebhook } from 'src/controllers/event-listener-controller';
 import { handleRequest } from 'src/core/utils/http';
-import { EventListenerRequest } from 'src/models/event-models';
+import { SecondEventListenerRequest } from 'src/models/event-models';
 
 export const handler = async (event: any) =>
-  handleRequest(EventListenerRequest, handleListenSecondWebhook, event);
+  handleRequest(SecondEventListenerRequest, handleListenWebhook, event);
