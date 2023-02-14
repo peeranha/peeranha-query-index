@@ -7,7 +7,7 @@ export async function publishSlackMessage(
   id: string,
   message: string
 ): Promise<void> {
-  log(`Send monitoring message to Slack channel: ${id}`);
+  log(`Send message to Slack channel: ${id}`);
   log(`Message: ${message}`);
   const accessToken = await getSecretValue('SLACK_OAUTH_TOKEN');
 

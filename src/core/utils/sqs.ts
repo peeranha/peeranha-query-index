@@ -1,8 +1,44 @@
+import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
 import { DatabaseManager } from 'src/core/db/db-manager';
 import { getSecretValue } from 'src/core/utils/secrets';
 import { publishSlackMessage } from 'src/core/utils/slack';
 
 import { log, LogLevel } from './logger';
+
+export enum QueueNames {
+  FirstQueue = 'firstQueue.fifo',
+  SecondQueue = 'secondQueue.fifo',
+}
+
+const client = new SQSClient({
+  region: process.env.REGION,
+});
+
+const QUEUE_URL = `https://sqs.${process.env.REGION}.amazonaws.com/${
+  process.env.ENV === 'offline' ? 'queue' : process.env.AWS_ACCOUNT_ID
+}/`;
+
+export async function pushToSQS(queueName: string, content: any) {
+  try {
+    const command = new SendMessageCommand({
+      QueueUrl: QUEUE_URL + queueName,
+      MessageBody: JSON.stringify(content),
+      MessageGroupId: 'event',
+    });
+
+    const result = await client.send(command);
+    log(
+      `Successfully published event to SQS. Message ID: ${
+        result.MessageId
+      } Model: ${JSON.stringify(content)}`,
+      LogLevel.DEBUG
+    );
+    return result;
+  } catch (err: any) {
+    log(`Unable to publish event to SQS. Error: ${err.stack}`);
+    throw err;
+  }
+}
 
 async function handleMessage(
   handlerFunc: (params: any) => any,
@@ -34,9 +70,10 @@ async function handleMessage(
 
 export async function handleSqsEvent(
   handlerFunc: (params: any) => any,
-  event: any
+  event: any,
+  queueName: string
 ) {
-  await DatabaseManager.initialize();
+  await DatabaseManager.initialize(queueName);
   const records = event.Records;
   for (let i = 0; i < records.length; i++) {
     /* eslint-disable no-await-in-loop */

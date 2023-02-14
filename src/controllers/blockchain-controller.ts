@@ -5,10 +5,18 @@ import {
   TriggerPeriodResponseModel,
 } from 'src/models/period-trigger-models';
 
-export async function triggerPeriodForDb(
-  _request: TriggerPeriodRequestModel
+export async function triggerPeriodForFirstDb(
+  request: TriggerPeriodRequestModel
 ): Promise<TriggerPeriodResponseModel> {
-  await DatabaseManager.initialize();
+  await DatabaseManager.initialize(request.queueName);
+  await indexingPeriods();
+  return new TriggerPeriodResponseModel();
+}
+
+export async function triggerPeriodForSecondDb(
+  request: TriggerPeriodRequestModel
+): Promise<TriggerPeriodResponseModel> {
+  await DatabaseManager.initialize(request.queueName);
   await indexingPeriods();
   return new TriggerPeriodResponseModel();
 }

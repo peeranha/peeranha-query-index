@@ -4,17 +4,6 @@ import peeranhaCommunityInterface from './abi/PeeranhaCommunity.json';
 import { BaseContractWrapper } from './base-contract-wrapper';
 
 export class PeeranhaCommunityWrapper extends BaseContractWrapper {
-  public async createUserByDelegate(
-    userAddress: string,
-    ipfsHashHex: string
-  ): Promise<string> {
-    const txObj = await this.contractWithSigner.createUserByDelegate(
-      userAddress,
-      ipfsHashHex
-    );
-    return txObj.hash;
-  }
-
   public async getCommunitiesCount(): Promise<number> {
     return this.contract.getCommunitiesCount();
   }

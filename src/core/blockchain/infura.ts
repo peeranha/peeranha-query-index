@@ -1,4 +1,4 @@
-import { ethers } from 'ethers';
+import { providers, Wallet } from 'ethers';
 import { getSecretValue } from 'src/core/utils/secrets';
 
 import { log, LogLevel } from '../utils/logger';
@@ -6,18 +6,18 @@ import { log, LogLevel } from '../utils/logger';
 export const DELEGATE_USERS_COUNT = 'DELEGATE_USERS_COUNT';
 export const DELEGATE_USER_PRIVATE_KEY = 'DELEGATE_USER_PRIVATE_KEY_';
 
-export async function createRpcProvider() {
-  return new ethers.providers.JsonRpcProvider(process.env.RPC_ENDPOINT);
+export function createRpcProvider() {
+  return new providers.JsonRpcProvider(process.env.RPC_ENDPOINT);
 }
 
 export async function getDelegateUserSigner(
-  provider: ethers.providers.BaseProvider
+  provider: providers.JsonRpcProvider
 ) {
   const walletsCount = Number(await getSecretValue(DELEGATE_USERS_COUNT));
 
   /* eslint-disable no-await-in-loop */
   for (let i = 0; i < walletsCount - 1; i++) {
-    const wallet = new ethers.Wallet(
+    const wallet = new Wallet(
       await getSecretValue(`${DELEGATE_USER_PRIVATE_KEY}${i + 1}`)
     );
 
@@ -47,7 +47,7 @@ export async function getDelegateUserSigner(
 
   log(`Use the last resort account to submit meta transaction`, LogLevel.WARN);
 
-  const wallet = new ethers.Wallet(
+  const wallet = new Wallet(
     await getSecretValue(`${DELEGATE_USER_PRIVATE_KEY}${walletsCount}`)
   );
   return wallet;

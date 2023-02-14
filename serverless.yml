@@ -30,6 +30,7 @@ provider:
         - Effect: Allow
           Action:
             - secretsmanager:GetSecretValue
+            - sqs:SendMessage
           Resource: "*"
   vpc:
     securityGroupIds:
@@ -46,19 +47,79 @@ functions:
           path: '/graphql'
           method: 'POST'
 
-  blockchain-db-period-trigger:
-    handler: src/handlers/blockchain-db-period-trigger.handler
+  first-period-trigger:
+    handler: src/handlers/first-period-trigger.handler
     timeout: 300
     events:
       - schedule:
-          name: blockchain-db-period-trigger-${self:custom.stage}
-          rate: rate(5 minutes)    
+          name: first-period-trigger-${self:custom.stage}
+          rate: rate(10 minutes)
 
-  indexing-queue:
-    handler: src/handlers/indexing-queue.handler
+  second-period-trigger:
+    handler: src/handlers/second-period-trigger.handler
+    timeout: 300
+    events:
+      - schedule:
+          name: second-period-trigger-${self:custom.stage}
+          rate: rate(10 minutes)
+  
+  first-polygon-event-listener-webhook:
+    handler: src/handlers/first-polygon-event-listener-webhook.handler
     timeout: 50
     events:
-      - sqs: arn:aws:sqs:${self:custom.region}:${self:provider.environment.AWS_ACCOUNT_ID}:${self:provider.environment.QUEUE_NAME}
+      - httpApi:
+          path: '/polygon-event-listener/first-webhook'
+          method: 'POST'
+  
+  second-polygon-event-listener-webhook:
+    handler: src/handlers/second-polygon-event-listener-webhook.handler
+    timeout: 50
+    events:
+      - httpApi:
+          path: '/polygon-event-listener/second-webhook'
+          method: 'POST'
+
+  first-indexing-queue:
+    handler: src/handlers/first-indexing-queue.handler
+    timeout: 50
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - firstQueue
+              - Arn
+
+  second-indexing-queue:
+    handler: src/handlers/second-indexing-queue.handler
+    timeout: 50
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - secondQueue
+              - Arn
+
+resources:
+  Resources:
+    firstQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: firstQueue.fifo
+        VisibilityTimeout: 50
+        FifoQueue: true
+        ContentBasedDeduplication: true
+        DeduplicationScope: messageGroup
+        FifoThroughputLimit: perMessageGroupId
+
+    secondQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: secondQueue.fifo
+        VisibilityTimeout: 50
+        FifoQueue: true
+        ContentBasedDeduplication: true
+        DeduplicationScope: messageGroup
+        FifoThroughputLimit: perMessageGroupId
 
 package:
   individually: true

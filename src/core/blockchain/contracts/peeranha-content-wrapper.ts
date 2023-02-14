@@ -5,17 +5,6 @@ import { BaseContractWrapper } from './base-contract-wrapper';
 import { Documentation } from '../entities/documentation';
 
 export class PeeranhaContentWrapper extends BaseContractWrapper {
-  public async createUserByDelegate(
-    userAddress: string,
-    ipfsHashHex: string
-  ): Promise<string> {
-    const txObj = await this.contractWithSigner.createUserByDelegate(
-      userAddress,
-      ipfsHashHex
-    );
-    return txObj.hash;
-  }
-
   public async getPost(postId: number): Promise<any> {
     return this.contract.getPost(postId);
   }
