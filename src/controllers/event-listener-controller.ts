@@ -31,7 +31,7 @@ import {
 } from 'src/core/blockchain/constants';
 import { createRpcProvider } from 'src/core/blockchain/infura';
 import { ConfigurationError } from 'src/core/errors';
-import { pushToSQS } from 'src/core/utils/sqs';
+import { pushToSQS, QueueNames } from 'src/core/utils/sqs';
 import {
   BaseEventModel,
   ChangePostTypeEventModel,
@@ -178,13 +178,26 @@ async function getEvents(transactions: any[]) {
   return getSortedEvents(eventModels);
 }
 
-export async function handleListenWebhook(
-  request: EventListenerRequest
+async function handleListenWebhook(
+  request: EventListenerRequest,
+  queueName: string
 ): Promise<void> {
   const events = await getEvents(request.transactions);
 
   // TODO: think about possible failed operations
   events.forEach(async (event) => {
-    await pushToSQS(request.queueName, event);
+    await pushToSQS(queueName, event);
   });
+}
+
+export async function handleListenFirstWebhook(
+  request: EventListenerRequest
+): Promise<void> {
+  await handleListenWebhook(request, QueueNames.FirstQueue);
+}
+
+export async function handleListenSecondWebhook(
+  request: EventListenerRequest
+): Promise<void> {
+  await handleListenWebhook(request, QueueNames.SecondQueue);
 }

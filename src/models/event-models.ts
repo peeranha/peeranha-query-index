@@ -1,5 +1,3 @@
-import { QueueNames } from 'src/core/utils/sqs';
-
 export class BaseEventModel {
   public contractEventName: string;
 
@@ -23,27 +21,12 @@ export class BaseEventModel {
 export class EventListenerRequest {
   public transactions: any[];
 
-  public queueName: string;
-
-  constructor(req: any, queueName: string) {
+  constructor(req: any) {
     const transactions: any[] = [];
     req.body.payload.forEach((item: any) =>
       transactions.push(...item.transactions)
     );
     this.transactions = transactions;
-    this.queueName = queueName;
-  }
-}
-
-export class FirstEventListenerRequest extends EventListenerRequest {
-  constructor(req: any) {
-    super(req, QueueNames.FirstQueue);
-  }
-}
-
-export class SecondEventListenerRequest extends EventListenerRequest {
-  constructor(req: any) {
-    super(req, QueueNames.SecondQueue);
   }
 }
 

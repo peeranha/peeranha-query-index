@@ -65,7 +65,7 @@ functions:
   
   first-polygon-event-listener-webhook:
     handler: src/handlers/first-polygon-event-listener-webhook.handler
-    timeout: 50
+    timeout: 30
     events:
       - httpApi:
           path: '/polygon-event-listener/first-webhook'
@@ -73,7 +73,7 @@ functions:
   
   second-polygon-event-listener-webhook:
     handler: src/handlers/second-polygon-event-listener-webhook.handler
-    timeout: 50
+    timeout: 30
     events:
       - httpApi:
           path: '/polygon-event-listener/second-webhook'
