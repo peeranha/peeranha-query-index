@@ -5,11 +5,6 @@ import { publishSlackMessage } from 'src/core/utils/slack';
 
 import { log, LogLevel } from './logger';
 
-export enum QueueNames {
-  FirstQueue = 'firstQueue.fifo',
-  SecondQueue = 'secondQueue.fifo',
-}
-
 const client = new SQSClient({
   region: process.env.REGION,
 });

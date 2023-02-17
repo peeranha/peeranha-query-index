@@ -1,5 +1,3 @@
-import * as querystring from 'querystring';
-
 import fetch from 'cross-fetch';
 
 import { log, LogLevel } from './logger';
@@ -71,7 +69,7 @@ export function getHttpRequest(event: any): HttpRequest {
 
     switch (contentType) {
       case 'application/x-www-form-urlencoded':
-        body = querystring.parse(
+        body = new URLSearchParams(
           event.isBase64Encoded
             ? Buffer.from(event.body, 'base64').toString('binary')
             : event.body

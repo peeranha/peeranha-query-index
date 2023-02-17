@@ -6,6 +6,7 @@ import { ConfigurationError } from 'src/core/errors';
 import { indexingUserReward } from 'src/core/index/user';
 
 import { PeriodRepository } from '../db/repositories/PeriodRepository';
+import { log } from '../utils/logger';
 
 const contractInfoRepository = new ContractInfoRepository();
 
@@ -70,4 +71,6 @@ export async function indexingPeriods() {
   await contractInfoRepository.update(USER_CONTRACT_ADDRESS, {
     lastUpdatePeriod: period,
   });
+
+  log(`Last updated period: ${period}`);
 }

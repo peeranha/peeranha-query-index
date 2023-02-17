@@ -104,7 +104,7 @@ resources:
     firstQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: firstQueue.fifo
+        QueueName: ${self:custom.stage}-firstQueue.fifo
         VisibilityTimeout: 50
         FifoQueue: true
         ContentBasedDeduplication: true
@@ -114,7 +114,7 @@ resources:
     secondQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: secondQueue.fifo
+        QueueName: ${self:custom.stage}-secondQueue.fifo
         VisibilityTimeout: 50
         FifoQueue: true
         ContentBasedDeduplication: true

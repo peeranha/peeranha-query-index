@@ -3,8 +3,8 @@ import { getSecretValue } from 'src/core/utils/secrets';
 
 import { log, LogLevel } from '../utils/logger';
 
-export const DELEGATE_USERS_COUNT = 'DELEGATE_USERS_COUNT';
-export const DELEGATE_USER_PRIVATE_KEY = 'DELEGATE_USER_PRIVATE_KEY_';
+const DELEGATE_USERS_COUNT = 'DELEGATE_USERS_COUNT';
+const DELEGATE_USER_PRIVATE_KEY = 'DELEGATE_USER_PRIVATE_KEY_';
 
 export function createRpcProvider() {
   return new providers.JsonRpcProvider(process.env.RPC_ENDPOINT);

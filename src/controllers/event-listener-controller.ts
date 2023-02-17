@@ -30,8 +30,9 @@ import {
   USER_UPDATED_EVENT_NAME,
 } from 'src/core/blockchain/constants';
 import { createRpcProvider } from 'src/core/blockchain/infura';
+import { FIRST_QUEUE, SECOND_QUEUE } from 'src/core/constants';
 import { ConfigurationError } from 'src/core/errors';
-import { pushToSQS, QueueNames } from 'src/core/utils/sqs';
+import { pushToSQS } from 'src/core/utils/sqs';
 import {
   BaseEventModel,
   ChangePostTypeEventModel,
@@ -193,11 +194,11 @@ async function handleListenWebhook(
 export async function handleListenFirstWebhook(
   request: EventListenerRequest
 ): Promise<void> {
-  await handleListenWebhook(request, QueueNames.FirstQueue);
+  await handleListenWebhook(request, FIRST_QUEUE);
 }
 
 export async function handleListenSecondWebhook(
   request: EventListenerRequest
 ): Promise<void> {
-  await handleListenWebhook(request, QueueNames.SecondQueue);
+  await handleListenWebhook(request, SECOND_QUEUE);
 }

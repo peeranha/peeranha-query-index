@@ -2,17 +2,20 @@ import MySql from 'serverless-mysql';
 import { ConfigurationError } from 'src/core/errors';
 import { log, LogLevel } from 'src/core/utils/logger';
 import { getSecretValue } from 'src/core/utils/secrets';
-import { QueueNames } from 'src/core/utils/sqs';
+
+import {
+  FIRST_CLUSTER_CREDENTIALS,
+  FIRST_QUEUE,
+  SECOND_CLUSTER_CREDENTIALS,
+  SECOND_QUEUE,
+} from '../constants';
 
 const Knex = require('knex');
 const knexServerlessMysql = require('knex-serverless-mysql');
 
-const FIRST_CLUSTER_CREDENTIALS = 'FIRST_CLUSTER_CREDENTIALS';
-const SECOND_CLUSTER_CREDENTIALS = 'SECOND_CLUSTER_CREDENTIALS';
-
-const credentialsSecret: { [index: string]: string } = {
-  [QueueNames.FirstQueue]: FIRST_CLUSTER_CREDENTIALS,
-  [QueueNames.SecondQueue]: SECOND_CLUSTER_CREDENTIALS,
+const credentialsSecret = {
+  [FIRST_QUEUE]: FIRST_CLUSTER_CREDENTIALS,
+  [SECOND_QUEUE]: SECOND_CLUSTER_CREDENTIALS,
 };
 
 export class DatabaseManager {
