@@ -295,7 +295,7 @@ export class CommentDeletedEventModel extends BaseEventModel {
 }
 
 export class ConfigureNewAchievementNFTEventModel extends BaseEventModel {
-  public achievementId: any;
+  public achievementId: number;
 
   constructor(event: any) {
     super(event);
@@ -308,7 +308,7 @@ export class TransferEventModel extends BaseEventModel {
 
   public to: string;
 
-  public tokenId: any;
+  public tokenId: number;
 
   constructor(event: any) {
     super(event);
@@ -339,15 +339,12 @@ export class ItemVotedEventModel extends BaseEventModel {
 
   commentId: number;
 
-  voteDirection: number;
-
   constructor(event: any) {
     super(event);
     this.user = event.user;
     this.postId = event.postId;
     this.replyId = event.replyId;
     this.commentId = event.commentId;
-    this.voteDirection = event.voteDirection;
   }
 }
 

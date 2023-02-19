@@ -4,32 +4,32 @@ export class Achievement {
 
   maxCount: number;
 
-  achievementURI: any;
+  achievementURI: string;
 
-  achievementsType: any;
+  achievementsType: number;
 
-  constructor(achievemnt: any) {
-    this.factCount = Number(achievemnt.factCount._hex);
-    this.maxCount = Number(achievemnt.maxCount._hex);
-    this.achievementURI = achievemnt.achievementURI;
-    this.achievementsType = achievemnt.achievementsType;
+  constructor(achievement: any) {
+    this.factCount = Number(achievement.factCount._hex);
+    this.maxCount = Number(achievement.maxCount._hex);
+    this.achievementURI = achievement.achievementURI;
+    this.achievementsType = achievement.achievementsType;
   }
 }
 
 export class AchievementData extends Achievement {
-  name: any;
+  name: string;
 
-  description: any;
+  description: string;
 
-  image: any;
+  image: string;
 
-  attributes: any;
+  attributes: string;
 
-  constructor(achievemnt: any) {
-    super(achievemnt);
-    this.name = achievemnt?.name;
-    this.description = achievemnt?.description;
-    this.image = achievemnt?.image;
-    this.attributes = achievemnt?.attributes;
+  constructor(achievement: any) {
+    super(achievement);
+    this.name = achievement?.name;
+    this.description = achievement?.description;
+    this.image = achievement?.image;
+    this.attributes = achievement?.attributes;
   }
 }

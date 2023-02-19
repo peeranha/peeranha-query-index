@@ -48,7 +48,6 @@ import {
 import { getCommunityById, createCommunity, createTag } from './community';
 import {
   createComment,
-  getPostId,
   createPost,
   updatePostContent,
   createReply,
@@ -86,23 +85,17 @@ const userCommunityRepository = new UserCommunityRepository();
 const postTagRepository = new PostTagRepository();
 const communityDocumentationRepository = new CommunityDocumentationRepository();
 
-const POOL_NFT = 1000000;
+const POOL_NFT = 1_000_000;
 
 export async function handleConfigureNewAchievement(
   eventModel: ConfigureNewAchievementNFTEventModel
 ) {
-  const achievementId = Number(eventModel.achievementId.hex);
-  await achievementRepository.add(achievementId);
+  await achievementRepository.add(eventModel.achievementId);
 }
 
 export async function handleTransfer(eventModel: TransferEventModel) {
-  if (eventModel.contractAddress === process.env.TOKEN_CONTRACT_ADDRESS) {
-    return;
-  }
-
-  const { timestamp } = eventModel;
-  const to = eventModel.to.toLowerCase();
-  const tokenId = Math.floor(Number(eventModel.tokenId.hex) / POOL_NFT + 1);
+  const { timestamp, to } = eventModel;
+  const tokenId = Math.floor(eventModel.tokenId / POOL_NFT + 1);
   const achievement = await achievementRepository.get(tokenId);
 
   if (achievement) {
@@ -127,12 +120,11 @@ export async function handleTransfer(eventModel: TransferEventModel) {
 }
 
 export async function handleNewUser(eventModel: UserCreatedEventModel) {
-  await createUser(eventModel.userAddress.toLowerCase(), eventModel.timestamp);
+  await createUser(eventModel.userAddress, eventModel.timestamp);
 }
 
 export async function handleUpdatedUser(eventModel: UserUpdatedEventModel) {
-  const { timestamp } = eventModel;
-  const userAddress = eventModel.userAddress.toLowerCase();
+  const { timestamp, userAddress } = eventModel;
   if (!(await userRepository.get(userAddress))) {
     await createUser(userAddress, timestamp);
   } else {
@@ -154,8 +146,7 @@ export async function handleUpdatedUser(eventModel: UserUpdatedEventModel) {
 }
 
 export async function handlerGrantedRole(eventModel: RoleGrantedEventModel) {
-  const { role, timestamp } = eventModel;
-  const account = eventModel.account.toLowerCase();
+  const { role, timestamp, account } = eventModel;
   if (!(await userRepository.get(account))) {
     await createUser(account, timestamp);
   }
@@ -168,16 +159,14 @@ export async function handlerGrantedRole(eventModel: RoleGrantedEventModel) {
 }
 
 export async function handlerRevokedRole(eventModel: RoleRevokedEventModel) {
-  const { role } = eventModel;
-  const account = eventModel.account.toLowerCase();
+  const { role, account } = eventModel;
   await userPermissionRepository.delete(`${account}-${role}`);
 }
 
 export async function handlerFollowCommunity(
   eventModel: FollowedCommunityEventModel
 ) {
-  const { communityId, timestamp } = eventModel;
-  const userAddress = eventModel.userAddress.toLowerCase();
+  const { communityId, timestamp, userAddress } = eventModel;
 
   let user = await userRepository.get(userAddress);
   if (!user) user = await createUser(userAddress, timestamp);
@@ -198,8 +187,7 @@ export async function handlerFollowCommunity(
 export async function handlerUnfollowCommunity(
   eventModel: UnfollowedCommunityEventModel
 ) {
-  const { communityId, timestamp } = eventModel;
-  const userAddress = eventModel.userAddress.toLowerCase();
+  const { communityId, timestamp, userAddress } = eventModel;
 
   let user = await userRepository.get(userAddress);
   if (!user) user = await createUser(userAddress, timestamp);
@@ -293,7 +281,7 @@ export async function handleEditedTag(eventModel: TagUpdatedEventModel) {
 }
 
 export async function handleNewPost(eventModel: PostCreatedEventModel) {
-  const postId = getPostId(eventModel.postId);
+  const postId = String(eventModel.postId);
   await createPost(postId, eventModel.timestamp);
 
   await historyRepository.createHistory(
@@ -304,7 +292,7 @@ export async function handleNewPost(eventModel: PostCreatedEventModel) {
 }
 
 export async function handleEditedPost(eventModel: PostEditedEventModel) {
-  const postId = getPostId(eventModel.postId);
+  const postId = String(eventModel.postId);
 
   if (!(await postRepository.get(postId)))
     await createPost(postId, eventModel.timestamp);
@@ -322,7 +310,7 @@ export async function handleEditedPost(eventModel: PostEditedEventModel) {
 export async function handleChangedTypePost(
   eventModel: ChangePostTypeEventModel
 ) {
-  const postId = getPostId(eventModel.postId);
+  const postId = String(eventModel.postId);
   const post = await postRepository.get(postId);
   if (post) {
     await Promise.all([
@@ -337,7 +325,7 @@ export async function handleChangedTypePost(
 }
 
 export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
-  const postId = getPostId(eventModel.postId);
+  const postId = String(eventModel.postId);
   const post = await postRepository.get(postId);
   if (!post) return;
 
@@ -393,9 +381,7 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
     'postId',
     post.id
   );
-  const postTags: number[] = JSON.parse(JSON.stringify(tagsResponse)).map(
-    (tag: any) => tag.tagId
-  );
+  const postTags: number[] = tagsResponse.map((tag: any) => tag.tagId);
 
   postTags.forEach(async (tag) => {
     const id = `${communityId}-${tag}`;
@@ -423,7 +409,7 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
 
 export async function handleNewReply(eventModel: ReplyCreatedEventModel) {
   const { replyId, timestamp } = eventModel;
-  const postId = getPostId(eventModel.postId);
+  const postId = String(eventModel.postId);
 
   const reply = await createReply(postId, replyId, timestamp);
   if (!reply) {
@@ -446,7 +432,7 @@ export async function handleNewReply(eventModel: ReplyCreatedEventModel) {
 
 export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
   const { replyId, timestamp } = eventModel;
-  const postId = getPostId(eventModel.postId);
+  const postId = String(eventModel.postId);
   let storedReply = await replyRepository.get(`${postId}-${replyId}`);
   let createdReply;
 
@@ -481,7 +467,7 @@ export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
 
 export async function handleDeletedReply(eventModel: ReplyDeletedEventModel) {
   const { replyId, timestamp } = eventModel;
-  const postId = getPostId(eventModel.postId);
+  const postId = String(eventModel.postId);
 
   const reply = await replyRepository.get(`${postId}-${replyId}`);
   if (!reply) return;
@@ -532,7 +518,7 @@ export async function handleDeletedReply(eventModel: ReplyDeletedEventModel) {
 
 export async function handleNewComment(eventModel: CommentCreatedEventModel) {
   const { replyId, commentId } = eventModel;
-  const postId = getPostId(eventModel.postId);
+  const postId = String(eventModel.postId);
 
   const comment = await createComment(postId, replyId, commentId);
   if (!comment) {
@@ -564,7 +550,7 @@ export async function handleNewComment(eventModel: CommentCreatedEventModel) {
 
 export async function handleEditedComment(eventModel: CommentEditedEventModel) {
   const { replyId, commentId, timestamp } = eventModel;
-  const postId = getPostId(eventModel.postId);
+  const postId = String(eventModel.postId);
 
   let storedComment = await commentRepository.get(
     `${postId}-${replyId}-${commentId}`
@@ -601,7 +587,7 @@ export async function handleDeletedComment(
   eventModel: CommentDeletedEventModel
 ) {
   const { replyId, commentId, timestamp } = eventModel;
-  const postId = getPostId(eventModel.postId);
+  const postId = String(eventModel.postId);
 
   const comment = await commentRepository.get(
     `${postId}-${replyId}-${commentId}`
@@ -633,9 +619,8 @@ export async function handleDeletedComment(
 }
 
 export async function handlerForumItemVoted(eventModel: ItemVotedEventModel) {
-  const { replyId, commentId, timestamp } = eventModel;
-  const user = eventModel.user.toLowerCase();
-  const postId = getPostId(eventModel.postId);
+  const { replyId, commentId, timestamp, user } = eventModel;
+  const postId = String(eventModel.postId);
 
   if (commentId !== 0) {
     let comment = await commentRepository.get(
@@ -707,7 +692,7 @@ export async function handlerChangedStatusBestReply(
   eventModel: ReplyMarkedTheBestEventModel
 ) {
   const { timestamp, replyId } = eventModel;
-  const postId = getPostId(eventModel.postId);
+  const postId = String(eventModel.postId);
 
   let post = await postRepository.get(postId);
   let previousBestReply = 0;
@@ -756,8 +741,7 @@ export async function handlerChangedStatusBestReply(
 }
 
 export async function handleGetReward(eventModel: GetRewardEventModel) {
-  const { period } = eventModel;
-  const user = eventModel.user.toLowerCase();
+  const { period, user } = eventModel;
 
   const userReward = await userRewardRepository.get(`${period}-${user}`);
   if (userReward) {
@@ -770,8 +754,7 @@ export async function handleGetReward(eventModel: GetRewardEventModel) {
 export async function handlerSetDocumentationTree(
   eventModel: SetDocumentationTreeEventModel
 ) {
-  const { communityId, timestamp } = eventModel;
-  const userAddr = eventModel.userAddr.toLowerCase();
+  const { communityId, timestamp, userAddr } = eventModel;
 
   const [oldDocumentation, communityDocumentation] = await Promise.all([
     communityDocumentationRepository.get(communityId),

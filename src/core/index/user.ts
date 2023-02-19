@@ -136,8 +136,8 @@ export async function indexingUserReward(
     );
   }
 
-  activeUsersInPeriod.forEach(async (userAddress) => {
-    const user = userAddress.toLowerCase();
+  for (let i = 0; i < activeUsersInPeriod.length; i++) {
+    const user = activeUsersInPeriod[i]!.toLowerCase();
     const userEntity = await userRepository.get(user);
     if (!userEntity) {
       log(`Creating non-existent user by address ${user}`, LogLevel.DEBUG);
@@ -158,5 +158,5 @@ export async function indexingUserReward(
       `User by address ${user} was rewarded in period ${period}`,
       LogLevel.DEBUG
     );
-  });
+  }
 }

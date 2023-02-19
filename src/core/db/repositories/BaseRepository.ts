@@ -27,7 +27,7 @@ export abstract class BaseRepository<EntityT, KeyT> {
       .from(this.tableName)
       .where(key, value);
 
-    return result;
+    return JSON.parse(JSON.stringify(result));
   }
 
   public async create(data: any): Promise<any> {

@@ -202,7 +202,12 @@ export async function getAchievementsNFTConfig(
   const achievement = new AchievementData(
     await contract.getAchievementsNFTConfig(achievementId)
   );
-  return AddIpfsData(achievement, achievement.achievementURI.slice(7));
+  const achievementData: AchievementData = await AddIpfsData(
+    achievement,
+    achievement.achievementURI.slice(7)
+  );
+  achievementData.attributes = JSON.stringify(achievementData.attributes);
+  return achievementData;
 }
 
 export async function getDocumentationTree(

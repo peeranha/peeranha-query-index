@@ -43,10 +43,6 @@ const userRepository = new UserRepository();
 const postTagRepository = new PostTagRepository();
 const communityDocumentationRepository = new CommunityDocumentationRepository();
 
-export function getPostId(postId: any): string {
-  return typeof postId === 'object' ? String(postId.hex) : String(postId);
-}
-
 class DocumentationData {
   public posts: string[];
 
@@ -393,7 +389,7 @@ export async function updatePostContent(
     'postId',
     post.id
   );
-  const oldTags: string[] = JSON.parse(JSON.stringify(oldTagsResponse)).map(
+  const oldTags: string[] = oldTagsResponse.map(
     (tag: any) => `${post.communityId}-${tag.tagId}`
   );
 
@@ -614,15 +610,15 @@ export async function generateDocumentationPosts(
         newPosts.indexOf(post) === index && oldPosts.indexOf(post) === -1
     )
     .forEach(async (post) => {
-      const postContent = await getDataFromIpfs(getIpfsHashFromBytes32(post));
+      const postData = await getDataFromIpfs(getIpfsHashFromBytes32(post));
 
       const postEntity = new PostEntity({
         id: post,
         postType: PostTypes.Documentation,
         communityId,
-        title: postContent.title,
-        content: postContent.content,
-        postContent: `${postContent.title} ${postContent.content}`,
+        title: postData.title,
+        content: postData.content,
+        postContent: `${postData.title} ${postData.content}`,
         author: userAddr,
         isDeleted: false,
         rating: 0,

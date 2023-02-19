@@ -66,36 +66,46 @@ import {
   UserUpdatedEventModel,
 } from 'src/models/event-models';
 
-const eventOrder = [
-  USER_CREATED_EVENT_NAME,
-  COMMUNITY_CREATED_EVENT_NAME,
-  POST_CREATED_EVENT_NAME,
-  REPLY_CREATED_EVENT_NAME,
-  COMMENT_CREATED_EVENT_NAME,
-  TAG_CREATED_EVENT_NAME,
-  CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME,
-  USER_UPDATED_EVENT_NAME,
-  COMMUNITY_UPDATED_EVENT_NAME,
-  FOLLOWED_COMMUNITY_EVENT_NAME,
-  UNFOLLOWED_COMMUNITY_EVENT_NAME,
-  ITEM_VOTED_EVENT_NAME,
-  REPLY_MARKED_THE_BEST_EVENT_NAME,
-  POST_EDITED_EVENT_NAME,
-  REPLY_EDITED_EVENT_NAME,
-  COMMENT_EDITED_EVENT_NAME,
-  TAG_UPDATED_EVENT_NAME,
-  POST_DELETED_EVENT_NAME,
-  REPLY_DELETED_EVENT_NAME,
-  COMMENT_DELETED_EVENT_NAME,
-  CHANGE_POST_TYPE_EVENT_NAME,
-  COMMUNITY_FROZEN_EVENT_NAME,
-  COMMUNITY_UNFROZEN_EVENT_NAME,
-  TRANSFER_EVENT_NAME,
-  ROLE_GRANTED_EVENT_NAME,
-  ROLE_REVOKED_EVENT_NAME,
-  GET_REWARD_EVENT_NAME,
-  SET_DOCUMENTATION_TREE_EVENT_NAME,
-];
+const contractEvents = {
+  [process.env.USER_CONTRACT_ADDRESS!.toLowerCase()]: [
+    USER_CREATED_EVENT_NAME,
+    USER_UPDATED_EVENT_NAME,
+    FOLLOWED_COMMUNITY_EVENT_NAME,
+    UNFOLLOWED_COMMUNITY_EVENT_NAME,
+    ROLE_GRANTED_EVENT_NAME,
+    ROLE_REVOKED_EVENT_NAME,
+  ],
+  [process.env.COMMUNITY_CONTRACT_ADDRESS!.toLowerCase()]: [
+    COMMUNITY_CREATED_EVENT_NAME,
+    TAG_CREATED_EVENT_NAME,
+    COMMUNITY_UPDATED_EVENT_NAME,
+    TAG_UPDATED_EVENT_NAME,
+    COMMUNITY_FROZEN_EVENT_NAME,
+    COMMUNITY_UNFROZEN_EVENT_NAME,
+  ],
+  [process.env.MAIN_CONTRACT_ADDRESS!.toLowerCase()]: [
+    POST_CREATED_EVENT_NAME,
+    REPLY_CREATED_EVENT_NAME,
+    COMMENT_CREATED_EVENT_NAME,
+    POST_EDITED_EVENT_NAME,
+    REPLY_EDITED_EVENT_NAME,
+    COMMENT_EDITED_EVENT_NAME,
+    POST_DELETED_EVENT_NAME,
+    REPLY_DELETED_EVENT_NAME,
+    COMMENT_DELETED_EVENT_NAME,
+    ITEM_VOTED_EVENT_NAME,
+    REPLY_MARKED_THE_BEST_EVENT_NAME,
+    CHANGE_POST_TYPE_EVENT_NAME,
+    SET_DOCUMENTATION_TREE_EVENT_NAME,
+  ],
+  [process.env.TOKEN_CONTRACT_ADDRESS!.toLowerCase()]: [GET_REWARD_EVENT_NAME],
+  [process.env.NFT_CONTRACT_ADDRESS!.toLowerCase()]: [
+    CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME,
+    TRANSFER_EVENT_NAME,
+  ],
+};
+
+const contractsAddresses = Object.keys(contractEvents);
 
 const eventToModelType: Record<string, typeof BaseEventModel> = {};
 eventToModelType[ITEM_VOTED_EVENT_NAME] = ItemVotedEventModel;
@@ -133,7 +143,11 @@ eventToModelType[SET_DOCUMENTATION_TREE_EVENT_NAME] =
 
 const getEventModels = (transactions: any[]) =>
   transactions
-    .filter((transaction) => eventOrder.includes(transaction.event_name))
+    .filter((transaction) =>
+      contractEvents[transaction.contract_address]?.includes(
+        transaction.event_name
+      )
+    )
     .map((transaction) => {
       const EventModeType = eventToModelType[transaction.event_name];
       if (!EventModeType) {
@@ -149,13 +163,13 @@ const getSortedEvents = (events: BaseEventModel[]) =>
     if (a.timestamp < b.timestamp) return -1;
     if (a.timestamp > b.timestamp) return 1;
     if (
-      eventOrder.indexOf(a.contractEventName) <
-      eventOrder.indexOf(b.contractEventName)
+      contractsAddresses.indexOf(a.contractAddress) <
+      contractsAddresses.indexOf(b.contractAddress)
     )
       return -1;
     if (
-      eventOrder.indexOf(a.contractEventName) >
-      eventOrder.indexOf(b.contractEventName)
+      contractsAddresses.indexOf(a.contractAddress) >
+      contractsAddresses.indexOf(b.contractAddress)
     )
       return 1;
     return 0;
@@ -186,9 +200,10 @@ async function handleListenWebhook(
   const events = await getEvents(request.transactions);
 
   // TODO: think about possible failed operations
-  events.forEach(async (event) => {
-    await pushToSQS(queueName, event);
-  });
+  for (let i = 0; i < events.length; i++) {
+    // eslint-disable-next-line no-await-in-loop
+    await pushToSQS(queueName, events[i]);
+  }
 }
 
 export async function handleListenFirstWebhook(

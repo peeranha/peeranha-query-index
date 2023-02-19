@@ -1,9 +1,12 @@
 import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
+import fetch from 'cross-fetch';
 import { DatabaseManager } from 'src/core/db/db-manager';
 import { getSecretValue } from 'src/core/utils/secrets';
 import { publishSlackMessage } from 'src/core/utils/slack';
 
 import { log, LogLevel } from './logger';
+
+global.fetch = fetch;
 
 const client = new SQSClient({
   region: process.env.REGION,

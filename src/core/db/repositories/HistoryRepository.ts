@@ -1,8 +1,6 @@
 import { HistoryEntity } from 'src/core/db/entities';
 import { BaseRepository } from 'src/core/db/repositories/BaseRepository';
 
-import { getPostId } from '../../index/post';
-
 const TABLE_NAME = 'history';
 
 export class HistoryRepository extends BaseRepository<HistoryEntity, string> {
@@ -18,12 +16,10 @@ export class HistoryRepository extends BaseRepository<HistoryEntity, string> {
     const history = new HistoryEntity({
       id: event.transaction,
       transactionHash: event.transaction,
-      postId: String(getPostId(event.postId)),
-      replyId: event.replyId
-        ? `${getPostId(event.postId)}-${event.replyId}`
-        : undefined,
+      postId: String(event.postId),
+      replyId: event.replyId ? `${event.postId}-${event.replyId}` : undefined,
       commentId: event.commentId
-        ? `${getPostId(event.postId)}-${event.replyId}-${event.commentId}`
+        ? `${event.postId}-${event.replyId}-${event.commentId}`
         : undefined,
       eventEntity: entityType,
       eventName: operationType,
