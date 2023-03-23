@@ -1,5 +1,5 @@
 export class Comment {
-  ipfsDoc: any[];
+  ipfsDoc: [string, string];
 
   author: string;
 

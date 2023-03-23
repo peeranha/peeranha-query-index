@@ -30,7 +30,7 @@ export abstract class BaseRepository<EntityT, KeyT> {
     return JSON.parse(JSON.stringify(result));
   }
 
-  public async create(data: any): Promise<any> {
+  public async create(data: EntityT): Promise<any> {
     await DatabaseManager.getInstance()(this.tableName)
       .insert(data)
       .onConflict('id')

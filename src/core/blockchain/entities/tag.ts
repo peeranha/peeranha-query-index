@@ -1,5 +1,5 @@
 export class Tag {
-  ipfsDoc: any[];
+  ipfsDoc: [string, string];
 
   communityId: number;
 

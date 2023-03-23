@@ -1,5 +1,5 @@
 export class User {
-  ipfsDoc: any[];
+  ipfsDoc: [string, string];
 
   energy: any;
 

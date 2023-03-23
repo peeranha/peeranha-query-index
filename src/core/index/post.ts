@@ -43,17 +43,6 @@ const userRepository = new UserRepository();
 const postTagRepository = new PostTagRepository();
 const communityDocumentationRepository = new CommunityDocumentationRepository();
 
-class DocumentationData {
-  public posts: string[];
-
-  public documentationJSON: string;
-
-  constructor(posts: string[], documentationJSON: string) {
-    this.posts = posts;
-    this.documentationJSON = documentationJSON;
-  }
-}
-
 async function updateTagsPostCount(
   newTags: string[],
   oldTags: string[]
@@ -177,7 +166,7 @@ export async function createPost(
     }),
 
     userRepository.update(post.author, {
-      postCount: user.postCount + 1,
+      postCount: user!.postCount + 1,
     }),
 
     postRepository.create(post),
@@ -248,7 +237,7 @@ export async function createReply(
 
   promises.push(
     userRepository.update(reply.author, {
-      replyCount: user.replyCount + 1,
+      replyCount: user!.replyCount + 1,
     })
   );
 
@@ -513,9 +502,7 @@ function indexingJson(children: any[], posts: string[]) {
   });
 }
 
-async function indexingDocumentation(
-  ipfsHash: string
-): Promise<DocumentationData> {
+async function indexingDocumentation(ipfsHash: string) {
   const posts: string[] = [];
   const result = await getDataFromIpfs(getIpfsHashFromBytes32(ipfsHash));
   const documentationJSON = JSON.stringify(result);
@@ -559,7 +546,7 @@ async function indexingDocumentation(
     }
   }
 
-  return new DocumentationData(posts, documentationJSON);
+  return { posts, documentationJSON };
 }
 
 export async function generateDocumentationPosts(

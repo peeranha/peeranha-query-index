@@ -1,5 +1,5 @@
 export class Reply {
-  ipfsDoc: any[];
+  ipfsDoc: [string, string];
 
   author: string;
 

@@ -13,6 +13,7 @@ import {
   UserPermissionEntity,
   UserCommunityEntity,
   UserAchievementEntity,
+  HistoryEntity,
 } from 'src/core/db/entities';
 import {
   UserCreatedEventModel,
@@ -45,6 +46,7 @@ import {
   ReplyMarkedTheBestEventModel,
 } from 'src/models/event-models';
 
+import { createAchievement } from './achievement';
 import { getCommunityById, createCommunity, createTag } from './community';
 import {
   createComment,
@@ -87,33 +89,69 @@ const communityDocumentationRepository = new CommunityDocumentationRepository();
 
 const POOL_NFT = 1_000_000;
 
+async function createHistory(
+  event: any,
+  entityType: string,
+  operationType: string
+) {
+  const history = new HistoryEntity({
+    id: event.transaction,
+    transactionHash: event.transaction,
+    postId: String(event.postId),
+    replyId: event.replyId ? `${event.postId}-${event.replyId}` : undefined,
+    commentId: event.commentId
+      ? `${event.postId}-${event.replyId}-${event.commentId}`
+      : undefined,
+    eventEntity: entityType,
+    eventName: operationType,
+    actionUser: event.user,
+    timestamp: event.timestamp,
+  });
+
+  await historyRepository.create(history);
+}
+
 export async function handleConfigureNewAchievement(
   eventModel: ConfigureNewAchievementNFTEventModel
 ) {
-  await achievementRepository.add(eventModel.achievementId);
+  const { achievementId } = eventModel;
+  const peeranhaAchievement = await getAchievementsNFTConfig(achievementId);
+  await createAchievement(
+    achievementRepository,
+    achievementId,
+    peeranhaAchievement
+  );
 }
 
 export async function handleTransfer(eventModel: TransferEventModel) {
-  const { timestamp, to } = eventModel;
-  const tokenId = Math.floor(eventModel.tokenId / POOL_NFT + 1);
-  const achievement = await achievementRepository.get(tokenId);
+  const { timestamp, to: user } = eventModel;
+  const achievementId = Math.floor(eventModel.tokenId / POOL_NFT + 1);
+  const achievement = await achievementRepository.get(achievementId);
 
+  const peeranhaAchievement = await getAchievementsNFTConfig(achievementId);
   if (achievement) {
-    const peeranhaAchievement = await getAchievementsNFTConfig(tokenId);
-    if (peeranhaAchievement) {
-      await achievementRepository.update(tokenId, {
-        factCount: peeranhaAchievement.factCount,
-      });
-    }
-  } else await achievementRepository.add(tokenId);
+    await achievementRepository.update(achievementId, {
+      factCount: peeranhaAchievement.factCount,
+    });
+  } else {
+    await createAchievement(
+      achievementRepository,
+      achievementId,
+      peeranhaAchievement
+    );
+  }
 
-  if (!(await userRepository.get(to))) {
-    await createUser(to, timestamp);
+  let userEntity = await userRepository.get(user);
+  if (!userEntity) {
+    userEntity = await createUser(user, timestamp);
+  }
+  if (!userEntity) {
+    return;
   }
   const userAchievement = new UserAchievementEntity({
-    id: `${to}-${achievement}`,
-    userId: to,
-    achievementId: tokenId,
+    id: `${user}-${achievement}`,
+    userId: user,
+    achievementId,
   });
 
   await userAchievementRepository.create(userAchievement);
@@ -129,6 +167,9 @@ export async function handleUpdatedUser(eventModel: UserUpdatedEventModel) {
     await createUser(userAddress, timestamp);
   } else {
     const user = await getUserByAddress(userAddress);
+    if (!user) {
+      return;
+    }
     const userForSave = {
       displayName:
         user.displayName ||
@@ -284,11 +325,7 @@ export async function handleNewPost(eventModel: PostCreatedEventModel) {
   const postId = String(eventModel.postId);
   await createPost(postId, eventModel.timestamp);
 
-  await historyRepository.createHistory(
-    eventModel,
-    EntityType.Post,
-    OperationType.Create
-  );
+  await createHistory(eventModel, EntityType.Post, OperationType.Create);
 }
 
 export async function handleEditedPost(eventModel: PostEditedEventModel) {
@@ -299,11 +336,7 @@ export async function handleEditedPost(eventModel: PostEditedEventModel) {
 
   await Promise.all([
     updatePostContent(postId, eventModel.timestamp),
-    historyRepository.createHistory(
-      eventModel,
-      EntityType.Post,
-      OperationType.Edit
-    ),
+    createHistory(eventModel, EntityType.Post, OperationType.Edit),
   ]);
 }
 
@@ -348,11 +381,7 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
 
     updateUserRating(author, communityId),
 
-    historyRepository.createHistory(
-      eventModel,
-      EntityType.Post,
-      OperationType.Delete
-    )
+    createHistory(eventModel, EntityType.Post, OperationType.Delete)
   );
 
   const community = await getCommunityById(communityId);
@@ -423,11 +452,7 @@ export async function handleNewReply(eventModel: ReplyCreatedEventModel) {
     return;
   }
 
-  await historyRepository.createHistory(
-    eventModel,
-    EntityType.Reply,
-    OperationType.Create
-  );
+  await createHistory(eventModel, EntityType.Reply, OperationType.Create);
 }
 
 export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
@@ -455,11 +480,7 @@ export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
       ipfsHash2: peeranhaReply.ipfsDoc[1],
     }),
 
-    historyRepository.createHistory(
-      eventModel,
-      EntityType.Reply,
-      OperationType.Edit
-    ),
+    createHistory(eventModel, EntityType.Reply, OperationType.Edit),
   ]);
 
   await updatePostContent(postId, timestamp, replyId);
@@ -506,11 +527,7 @@ export async function handleDeletedReply(eventModel: ReplyDeletedEventModel) {
   promises.push(
     updatePostContent(postId, timestamp),
 
-    historyRepository.createHistory(
-      eventModel,
-      EntityType.Reply,
-      OperationType.Delete
-    )
+    createHistory(eventModel, EntityType.Reply, OperationType.Delete)
   );
 
   await Promise.all(promises);
@@ -541,11 +558,7 @@ export async function handleNewComment(eventModel: CommentCreatedEventModel) {
     return;
   }
 
-  await historyRepository.createHistory(
-    eventModel,
-    EntityType.Comment,
-    OperationType.Create
-  );
+  await createHistory(eventModel, EntityType.Comment, OperationType.Create);
 }
 
 export async function handleEditedComment(eventModel: CommentEditedEventModel) {
@@ -573,11 +586,7 @@ export async function handleEditedComment(eventModel: CommentEditedEventModel) {
       ipfsHash2: comment.ipfsDoc[1],
     }),
 
-    historyRepository.createHistory(
-      eventModel,
-      EntityType.Comment,
-      OperationType.Edit
-    ),
+    createHistory(eventModel, EntityType.Comment, OperationType.Edit),
   ]);
 
   await updatePostContent(postId, timestamp);
@@ -606,11 +615,7 @@ export async function handleDeletedComment(
   }
 
   promises.push(
-    historyRepository.createHistory(
-      eventModel,
-      EntityType.Comment,
-      OperationType.Delete
-    )
+    createHistory(eventModel, EntityType.Comment, OperationType.Delete)
   );
 
   await updatePostContent(postId, timestamp);

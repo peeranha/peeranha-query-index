@@ -25,7 +25,7 @@ export class Post {
 
   tags: number[];
 
-  ipfsDoc: any[];
+  ipfsDoc: [string, string];
 
   constructor(post: any) {
     [

@@ -1,5 +1,5 @@
 export class Community {
-  ipfsDoc: any[];
+  ipfsDoc: [string, string];
 
   tagsCount: number;
 

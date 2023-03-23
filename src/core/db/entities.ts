@@ -445,6 +445,8 @@ export class AchievementEntity {
 
   public achievementsType: number;
 
+  public lowerValue: number;
+
   public name: string;
 
   public description: string;
@@ -459,6 +461,7 @@ export class AchievementEntity {
     maxCount: number;
     achievementURI: string;
     achievementsType: number;
+    lowerValue: number;
     name: string;
     description: string;
     image: string;
@@ -473,6 +476,7 @@ export class AchievementEntity {
     this.description = achievement.description;
     this.achievementsType = achievement.achievementsType;
     this.attributes = achievement.attributes;
+    this.lowerValue = achievement.lowerValue;
   }
 }
 

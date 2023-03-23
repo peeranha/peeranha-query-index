@@ -23,10 +23,7 @@ const userRepository = new UserRepository();
 const userCommunityRatingRepository = new UserCommunityRatingRepository();
 const userRewardRepository = new UserRewardRepository();
 
-export async function createUser(
-  address: string,
-  timestamp: number
-): Promise<UserEntity> {
+export async function createUser(address: string, timestamp: number) {
   const storedUser = await userRepository.get(address);
   if (storedUser) {
     if (timestamp < storedUser.creationTime)
@@ -37,6 +34,10 @@ export async function createUser(
   }
 
   const peeranhaUser = await getUserByAddress(address);
+  if (!peeranhaUser) {
+    return undefined;
+  }
+
   const user = new UserEntity({
     id: address,
     displayName:

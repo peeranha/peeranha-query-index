@@ -8,10 +8,10 @@ type Query {
   count_achievement(where: achievement_WhereInput): Int
   comment(limit: Int, offset: Int, where: comment_WhereInput, orderBy: comment_OrderByInput): [comment]
   count_comment(where: comment_WhereInput): Int
-  community(limit: Int, offset: Int, where: community_WhereInput, orderBy: community_OrderByInput): [community]
-  count_community(where: community_WhereInput): Int
   communitydocumentation(limit: Int, offset: Int, where: communitydocumentation_WhereInput, orderBy: communitydocumentation_OrderByInput): [communitydocumentation]
   count_communitydocumentation(where: communitydocumentation_WhereInput): Int
+  community(limit: Int, offset: Int, where: community_WhereInput, orderBy: community_OrderByInput): [community]
+  count_community(where: community_WhereInput): Int
   contractinfo(limit: Int, offset: Int, where: contractinfo_WhereInput, orderBy: contractinfo_OrderByInput): [contractinfo]
   count_contractinfo(where: contractinfo_WhereInput): Int
   history(limit: Int, offset: Int, where: history_WhereInput, orderBy: history_OrderByInput): [history]
@@ -46,6 +46,7 @@ type achievement {
   maxCount: Int
   achievementURI: String
   achievementsType: Int
+  lowerValue: Int
   name: String
   description: String
   image: String
@@ -67,6 +68,7 @@ input achievement_WhereInput {
   maxCount: String
   achievementURI: String
   achievementsType: String
+  lowerValue: String
   name: String
   description: String
   image: String
@@ -79,6 +81,7 @@ input achievement_OrderByInput {
   maxCount: OrderBy
   achievementURI: OrderBy
   achievementsType: OrderBy
+  lowerValue: OrderBy
   name: OrderBy
   description: OrderBy
   image: OrderBy
@@ -674,6 +677,7 @@ input achievement_InsertInput {
   maxCount: Int
   achievementURI: String
   achievementsType: Int
+  lowerValue: Int
   name: String
   description: String
   image: String
@@ -686,6 +690,7 @@ input achievement_UpdateInput {
   maxCount: Int
   achievementURI: String
   achievementsType: Int
+  lowerValue: Int
   name: String
   description: String
   image: String
@@ -716,6 +721,18 @@ input comment_UpdateInput {
   parentReplyId: Int
   content: String
   isDeleted: Int
+}
+
+input communitydocumentation_InsertInput {
+  id: Int!
+  documentationJSON: String
+  ipfsHash: String
+}
+
+input communitydocumentation_UpdateInput {
+  id: Int
+  documentationJSON: String
+  ipfsHash: String
 }
 
 input community_InsertInput {
@@ -754,18 +771,6 @@ input community_UpdateInput {
   followingUsers: Int
   ipfsHash: String
   ipfsHash2: String
-}
-
-input communitydocumentation_InsertInput {
-  id: Int!
-  documentationJSON: String
-  ipfsHash: String
-}
-
-input communitydocumentation_UpdateInput {
-  id: Int
-  documentationJSON: String
-  ipfsHash: String
 }
 
 input contractinfo_InsertInput {

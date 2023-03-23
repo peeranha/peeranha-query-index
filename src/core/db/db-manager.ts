@@ -41,6 +41,7 @@ export class DatabaseManager {
         database: process.env.DB_NAME,
         user: credentials.username,
         password: credentials.password,
+        charset: 'utf8mb4_unicode_ci',
       },
     });
 

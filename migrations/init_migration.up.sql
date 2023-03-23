@@ -151,6 +151,7 @@ CREATE TABLE IF NOT EXISTS achievement (
   maxCount INT,
   achievementURI VARCHAR(53),
   achievementsType INT,
+  lowerValue INT,
   name VARCHAR(30),
   description VARCHAR(250),
   image VARCHAR(53),

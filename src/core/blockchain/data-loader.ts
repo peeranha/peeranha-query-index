@@ -7,6 +7,7 @@ import { PeeranhaNFTWrapper } from './contracts/peeranha-nft-wrapper';
 import { PeeranhaTokenWrapper } from './contracts/peeranha-token-wrapper';
 import { PeeranhaUserWrapper } from './contracts/peeranha-user-wrapper';
 import { AchievementData } from './entities/achievement';
+import { AchievementConfig } from './entities/achievement-config';
 import { CommentData } from './entities/comment';
 import { CommunityData } from './entities/community';
 import { ContractInfo } from './entities/contract-info';
@@ -73,12 +74,22 @@ export async function getContractInfo(): Promise<ContractInfo> {
   return new ContractInfo(await userContract.getContractInfo());
 }
 
-export async function getUserByAddress(address: string): Promise<UserData> {
-  const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const userContract = new PeeranhaUserWrapper(provider, wallet);
-  const user = new UserData(await userContract.getUserByAddress(address));
-  return AddIpfsData(user, user.ipfsDoc[0]);
+export async function getUserByAddress(
+  address: string
+): Promise<UserData | undefined> {
+  try {
+    const provider = createRpcProvider();
+    const wallet = await getDelegateUserSigner(provider);
+    const userContract = new PeeranhaUserWrapper(provider, wallet);
+    const user = new UserData(await userContract.getUserByAddress(address));
+    return await AddIpfsData(user, user.ipfsDoc[0]);
+  } catch (err: any) {
+    log(
+      `Error during getting user. Params: address - ${address}\n${err}`,
+      LogLevel.ERROR
+    );
+    return undefined;
+  }
 }
 
 export async function getUserRating(
@@ -239,6 +250,23 @@ export async function getItemProperty(
   } catch (err) {
     log(
       `Error during getting item property. Params: commentId - ${commentId}, replyId - ${replyId}, postId - ${postId}.\n${err}`,
+      LogLevel.ERROR
+    );
+    return undefined;
+  }
+}
+
+export async function getAchievementConfig(achievementId: number) {
+  try {
+    const provider = createRpcProvider();
+    const wallet = await getDelegateUserSigner(provider);
+    const contract = new PeeranhaUserWrapper(provider, wallet);
+    return new AchievementConfig(
+      await contract.getAchievementConfig(achievementId)
+    );
+  } catch (err: any) {
+    log(
+      `Error during getting achievement config. Params: achievementId - ${achievementId}\n${err}`,
       LogLevel.ERROR
     );
     return undefined;
