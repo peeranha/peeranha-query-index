@@ -16,6 +16,7 @@ import { PostData } from './entities/post';
 import { ReplyData } from './entities/reply';
 import { TagData } from './entities/tag';
 import { UserData } from './entities/user';
+import { UserRating } from './entities/user-rating';
 import { createRpcProvider, getDelegateUserSigner } from './infura';
 
 export async function getPost(postId: number): Promise<PostData> {
@@ -217,7 +218,6 @@ export async function getAchievementsNFTConfig(
     achievement,
     achievement.achievementURI.slice(7)
   );
-  achievementData.attributes = JSON.stringify(achievementData.attributes);
   return achievementData;
 }
 
@@ -267,6 +267,41 @@ export async function getAchievementConfig(achievementId: number) {
   } catch (err: any) {
     log(
       `Error during getting achievement config. Params: achievementId - ${achievementId}\n${err}`,
+      LogLevel.ERROR
+    );
+    return undefined;
+  }
+}
+
+export async function getAchievementCommunity(achievementId: number) {
+  try {
+    const provider = createRpcProvider();
+    const wallet = await getDelegateUserSigner(provider);
+    const contract = new PeeranhaUserWrapper(provider, wallet);
+    return await contract.getAchievementCommunity(achievementId);
+  } catch (err: any) {
+    log(
+      `Error during getting achievement config. Params: achievementId - ${achievementId}\n${err}`,
+      LogLevel.ERROR
+    );
+    return 0;
+  }
+}
+
+export async function getUserRatingCollection(
+  address: string,
+  communityId: number
+): Promise<UserRating | undefined> {
+  try {
+    const provider = createRpcProvider();
+    const wallet = await getDelegateUserSigner(provider);
+    const userContract = new PeeranhaUserWrapper(provider, wallet);
+    return new UserRating(
+      await userContract.getUserRatingCollection(address, communityId)
+    );
+  } catch (err: any) {
+    log(
+      `Error during getting user rating collection. Params: user - ${address}, communityId - ${communityId}\n${err}`,
       LogLevel.ERROR
     );
     return undefined;

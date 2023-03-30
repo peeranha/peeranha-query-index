@@ -23,7 +23,7 @@ export class AchievementData extends Achievement {
 
   image: string;
 
-  attributes: string;
+  attributes: { trait_type: string; value: string }[] | string;
 
   constructor(achievement: any) {
     super(achievement);

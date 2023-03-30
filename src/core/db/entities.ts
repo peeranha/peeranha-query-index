@@ -73,6 +73,8 @@ export class CommunityEntity {
 
   public postCount: number;
 
+  public documentationCount: number;
+
   public deletedPostCount: number;
 
   public replyCount: number;
@@ -96,6 +98,7 @@ export class CommunityEntity {
     isFrozen: boolean;
     creationTime: number;
     postCount: number;
+    documentationCount: number;
     deletedPostCount: number;
     replyCount: number;
     tagsCount: number;
@@ -113,6 +116,7 @@ export class CommunityEntity {
     this.isFrozen = community.isFrozen;
     this.creationTime = community.creationTime;
     this.postCount = community.postCount;
+    this.documentationCount = community.documentationCount;
     this.deletedPostCount = community.deletedPostCount;
     this.replyCount = community.replyCount;
     this.tagsCount = community.tagsCount;
@@ -453,7 +457,13 @@ export class AchievementEntity {
 
   public image: string;
 
-  public attributes: string;
+  public communityId?: number;
+
+  public attrCommunityId?: number;
+
+  public attrEvent?: string;
+
+  public attrType?: string;
 
   constructor(achievement: {
     id: number;
@@ -465,7 +475,13 @@ export class AchievementEntity {
     name: string;
     description: string;
     image: string;
-    attributes: string;
+    communityId?: number;
+
+    attrCommunityId?: number;
+
+    attrEvent?: string;
+
+    attrType?: string;
   }) {
     this.id = achievement.id;
     this.factCount = achievement.factCount;
@@ -475,8 +491,11 @@ export class AchievementEntity {
     this.image = achievement.image;
     this.description = achievement.description;
     this.achievementsType = achievement.achievementsType;
-    this.attributes = achievement.attributes;
     this.lowerValue = achievement.lowerValue;
+    this.communityId = achievement.communityId;
+    this.attrCommunityId = achievement.attrCommunityId;
+    this.attrEvent = achievement.attrEvent;
+    this.attrType = achievement.attrType;
   }
 }
 

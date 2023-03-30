@@ -35,6 +35,14 @@ export class PeeranhaUserWrapper extends BaseContractWrapper {
     return this.contract.getAchievementConfig(achievementId);
   }
 
+  public async getAchievementCommunity(achievementId: number): Promise<number> {
+    return this.contract.getAchievementCommunity(achievementId);
+  }
+
+  public async getUserRatingCollection(address: string, communityId: number) {
+    return this.contract.getUserRatingCollection(address, communityId);
+  }
+
   public getAddress(): string {
     if (!process.env.USER_CONTRACT_ADDRESS) {
       throw new ConfigurationError('USER_CONTRACT_ADDRESS is not configured');

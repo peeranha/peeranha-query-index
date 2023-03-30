@@ -115,12 +115,7 @@ export async function handleConfigureNewAchievement(
   eventModel: ConfigureNewAchievementNFTEventModel
 ) {
   const { achievementId } = eventModel;
-  const peeranhaAchievement = await getAchievementsNFTConfig(achievementId);
-  await createAchievement(
-    achievementRepository,
-    achievementId,
-    peeranhaAchievement
-  );
+  await createAchievement(achievementRepository, achievementId);
 }
 
 export async function handleTransfer(eventModel: TransferEventModel) {
@@ -128,17 +123,13 @@ export async function handleTransfer(eventModel: TransferEventModel) {
   const achievementId = Math.floor(eventModel.tokenId / POOL_NFT + 1);
   const achievement = await achievementRepository.get(achievementId);
 
-  const peeranhaAchievement = await getAchievementsNFTConfig(achievementId);
   if (achievement) {
+    const peeranhaAchievement = await getAchievementsNFTConfig(achievementId);
     await achievementRepository.update(achievementId, {
       factCount: peeranhaAchievement.factCount,
     });
   } else {
-    await createAchievement(
-      achievementRepository,
-      achievementId,
-      peeranhaAchievement
-    );
+    await createAchievement(achievementRepository, achievementId);
   }
 
   let userEntity = await userRepository.get(user);

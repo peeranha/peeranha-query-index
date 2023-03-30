@@ -11,12 +11,7 @@ import { getDataFromIpfs, getIpfsHashFromBytes32 } from 'src/core/utils/ipfs';
 import { log } from 'src/core/utils/logger';
 
 import { getCommunityById } from './community';
-import {
-  createUser,
-  updatePostUsersRatings,
-  updateStartUserRating,
-  updateUserRating,
-} from './user';
+import { createUser, updatePostUsersRatings, updateUserRating } from './user';
 import { ReplyProperties } from './utils';
 import {
   CommentEntity,
@@ -171,7 +166,7 @@ export async function createPost(
 
     postRepository.create(post),
 
-    updateStartUserRating(post.author, post.communityId),
+    updateUserRating(post.author, post.communityId),
   ]);
 
   const promises: Promise<any>[] = [];
@@ -265,7 +260,7 @@ export async function createReply(
         lastMod: reply.postTime,
       }),
 
-      updateStartUserRating(reply.author, post.communityId)
+      updateUserRating(reply.author, post.communityId)
     );
 
     if (peeranhaReply.isFirstReply || peeranhaReply.isQuickReply) {
@@ -328,7 +323,7 @@ export async function createComment(
         lastMod: comment.postTime,
       }),
 
-      updateStartUserRating(post.author, post.communityId),
+      updateUserRating(post.author, post.communityId),
     ]);
   }
 
@@ -589,45 +584,53 @@ export async function generateDocumentationPosts(
     await createUser(userAddr, timestamp);
   }
 
+  const postsForCreating = newPosts.filter(
+    (post, index) =>
+      newPosts.indexOf(post) === index && oldPosts.indexOf(post) === -1
+  );
+  const postsForDeleting = oldPosts.filter(
+    (post, index) =>
+      oldPosts.indexOf(post) === index && newPosts.indexOf(post) === -1
+  );
+  const documentationCount =
+    oldPosts.length - postsForDeleting.length + postsForCreating.length;
+
+  const community = await getCommunityById(communityId);
+  await communityRepository.update(community.id, {
+    documentationCount,
+  });
+
   const postPromises: Promise<void>[] = [];
 
-  newPosts
-    .filter(
-      (post, index) =>
-        newPosts.indexOf(post) === index && oldPosts.indexOf(post) === -1
-    )
-    .forEach(async (post) => {
-      const postData = await getDataFromIpfs(getIpfsHashFromBytes32(post));
+  postsForCreating.forEach(async (post) => {
+    const postData = await getDataFromIpfs(getIpfsHashFromBytes32(post));
 
-      const postEntity = new PostEntity({
-        id: post,
-        postType: PostTypes.Documentation,
-        communityId,
-        title: postData.title,
-        content: postData.content,
-        postContent: `${postData.title} ${postData.content}`,
-        author: userAddr,
-        isDeleted: false,
-        rating: 0,
-        postTime: timestamp,
-        lastMod: timestamp,
-        commentCount: 0,
-        replyCount: 0,
-        officialReply: 0,
-        bestReply: 0,
-        ipfsHash: post,
-        ipfsHash2: '',
-      });
-
-      postPromises.push(postRepository.create(postEntity));
+    const postEntity = new PostEntity({
+      id: post,
+      postType: PostTypes.Documentation,
+      communityId,
+      title: postData.title,
+      content: postData.content,
+      postContent: `${postData.title} ${postData.content}`,
+      author: userAddr,
+      isDeleted: false,
+      rating: 0,
+      postTime: timestamp,
+      lastMod: timestamp,
+      commentCount: 0,
+      replyCount: 0,
+      officialReply: 0,
+      bestReply: 0,
+      ipfsHash: post,
+      ipfsHash2: '',
     });
 
-  oldPosts
-    .filter(
-      (post, index) =>
-        oldPosts.indexOf(post) === index && newPosts.indexOf(post) === -1
-    )
-    .forEach((post) => postPromises.push(postRepository.delete(post)));
+    postPromises.push(postRepository.create(postEntity));
+  });
+
+  postsForDeleting.forEach((post) =>
+    postPromises.push(postRepository.delete(post))
+  );
 
   await Promise.all(postPromises);
 }

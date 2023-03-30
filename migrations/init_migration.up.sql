@@ -24,6 +24,7 @@ CREATE TABLE IF NOT EXISTS community (
   isFrozen BOOLEAN DEFAULT 0,
   creationTime INT NOT NULL,
   postCount INT DEFAULT 0,
+  documentationCount INT DEFAULT 0,
   deletedPostCount INT DEFAULT 0,
   replyCount INT DEFAULT 0,
   tagsCount SMALLINT DEFAULT 0,
@@ -155,7 +156,12 @@ CREATE TABLE IF NOT EXISTS achievement (
   name VARCHAR(30),
   description VARCHAR(250),
   image VARCHAR(53),
-  attributes TEXT
+  communityId INT NOT NULL,
+  attrCommunityId INT,
+  attrEvent VARCHAR(50),
+  attrType VARCHAR(20),
+
+  FOREIGN KEY (communityId) REFERENCES community (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS userachievement (

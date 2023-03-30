@@ -1,9 +1,10 @@
 /* eslint-disable no-await-in-loop */
 import {
   getUserByAddress,
-  getUserRating,
   getActiveUsersInPeriod,
   getUserRewardGraph,
+  getUserRatingCollection,
+  getUserRating,
 } from 'src/core/blockchain/data-loader';
 import {
   PostEntity,
@@ -22,6 +23,8 @@ const replyRepository = new ReplyRepository();
 const userRepository = new UserRepository();
 const userCommunityRatingRepository = new UserCommunityRatingRepository();
 const userRewardRepository = new UserRewardRepository();
+
+const START_USER_RATING = 10;
 
 export async function createUser(address: string, timestamp: number) {
   const storedUser = await userRepository.get(address);
@@ -65,12 +68,27 @@ export async function updateUserRating(
 ) {
   const user = await userRepository.get(userAddress);
   if (!user) return;
+
+  let rating = START_USER_RATING;
+
+  const userRatingCollection = await getUserRatingCollection(
+    userAddress,
+    communityId
+  );
+
+  if (userRatingCollection) {
+    if (userRatingCollection.isActive) {
+      rating = userRatingCollection.rating;
+    }
+  } else {
+    rating = await getUserRating(userAddress, communityId);
+  }
+
   const userRatingId = `${communityId} ${userAddress}`;
   let userComunityRating = await userCommunityRatingRepository.get(
     userRatingId
   );
 
-  const rating = await getUserRating(userAddress, communityId);
   if (!userComunityRating) {
     userComunityRating = new UserCommunityRatingEntity({
       id: userRatingId,
@@ -78,6 +96,7 @@ export async function updateUserRating(
       communityId,
       rating,
     });
+
     await userCommunityRatingRepository.create(userComunityRating);
   } else {
     await userCommunityRatingRepository.update(userRatingId, { rating });
@@ -103,27 +122,6 @@ export async function updatePostUsersRatings(post: PostEntity) {
     }
   }
   await Promise.all(promises);
-}
-
-export async function updateStartUserRating(
-  userAddress: string,
-  communityId: number
-) {
-  const userRatingId = `${communityId} ${userAddress}`;
-  let userComunityRating = await userCommunityRatingRepository.get(
-    userRatingId
-  );
-
-  if (!userComunityRating) {
-    const valueStartUserRating = 10;
-    userComunityRating = new UserCommunityRatingEntity({
-      id: userRatingId,
-      userId: userAddress,
-      communityId,
-      rating: valueStartUserRating,
-    });
-    await userCommunityRatingRepository.create(userComunityRating);
-  }
 }
 
 export async function indexingUserReward(

@@ -44,6 +44,7 @@ export async function createCommunity(
     isFrozen: peeranhaCommunity.isFrozen,
     creationTime: peeranhaCommunity.timeCreate,
     postCount: 0,
+    documentationCount: 0,
     deletedPostCount: 0,
     replyCount: 0,
     tagsCount: peeranhaCommunity.tagsCount,
