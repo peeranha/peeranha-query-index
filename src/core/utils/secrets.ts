@@ -3,8 +3,7 @@ import {
   GetSecretValueCommand,
 } from '@aws-sdk/client-secrets-manager';
 import { ConfigurationError } from 'src/core/errors';
-
-import { log } from './logger';
+import { log } from 'src/core/utils/logger';
 
 export const DB_SECRETS_ENC_KEY_SECRET_NAME = 'DB_SECRETS_ENC_KEY';
 

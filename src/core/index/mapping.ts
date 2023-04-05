@@ -15,6 +15,39 @@ import {
   UserAchievementEntity,
   HistoryEntity,
 } from 'src/core/db/entities';
+import { AchievementRepository } from 'src/core/db/repositories/AchievementRepository';
+import { CommentRepository } from 'src/core/db/repositories/CommentRepository';
+import { CommunityDocumentationRepository } from 'src/core/db/repositories/CommunityDocumentationRepository';
+import { CommunityRepository } from 'src/core/db/repositories/CommunityRepository';
+import { HistoryRepository } from 'src/core/db/repositories/HistoryRepository';
+import { PostRepository } from 'src/core/db/repositories/PostRepository';
+import { PostTagRepository } from 'src/core/db/repositories/PostTagRepository';
+import { ReplyRepository } from 'src/core/db/repositories/ReplyRepository';
+import { TagRepository } from 'src/core/db/repositories/TagRepository';
+import { UserAchievementRepository } from 'src/core/db/repositories/UserAchievementRepository';
+import { UserCommunityRepository } from 'src/core/db/repositories/UserCommunityRepository';
+import { UserPermissionRepository } from 'src/core/db/repositories/UserPermissionRepository';
+import { UserRepository } from 'src/core/db/repositories/UserRepository';
+import { UserRewardRepository } from 'src/core/db/repositories/UserRewardRepository';
+import { createAchievement } from 'src/core/index/achievement';
+import {
+  getCommunityById,
+  createCommunity,
+  createTag,
+} from 'src/core/index/community';
+import {
+  createComment,
+  createPost,
+  updatePostContent,
+  createReply,
+  generateDocumentationPosts,
+} from 'src/core/index/post';
+import {
+  createUser,
+  updatePostUsersRatings,
+  updateUserRating,
+} from 'src/core/index/user';
+import { EntityType, OperationType } from 'src/core/index/utils';
 import {
   UserCreatedEventModel,
   FollowedCommunityEventModel,
@@ -45,32 +78,6 @@ import {
   ReplyCreatedEventModel,
   ReplyMarkedTheBestEventModel,
 } from 'src/models/event-models';
-
-import { createAchievement } from './achievement';
-import { getCommunityById, createCommunity, createTag } from './community';
-import {
-  createComment,
-  createPost,
-  updatePostContent,
-  createReply,
-  generateDocumentationPosts,
-} from './post';
-import { createUser, updatePostUsersRatings, updateUserRating } from './user';
-import { EntityType, OperationType } from './utils';
-import { AchievementRepository } from '../db/repositories/AchievementRepository';
-import { CommentRepository } from '../db/repositories/CommentRepository';
-import { CommunityDocumentationRepository } from '../db/repositories/CommunityDocumentationRepository';
-import { CommunityRepository } from '../db/repositories/CommunityRepository';
-import { HistoryRepository } from '../db/repositories/HistoryRepository';
-import { PostRepository } from '../db/repositories/PostRepository';
-import { PostTagRepository } from '../db/repositories/PostTagRepository';
-import { ReplyRepository } from '../db/repositories/ReplyRepository';
-import { TagRepository } from '../db/repositories/TagRepository';
-import { UserAchievementRepository } from '../db/repositories/UserAchievementRepository';
-import { UserCommunityRepository } from '../db/repositories/UserCommunityRepository';
-import { UserPermissionRepository } from '../db/repositories/UserPermissionRepository';
-import { UserRepository } from '../db/repositories/UserRepository';
-import { UserRewardRepository } from '../db/repositories/UserRewardRepository';
 
 const userAchievementRepository = new UserAchievementRepository();
 const achievementRepository = new AchievementRepository();
@@ -140,7 +147,7 @@ export async function handleTransfer(eventModel: TransferEventModel) {
     return;
   }
   const userAchievement = new UserAchievementEntity({
-    id: `${user}-${achievement}`,
+    id: `${user}-${achievementId}`,
     userId: user,
     achievementId,
   });

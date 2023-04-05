@@ -1,14 +1,13 @@
 import MySql from 'serverless-mysql';
-import { ConfigurationError } from 'src/core/errors';
-import { log, LogLevel } from 'src/core/utils/logger';
-import { getSecretValue } from 'src/core/utils/secrets';
-
 import {
   FIRST_CLUSTER_CREDENTIALS,
   FIRST_QUEUE,
   SECOND_CLUSTER_CREDENTIALS,
   SECOND_QUEUE,
-} from '../constants';
+} from 'src/core/constants';
+import { ConfigurationError } from 'src/core/errors';
+import { log, LogLevel } from 'src/core/utils/logger';
+import { getSecretValue } from 'src/core/utils/secrets';
 
 const Knex = require('knex');
 const knexServerlessMysql = require('knex-serverless-mysql');

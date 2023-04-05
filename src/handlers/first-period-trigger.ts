@@ -1,8 +1,7 @@
 import { triggerPeriodForDb } from 'src/controllers/blockchain-controller';
 import { FIRST_QUEUE } from 'src/core/constants';
 import { handleScheduleRequest } from 'src/core/utils/schedule';
-
-import { TriggerPeriodRequestModel } from '../models/period-trigger-models';
+import { TriggerPeriodRequestModel } from 'src/models/period-trigger-models';
 
 export const handler = async () => {
   const request = new TriggerPeriodRequestModel(FIRST_QUEUE);

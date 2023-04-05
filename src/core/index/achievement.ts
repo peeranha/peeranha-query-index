@@ -2,21 +2,20 @@ import {
   getAchievementCommunity,
   getAchievementConfig,
   getAchievementsNFTConfig,
-} from '../blockchain/data-loader';
-import { AchievementEntity } from '../db/entities';
-import { AchievementRepository } from '../db/repositories/AchievementRepository';
+} from 'src/core/blockchain/data-loader';
+import { AchievementEntity } from 'src/core/db/entities';
+import { AchievementRepository } from 'src/core/db/repositories/AchievementRepository';
 
 export async function createAchievement(
   achievementRepository: AchievementRepository,
   achievementId: number
 ) {
-  const achievementData = await getAchievementsNFTConfig(achievementId);
-  if (!achievementData) return;
-
-  const [peeranhaAchievementConfig, achievementCommunity] = await Promise.all([
-    getAchievementConfig(achievementId),
-    getAchievementCommunity(achievementId),
-  ]);
+  const [achievementData, peeranhaAchievementConfig, achievementCommunity] =
+    await Promise.all([
+      getAchievementsNFTConfig(achievementId),
+      getAchievementConfig(achievementId),
+      getAchievementCommunity(achievementId),
+    ]);
 
   let attrCommunityId;
   let attrEvent;

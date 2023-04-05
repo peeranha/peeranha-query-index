@@ -1,23 +1,25 @@
+import { PeeranhaCommunityWrapper } from 'src/core/blockchain/contracts/peeranha-community-wrapper';
+import { PeeranhaContentWrapper } from 'src/core/blockchain/contracts/peeranha-content-wrapper';
+import { PeeranhaNFTWrapper } from 'src/core/blockchain/contracts/peeranha-nft-wrapper';
+import { PeeranhaTokenWrapper } from 'src/core/blockchain/contracts/peeranha-token-wrapper';
+import { PeeranhaUserWrapper } from 'src/core/blockchain/contracts/peeranha-user-wrapper';
+import { AchievementData } from 'src/core/blockchain/entities/achievement';
+import { AchievementConfig } from 'src/core/blockchain/entities/achievement-config';
+import { CommentData } from 'src/core/blockchain/entities/comment';
+import { CommunityData } from 'src/core/blockchain/entities/community';
+import { ContractInfo } from 'src/core/blockchain/entities/contract-info';
+import { Documentation } from 'src/core/blockchain/entities/documentation';
+import { PostData } from 'src/core/blockchain/entities/post';
+import { ReplyData } from 'src/core/blockchain/entities/reply';
+import { TagData } from 'src/core/blockchain/entities/tag';
+import { UserData } from 'src/core/blockchain/entities/user';
+import { UserRating } from 'src/core/blockchain/entities/user-rating';
+import {
+  createRpcProvider,
+  getDelegateUserSigner,
+} from 'src/core/blockchain/infura';
 import { AddIpfsData } from 'src/core/utils/ipfs';
 import { log, LogLevel } from 'src/core/utils/logger';
-
-import { PeeranhaCommunityWrapper } from './contracts/peeranha-community-wrapper';
-import { PeeranhaContentWrapper } from './contracts/peeranha-content-wrapper';
-import { PeeranhaNFTWrapper } from './contracts/peeranha-nft-wrapper';
-import { PeeranhaTokenWrapper } from './contracts/peeranha-token-wrapper';
-import { PeeranhaUserWrapper } from './contracts/peeranha-user-wrapper';
-import { AchievementData } from './entities/achievement';
-import { AchievementConfig } from './entities/achievement-config';
-import { CommentData } from './entities/comment';
-import { CommunityData } from './entities/community';
-import { ContractInfo } from './entities/contract-info';
-import { Documentation } from './entities/documentation';
-import { PostData } from './entities/post';
-import { ReplyData } from './entities/reply';
-import { TagData } from './entities/tag';
-import { UserData } from './entities/user';
-import { UserRating } from './entities/user-rating';
-import { createRpcProvider, getDelegateUserSigner } from './infura';
 
 export async function getPost(postId: number): Promise<PostData> {
   const provider = createRpcProvider();

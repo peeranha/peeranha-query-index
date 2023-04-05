@@ -1,13 +1,12 @@
 import fetch from 'cross-fetch';
-
-import { log, LogLevel } from './logger';
 import {
   UnauthorizedError,
   BadRequestError,
   NotFoundError,
   ForbiddenError,
   BadRequestErrorWithBody,
-} from '../errors';
+} from 'src/core/errors';
+import { log, LogLevel } from 'src/core/utils/logger';
 
 global.fetch = fetch;
 

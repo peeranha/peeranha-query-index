@@ -1,8 +1,9 @@
-import { execute } from '../../.mesh';
 import {
   ExecuteQueryRequest,
   ExecuteQueryResponse,
-} from '../models/graphql-models';
+} from 'src/models/graphql-models';
+
+import { execute } from '../../.mesh';
 
 export async function executeQuery(
   request: ExecuteQueryRequest

@@ -1,7 +1,6 @@
 import { providers, Wallet } from 'ethers';
+import { log, LogLevel } from 'src/core/utils/logger';
 import { getSecretValue } from 'src/core/utils/secrets';
-
-import { log, LogLevel } from '../utils/logger';
 
 const DELEGATE_USERS_COUNT = 'DELEGATE_USERS_COUNT';
 const DELEGATE_USER_PRIVATE_KEY = 'DELEGATE_USER_PRIVATE_KEY_';

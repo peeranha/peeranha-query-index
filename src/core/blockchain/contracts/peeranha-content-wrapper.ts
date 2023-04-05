@@ -1,8 +1,7 @@
+import peeranhaContentInterface from 'src/core/blockchain/contracts/abi/PeeranhaContent.json';
+import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
+import { Documentation } from 'src/core/blockchain/entities/documentation';
 import { ConfigurationError } from 'src/core/errors';
-
-import peeranhaContentInterface from './abi/PeeranhaContent.json';
-import { BaseContractWrapper } from './base-contract-wrapper';
-import { Documentation } from '../entities/documentation';
 
 export class PeeranhaContentWrapper extends BaseContractWrapper {
   public async getPost(postId: number): Promise<any> {

@@ -1,9 +1,8 @@
 import { getCommunity, getTags } from 'src/core/blockchain/data-loader';
 import { TagData } from 'src/core/blockchain/entities/tag';
-
-import { CommunityEntity, TagEntity } from '../db/entities';
-import { CommunityRepository } from '../db/repositories/CommunityRepository';
-import { TagRepository } from '../db/repositories/TagRepository';
+import { CommunityEntity, TagEntity } from 'src/core/db/entities';
+import { CommunityRepository } from 'src/core/db/repositories/CommunityRepository';
+import { TagRepository } from 'src/core/db/repositories/TagRepository';
 
 const communityRepository = new CommunityRepository();
 const tagRepository = new TagRepository();

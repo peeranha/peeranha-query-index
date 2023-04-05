@@ -1,7 +1,6 @@
+import peeranhaCommunityInterface from 'src/core/blockchain/contracts/abi/PeeranhaCommunity.json';
+import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
 import { ConfigurationError } from 'src/core/errors';
-
-import peeranhaCommunityInterface from './abi/PeeranhaCommunity.json';
-import { BaseContractWrapper } from './base-contract-wrapper';
 
 export class PeeranhaCommunityWrapper extends BaseContractWrapper {
   public async getCommunitiesCount(): Promise<number> {

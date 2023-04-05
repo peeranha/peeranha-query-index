@@ -1,7 +1,6 @@
+import peeranhaUserInterface from 'src/core/blockchain/contracts/abi/PeeranhaUser.json';
+import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
 import { ConfigurationError } from 'src/core/errors';
-
-import peeranhaUserInterface from './abi/PeeranhaUser.json';
-import { BaseContractWrapper } from './base-contract-wrapper';
 
 export class PeeranhaUserWrapper extends BaseContractWrapper {
   public async getUserByAddress(address: string): Promise<any> {

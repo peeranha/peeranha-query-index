@@ -2,11 +2,10 @@
 import { getContractInfo, getPeriod } from 'src/core/blockchain/data-loader';
 import { ContractInfoEntity, PeriodEntity } from 'src/core/db/entities';
 import { ContractInfoRepository } from 'src/core/db/repositories/ContractInfoRepository';
+import { PeriodRepository } from 'src/core/db/repositories/PeriodRepository';
 import { ConfigurationError } from 'src/core/errors';
 import { indexingUserReward } from 'src/core/index/user';
-
-import { PeriodRepository } from '../db/repositories/PeriodRepository';
-import { log } from '../utils/logger';
+import { log } from 'src/core/utils/logger';
 
 const contractInfoRepository = new ContractInfoRepository();
 

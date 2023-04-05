@@ -12,12 +12,11 @@ import {
   UserEntity,
   UserRewardEntity,
 } from 'src/core/db/entities';
-
-import { ReplyRepository } from '../db/repositories/ReplyRepository';
-import { UserCommunityRatingRepository } from '../db/repositories/UserCommunityRatingRepository';
-import { UserRepository } from '../db/repositories/UserRepository';
-import { UserRewardRepository } from '../db/repositories/UserRewardRepository';
-import { log, LogLevel } from '../utils/logger';
+import { ReplyRepository } from 'src/core/db/repositories/ReplyRepository';
+import { UserCommunityRatingRepository } from 'src/core/db/repositories/UserCommunityRatingRepository';
+import { UserRepository } from 'src/core/db/repositories/UserRepository';
+import { UserRewardRepository } from 'src/core/db/repositories/UserRewardRepository';
+import { log, LogLevel } from 'src/core/utils/logger';
 
 const replyRepository = new ReplyRepository();
 const userRepository = new UserRepository();

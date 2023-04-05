@@ -1,7 +1,6 @@
 import { WebClient, LogLevel } from '@slack/web-api';
+import { log } from 'src/core/utils/logger';
 import { getSecretValue } from 'src/core/utils/secrets';
-
-import { log } from './logger';
 
 export async function publishSlackMessage(
   id: string,

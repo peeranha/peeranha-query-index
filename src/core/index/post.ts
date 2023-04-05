@@ -7,27 +7,30 @@ import {
 } from 'src/core/blockchain/data-loader';
 import { PostTypes } from 'src/core/blockchain/entities';
 import { PostData } from 'src/core/blockchain/entities/post';
-import { getDataFromIpfs, getIpfsHashFromBytes32 } from 'src/core/utils/ipfs';
-import { log } from 'src/core/utils/logger';
-
-import { getCommunityById } from './community';
-import { createUser, updatePostUsersRatings, updateUserRating } from './user';
-import { ReplyProperties } from './utils';
 import {
   CommentEntity,
   CommunityDocumentationEntity,
   PostEntity,
   PostTagEntity,
   ReplyEntity,
-} from '../db/entities';
-import { CommentRepository } from '../db/repositories/CommentRepository';
-import { CommunityDocumentationRepository } from '../db/repositories/CommunityDocumentationRepository';
-import { CommunityRepository } from '../db/repositories/CommunityRepository';
-import { PostRepository } from '../db/repositories/PostRepository';
-import { PostTagRepository } from '../db/repositories/PostTagRepository';
-import { ReplyRepository } from '../db/repositories/ReplyRepository';
-import { TagRepository } from '../db/repositories/TagRepository';
-import { UserRepository } from '../db/repositories/UserRepository';
+} from 'src/core/db/entities';
+import { CommentRepository } from 'src/core/db/repositories/CommentRepository';
+import { CommunityDocumentationRepository } from 'src/core/db/repositories/CommunityDocumentationRepository';
+import { CommunityRepository } from 'src/core/db/repositories/CommunityRepository';
+import { PostRepository } from 'src/core/db/repositories/PostRepository';
+import { PostTagRepository } from 'src/core/db/repositories/PostTagRepository';
+import { ReplyRepository } from 'src/core/db/repositories/ReplyRepository';
+import { TagRepository } from 'src/core/db/repositories/TagRepository';
+import { UserRepository } from 'src/core/db/repositories/UserRepository';
+import { getCommunityById } from 'src/core/index/community';
+import {
+  createUser,
+  updatePostUsersRatings,
+  updateUserRating,
+} from 'src/core/index/user';
+import { ItemProperties } from 'src/core/index/utils';
+import { getDataFromIpfs, getIpfsHashFromBytes32 } from 'src/core/utils/ipfs';
+import { log } from 'src/core/utils/logger';
 
 const postRepository = new PostRepository();
 const replyRepository = new ReplyRepository();
@@ -115,7 +118,7 @@ export async function createPost(
 ): Promise<PostEntity> {
   const [peeranhaPost, messengerUserData] = await Promise.all([
     getPost(Number(postId)),
-    getItemProperty(ReplyProperties.MessengerSender, Number(postId)),
+    getItemProperty(ItemProperties.MessengerSender, Number(postId)),
   ]);
 
   const post = new PostEntity({
@@ -191,7 +194,7 @@ export async function createReply(
   const [peeranhaReply, peeranhaPost, messengerUserData] = await Promise.all([
     getReply(Number(postId), replyId),
     getPost(Number(postId)),
-    getItemProperty(ReplyProperties.MessengerSender, Number(postId), replyId),
+    getItemProperty(ItemProperties.MessengerSender, Number(postId), replyId),
   ]);
 
   if (!peeranhaReply) {

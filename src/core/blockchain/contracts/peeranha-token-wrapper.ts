@@ -1,7 +1,6 @@
+import peeranhaTokenInterface from 'src/core/blockchain/contracts/abi/PeeranhaToken.json';
+import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
 import { ConfigurationError } from 'src/core/errors';
-
-import peeranhaTokenInterface from './abi/PeeranhaToken.json';
-import { BaseContractWrapper } from './base-contract-wrapper';
 
 export class PeeranhaTokenWrapper extends BaseContractWrapper {
   public async getUserRewardGraph(user: string, period: number): Promise<any> {

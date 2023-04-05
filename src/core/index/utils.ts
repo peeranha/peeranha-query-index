@@ -1,4 +1,4 @@
-export enum ReplyProperties {
+export enum ItemProperties {
   MessengerSender,
 }
 

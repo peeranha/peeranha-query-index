@@ -1,7 +1,6 @@
+import peeranhaNFTInterface from 'src/core/blockchain/contracts/abi/PeeranhaNFT.json';
+import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
 import { ConfigurationError } from 'src/core/errors';
-
-import peeranhaNFTInterface from './abi/PeeranhaNFT.json';
-import { BaseContractWrapper } from './base-contract-wrapper';
 
 export class PeeranhaNFTWrapper extends BaseContractWrapper {
   public getAchievementsNFTConfig(achievementId: number): Promise<any> {
