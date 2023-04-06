@@ -1,18 +1,15 @@
-import { Contract, Wallet, providers } from 'ethers';
+import { Contract, providers } from 'ethers';
 import { ConfigurationError } from 'src/core/errors';
 
 export class BaseContractWrapper {
   contract: Contract;
 
-  delegateUserWallet: Wallet;
-
-  constructor(provider: providers.Provider, wallet: Wallet, address?: string) {
+  constructor(provider: providers.Provider, address?: string) {
     this.contract = new Contract(
       address ?? this.getAddress(),
       this.getAbi(),
       provider
     );
-    this.delegateUserWallet = wallet.connect(provider);
   }
 
   public getAddress(): string {

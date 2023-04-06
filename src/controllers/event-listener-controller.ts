@@ -29,7 +29,7 @@ import {
   USER_CREATED_EVENT_NAME,
   USER_UPDATED_EVENT_NAME,
 } from 'src/core/blockchain/constants';
-import { createRpcProvider } from 'src/core/blockchain/infura';
+import { createRpcProvider } from 'src/core/blockchain/rpc';
 import { FIRST_QUEUE, SECOND_QUEUE } from 'src/core/constants';
 import { ConfigurationError } from 'src/core/errors';
 import { pushToSQS } from 'src/core/utils/sqs';
@@ -105,8 +105,6 @@ const contractEvents = {
   ],
 };
 
-const contractsAddresses = Object.keys(contractEvents);
-
 const eventToModelType: Record<string, typeof BaseEventModel> = {};
 eventToModelType[ITEM_VOTED_EVENT_NAME] = ItemVotedEventModel;
 eventToModelType[REPLY_MARKED_THE_BEST_EVENT_NAME] =
@@ -158,23 +156,6 @@ const getEventModels = (transactions: any[]) =>
       return new EventModeType(transaction);
     });
 
-const getSortedEvents = (events: BaseEventModel[]) =>
-  events.sort((a, b) => {
-    if (a.timestamp < b.timestamp) return -1;
-    if (a.timestamp > b.timestamp) return 1;
-    if (
-      contractsAddresses.indexOf(a.contractAddress) <
-      contractsAddresses.indexOf(b.contractAddress)
-    )
-      return -1;
-    if (
-      contractsAddresses.indexOf(a.contractAddress) >
-      contractsAddresses.indexOf(b.contractAddress)
-    )
-      return 1;
-    return 0;
-  });
-
 async function getEvents(transactions: any[]) {
   const provider = createRpcProvider();
 
@@ -190,7 +171,7 @@ async function getEvents(transactions: any[]) {
     eventModels[i]!.timestamp = blocks[i]!.timestamp;
   }
 
-  return getSortedEvents(eventModels);
+  return eventModels;
 }
 
 async function handleListenWebhook(

@@ -60,6 +60,7 @@ import {
   handleUpdatedCommunity,
   handlerSetDocumentationTree,
 } from 'src/core/index/mapping';
+import { log } from 'src/core/utils/logger';
 
 const eventToHandler: Record<string, Function> = {};
 eventToHandler[POST_CREATED_EVENT_NAME] = handleNewPost;
@@ -94,6 +95,8 @@ eventToHandler[ITEM_VOTED_EVENT_NAME] = handlerForumItemVoted;
 eventToHandler[SET_DOCUMENTATION_TREE_EVENT_NAME] = handlerSetDocumentationTree;
 
 export async function processIndexing(eventModel: any) {
+  log(`Starting indexing event ${JSON.stringify(eventModel, null, 2)}`);
+
   const eventName = eventModel.contractEventName;
   const handler = eventToHandler[eventName];
   if (!handler) {

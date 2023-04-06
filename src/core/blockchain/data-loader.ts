@@ -14,17 +14,13 @@ import { ReplyData } from 'src/core/blockchain/entities/reply';
 import { TagData } from 'src/core/blockchain/entities/tag';
 import { UserData } from 'src/core/blockchain/entities/user';
 import { UserRating } from 'src/core/blockchain/entities/user-rating';
-import {
-  createRpcProvider,
-  getDelegateUserSigner,
-} from 'src/core/blockchain/infura';
+import { createRpcProvider } from 'src/core/blockchain/rpc';
 import { AddIpfsData } from 'src/core/utils/ipfs';
 import { log, LogLevel } from 'src/core/utils/logger';
 
 export async function getPost(postId: number): Promise<PostData> {
   const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const mainContract = new PeeranhaContentWrapper(provider, wallet);
+  const mainContract = new PeeranhaContentWrapper(provider);
   const post = new PostData(await mainContract.getPost(postId));
   return AddIpfsData(post, post.ipfsDoc[0]);
 }
@@ -35,8 +31,7 @@ export async function getReply(
 ): Promise<ReplyData | undefined> {
   try {
     const provider = createRpcProvider();
-    const wallet = await getDelegateUserSigner(provider);
-    const mainContract = new PeeranhaContentWrapper(provider, wallet);
+    const mainContract = new PeeranhaContentWrapper(provider);
     const reply = new ReplyData(await mainContract.getReply(postId, replyId));
     return await AddIpfsData(reply, reply.ipfsDoc[0]);
   } catch (err) {
@@ -55,8 +50,7 @@ export async function getComment(
 ): Promise<CommentData | undefined> {
   try {
     const provider = createRpcProvider();
-    const wallet = await getDelegateUserSigner(provider);
-    const mainContract = new PeeranhaContentWrapper(provider, wallet);
+    const mainContract = new PeeranhaContentWrapper(provider);
     const comment = new CommentData(
       await mainContract.getComment(postId, replyId, commentId)
     );
@@ -72,8 +66,7 @@ export async function getComment(
 
 export async function getContractInfo(): Promise<ContractInfo> {
   const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const userContract = new PeeranhaUserWrapper(provider, wallet);
+  const userContract = new PeeranhaUserWrapper(provider);
   return new ContractInfo(await userContract.getContractInfo());
 }
 
@@ -82,8 +75,7 @@ export async function getUserByAddress(
 ): Promise<UserData | undefined> {
   try {
     const provider = createRpcProvider();
-    const wallet = await getDelegateUserSigner(provider);
-    const userContract = new PeeranhaUserWrapper(provider, wallet);
+    const userContract = new PeeranhaUserWrapper(provider);
     const user = new UserData(await userContract.getUserByAddress(address));
     return await AddIpfsData(user, user.ipfsDoc[0]);
   } catch (err: any) {
@@ -100,15 +92,13 @@ export async function getUserRating(
   communityId: number
 ): Promise<number> {
   const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const userContract = new PeeranhaUserWrapper(provider, wallet);
+  const userContract = new PeeranhaUserWrapper(provider);
   return userContract.getUserRating(address, communityId);
 }
 
 export async function getPeriod(): Promise<number> {
   const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const userContract = new PeeranhaUserWrapper(provider, wallet);
+  const userContract = new PeeranhaUserWrapper(provider);
   return userContract.getPeriod();
 }
 
@@ -117,8 +107,7 @@ export async function getUserRewardGraph(
   period: number
 ): Promise<any> {
   const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const tokenContract = new PeeranhaTokenWrapper(provider, wallet);
+  const tokenContract = new PeeranhaTokenWrapper(provider);
   return tokenContract.getUserRewardGraph(user, period);
 }
 
@@ -126,54 +115,23 @@ export async function getActiveUsersInPeriod(
   period: number
 ): Promise<string[]> {
   const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const userContract = new PeeranhaUserWrapper(provider, wallet);
+  const userContract = new PeeranhaUserWrapper(provider);
   return userContract.getActiveUsersInPeriod(period);
 }
 
 export async function getCommunity(id: number): Promise<CommunityData> {
   const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const contract = new PeeranhaCommunityWrapper(provider, wallet);
+  const contract = new PeeranhaCommunityWrapper(provider);
   const community = new CommunityData(await contract.getCommunity(id));
   return AddIpfsData(community, community.ipfsDoc[0]);
 }
 
-export async function getCommunities(): Promise<CommunityData[]> {
-  const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const contract = new PeeranhaCommunityWrapper(provider, wallet);
-  const communitiesCount = await contract.getCommunitiesCount();
-  const communities: CommunityData[] = [];
-  const promises: Promise<any>[] = [];
-
-  for (let i = 1; i <= communitiesCount; i++) {
-    promises.push(
-      getCommunity(i)
-        .then((community) => {
-          return {
-            ...community,
-            id: i,
-          };
-        })
-        .then((community) =>
-          !community.isFrozen ? communities.push(community) : community
-        )
-    );
-  }
-
-  await Promise.all(promises);
-  return communities;
-}
-
 export async function getTags(communityId: number): Promise<TagData[]> {
   const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const contract = new PeeranhaCommunityWrapper(provider, wallet);
+  const contract = new PeeranhaCommunityWrapper(provider);
   const tags = await contract.getTags(communityId);
   const tagsWithIpfsData: TagData[] = [];
   const promises: Promise<any>[] = [];
-
   tags.forEach((tag, index) => {
     promises.push(
       AddIpfsData(new TagData(tag), tag.ipfsDoc[0])
@@ -196,8 +154,7 @@ export async function getTag(
   tagId: number
 ): Promise<TagData> {
   const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const contract = new PeeranhaCommunityWrapper(provider, wallet);
+  const contract = new PeeranhaCommunityWrapper(provider);
   const tag = new TagData(await contract.getTag(communityId, tagId));
   const tagWithIpfs = await AddIpfsData(tag, tag.ipfsDoc[0]);
   return {
@@ -211,8 +168,7 @@ export async function getAchievementsNFTConfig(
   achievementId: number
 ): Promise<AchievementData> {
   const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const contract = new PeeranhaNFTWrapper(provider, wallet);
+  const contract = new PeeranhaNFTWrapper(provider);
   const achievement = new AchievementData(
     await contract.getAchievementsNFTConfig(achievementId)
   );
@@ -227,8 +183,7 @@ export async function getDocumentationTree(
   communityId: number
 ): Promise<Documentation> {
   const provider = createRpcProvider();
-  const wallet = await getDelegateUserSigner(provider);
-  const contract = new PeeranhaContentWrapper(provider, wallet);
+  const contract = new PeeranhaContentWrapper(provider);
   return contract.getDocumentationTree(communityId);
 }
 
@@ -240,8 +195,7 @@ export async function getItemProperty(
 ): Promise<string | undefined> {
   try {
     const provider = createRpcProvider();
-    const wallet = await getDelegateUserSigner(provider);
-    const contract = new PeeranhaContentWrapper(provider, wallet);
+    const contract = new PeeranhaContentWrapper(provider);
     const itemProperty = await contract.getItemProperty(
       propertyId,
       postId,
@@ -261,8 +215,7 @@ export async function getItemProperty(
 export async function getAchievementConfig(achievementId: number) {
   try {
     const provider = createRpcProvider();
-    const wallet = await getDelegateUserSigner(provider);
-    const contract = new PeeranhaUserWrapper(provider, wallet);
+    const contract = new PeeranhaUserWrapper(provider);
     return new AchievementConfig(
       await contract.getAchievementConfig(achievementId)
     );
@@ -278,8 +231,7 @@ export async function getAchievementConfig(achievementId: number) {
 export async function getAchievementCommunity(achievementId: number) {
   try {
     const provider = createRpcProvider();
-    const wallet = await getDelegateUserSigner(provider);
-    const contract = new PeeranhaUserWrapper(provider, wallet);
+    const contract = new PeeranhaUserWrapper(provider);
     return await contract.getAchievementCommunity(achievementId);
   } catch (err: any) {
     log(
@@ -296,8 +248,7 @@ export async function getUserRatingCollection(
 ): Promise<UserRating | undefined> {
   try {
     const provider = createRpcProvider();
-    const wallet = await getDelegateUserSigner(provider);
-    const userContract = new PeeranhaUserWrapper(provider, wallet);
+    const userContract = new PeeranhaUserWrapper(provider);
     return new UserRating(
       await userContract.getUserRatingCollection(address, communityId)
     );
