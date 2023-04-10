@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { getContractInfo, getPeriod } from 'src/core/blockchain/data-loader';
+import { getContractInfo } from 'src/core/blockchain/data-loader';
 import { ContractInfoEntity, PeriodEntity } from 'src/core/db/entities';
 import { ContractInfoRepository } from 'src/core/db/repositories/ContractInfoRepository';
 import { PeriodRepository } from 'src/core/db/repositories/PeriodRepository';
@@ -7,8 +7,10 @@ import { ConfigurationError } from 'src/core/errors';
 import { indexingUserReward } from 'src/core/index/user';
 import { log } from 'src/core/utils/logger';
 
-const contractInfoRepository = new ContractInfoRepository();
+const getPeriod = (startPeriodTime: number, periodLength: number) =>
+  Math.floor((Date.now() / 1000 - startPeriodTime) / periodLength);
 
+const contractInfoRepository = new ContractInfoRepository();
 const periodRepository = new PeriodRepository();
 
 export async function indexingPeriods() {
@@ -33,7 +35,7 @@ export async function indexingPeriods() {
   const promises: Promise<void>[] = [];
 
   const period = Math.min(
-    await getPeriod(),
+    getPeriod(contractInfo.deployTime, contractInfo.periodLength),
     contractInfo.lastUpdatePeriod + 5 * (process.env.ENV === 'prod' ? 1 : 10)
   );
   for (

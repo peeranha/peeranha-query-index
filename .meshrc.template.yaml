@@ -7,6 +7,7 @@ sources:
         user: {{user}}
         password: {{password}}
         database: {{database}}
+        charset: utf8mb4
 transforms:
   - filterSchema:
       mode: bare | wrap

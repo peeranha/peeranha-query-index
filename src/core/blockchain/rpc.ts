@@ -1,4 +1,8 @@
 import { providers } from 'ethers';
+import { getSecretValue } from 'src/core/utils/secrets';
 
-export const createRpcProvider = () =>
-  new providers.JsonRpcProvider(process.env.RPC_ENDPOINT);
+export async function createRpcProvider() {
+  const apiKey = await getSecretValue('RPC_API_KEY');
+  const url = `${process.env.RPC_ENDPOINT}/${apiKey}`;
+  return new providers.JsonRpcProvider(url);
+}

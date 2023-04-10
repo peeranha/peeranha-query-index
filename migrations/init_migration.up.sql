@@ -156,12 +156,10 @@ CREATE TABLE IF NOT EXISTS achievement (
   name VARCHAR(30),
   description VARCHAR(250),
   image VARCHAR(66),
-  communityId INT NOT NULL,
+  communityId INT,
   attrCommunityId INT,
   attrEvent VARCHAR(50),
-  attrType VARCHAR(20),
-
-  FOREIGN KEY (communityId) REFERENCES community (id)
+  attrType VARCHAR(20)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS userachievement (

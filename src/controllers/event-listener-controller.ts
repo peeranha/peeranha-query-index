@@ -157,7 +157,7 @@ const getEventModels = (transactions: any[]) =>
     });
 
 async function getEvents(transactions: any[]) {
-  const provider = createRpcProvider();
+  const provider = await createRpcProvider();
 
   const eventModels = getEventModels(transactions);
 

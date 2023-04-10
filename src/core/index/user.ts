@@ -68,7 +68,7 @@ export async function updateUserRating(
   const user = await userRepository.get(userAddress);
   if (!user) return;
 
-  let rating = START_USER_RATING;
+  let rating = 0;
 
   const userRatingCollection = await getUserRatingCollection(
     userAddress,
@@ -78,6 +78,8 @@ export async function updateUserRating(
   if (userRatingCollection) {
     if (userRatingCollection.isActive) {
       rating = userRatingCollection.rating;
+    } else {
+      rating = START_USER_RATING;
     }
   } else {
     rating = await getUserRating(userAddress, communityId);

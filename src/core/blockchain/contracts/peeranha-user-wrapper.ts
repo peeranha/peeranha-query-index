@@ -15,10 +15,6 @@ export class PeeranhaUserWrapper extends BaseContractWrapper {
     return this.contract.getContractInformation();
   }
 
-  public async getPeriod(): Promise<number> {
-    return this.contract.getPeriod();
-  }
-
   public async getActiveUsersInPeriod(period: number): Promise<string[]> {
     return this.contract.getActiveUsersInPeriod(period);
   }

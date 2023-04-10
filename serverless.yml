@@ -19,7 +19,6 @@ provider:
   memorySize: 512
   timeout: 10
   logRetentionInDays: 30
-  lambdaHashingVersion: 20201221
   logs:
     httpApi: true
   httpApi:

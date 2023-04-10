@@ -19,7 +19,7 @@ import { AddIpfsData } from 'src/core/utils/ipfs';
 import { log, LogLevel } from 'src/core/utils/logger';
 
 export async function getPost(postId: number): Promise<PostData> {
-  const provider = createRpcProvider();
+  const provider = await createRpcProvider();
   const mainContract = new PeeranhaContentWrapper(provider);
   const post = new PostData(await mainContract.getPost(postId));
   return AddIpfsData(post, post.ipfsDoc[0]);
@@ -30,7 +30,7 @@ export async function getReply(
   replyId: number
 ): Promise<ReplyData | undefined> {
   try {
-    const provider = createRpcProvider();
+    const provider = await createRpcProvider();
     const mainContract = new PeeranhaContentWrapper(provider);
     const reply = new ReplyData(await mainContract.getReply(postId, replyId));
     return await AddIpfsData(reply, reply.ipfsDoc[0]);
@@ -49,7 +49,7 @@ export async function getComment(
   commentId: number
 ): Promise<CommentData | undefined> {
   try {
-    const provider = createRpcProvider();
+    const provider = await createRpcProvider();
     const mainContract = new PeeranhaContentWrapper(provider);
     const comment = new CommentData(
       await mainContract.getComment(postId, replyId, commentId)
@@ -65,7 +65,7 @@ export async function getComment(
 }
 
 export async function getContractInfo(): Promise<ContractInfo> {
-  const provider = createRpcProvider();
+  const provider = await createRpcProvider();
   const userContract = new PeeranhaUserWrapper(provider);
   return new ContractInfo(await userContract.getContractInfo());
 }
@@ -74,7 +74,7 @@ export async function getUserByAddress(
   address: string
 ): Promise<UserData | undefined> {
   try {
-    const provider = createRpcProvider();
+    const provider = await createRpcProvider();
     const userContract = new PeeranhaUserWrapper(provider);
     const user = new UserData(await userContract.getUserByAddress(address));
     return await AddIpfsData(user, user.ipfsDoc[0]);
@@ -91,22 +91,16 @@ export async function getUserRating(
   address: string,
   communityId: number
 ): Promise<number> {
-  const provider = createRpcProvider();
+  const provider = await createRpcProvider();
   const userContract = new PeeranhaUserWrapper(provider);
   return userContract.getUserRating(address, communityId);
-}
-
-export async function getPeriod(): Promise<number> {
-  const provider = createRpcProvider();
-  const userContract = new PeeranhaUserWrapper(provider);
-  return userContract.getPeriod();
 }
 
 export async function getUserRewardGraph(
   user: string,
   period: number
 ): Promise<any> {
-  const provider = createRpcProvider();
+  const provider = await createRpcProvider();
   const tokenContract = new PeeranhaTokenWrapper(provider);
   return tokenContract.getUserRewardGraph(user, period);
 }
@@ -114,20 +108,20 @@ export async function getUserRewardGraph(
 export async function getActiveUsersInPeriod(
   period: number
 ): Promise<string[]> {
-  const provider = createRpcProvider();
+  const provider = await createRpcProvider();
   const userContract = new PeeranhaUserWrapper(provider);
   return userContract.getActiveUsersInPeriod(period);
 }
 
 export async function getCommunity(id: number): Promise<CommunityData> {
-  const provider = createRpcProvider();
+  const provider = await createRpcProvider();
   const contract = new PeeranhaCommunityWrapper(provider);
   const community = new CommunityData(await contract.getCommunity(id));
   return AddIpfsData(community, community.ipfsDoc[0]);
 }
 
 export async function getTags(communityId: number): Promise<TagData[]> {
-  const provider = createRpcProvider();
+  const provider = await createRpcProvider();
   const contract = new PeeranhaCommunityWrapper(provider);
   const tags = await contract.getTags(communityId);
   const tagsWithIpfsData: TagData[] = [];
@@ -153,7 +147,7 @@ export async function getTag(
   communityId: number,
   tagId: number
 ): Promise<TagData> {
-  const provider = createRpcProvider();
+  const provider = await createRpcProvider();
   const contract = new PeeranhaCommunityWrapper(provider);
   const tag = new TagData(await contract.getTag(communityId, tagId));
   const tagWithIpfs = await AddIpfsData(tag, tag.ipfsDoc[0]);
@@ -167,7 +161,7 @@ export async function getTag(
 export async function getAchievementsNFTConfig(
   achievementId: number
 ): Promise<AchievementData> {
-  const provider = createRpcProvider();
+  const provider = await createRpcProvider();
   const contract = new PeeranhaNFTWrapper(provider);
   const achievement = new AchievementData(
     await contract.getAchievementsNFTConfig(achievementId)
@@ -182,7 +176,7 @@ export async function getAchievementsNFTConfig(
 export async function getDocumentationTree(
   communityId: number
 ): Promise<Documentation> {
-  const provider = createRpcProvider();
+  const provider = await createRpcProvider();
   const contract = new PeeranhaContentWrapper(provider);
   return contract.getDocumentationTree(communityId);
 }
@@ -194,7 +188,7 @@ export async function getItemProperty(
   commentId?: number
 ): Promise<string | undefined> {
   try {
-    const provider = createRpcProvider();
+    const provider = await createRpcProvider();
     const contract = new PeeranhaContentWrapper(provider);
     const itemProperty = await contract.getItemProperty(
       propertyId,
@@ -214,7 +208,7 @@ export async function getItemProperty(
 
 export async function getAchievementConfig(achievementId: number) {
   try {
-    const provider = createRpcProvider();
+    const provider = await createRpcProvider();
     const contract = new PeeranhaUserWrapper(provider);
     return new AchievementConfig(
       await contract.getAchievementConfig(achievementId)
@@ -230,7 +224,7 @@ export async function getAchievementConfig(achievementId: number) {
 
 export async function getAchievementCommunity(achievementId: number) {
   try {
-    const provider = createRpcProvider();
+    const provider = await createRpcProvider();
     const contract = new PeeranhaUserWrapper(provider);
     return await contract.getAchievementCommunity(achievementId);
   } catch (err: any) {
@@ -247,7 +241,7 @@ export async function getUserRatingCollection(
   communityId: number
 ): Promise<UserRating | undefined> {
   try {
-    const provider = createRpcProvider();
+    const provider = await createRpcProvider();
     const userContract = new PeeranhaUserWrapper(provider);
     return new UserRating(
       await userContract.getUserRatingCollection(address, communityId)
