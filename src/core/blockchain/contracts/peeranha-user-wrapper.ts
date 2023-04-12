@@ -19,13 +19,6 @@ export class PeeranhaUserWrapper extends BaseContractWrapper {
     return this.contract.getActiveUsersInPeriod(period);
   }
 
-  public async getUserRating(
-    address: string,
-    communityId: number
-  ): Promise<number> {
-    return this.contract.getUserRating(address, communityId);
-  }
-
   public async getAchievementConfig(achievementId: number) {
     return this.contract.getAchievementConfig(achievementId);
   }

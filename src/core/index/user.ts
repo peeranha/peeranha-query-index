@@ -4,7 +4,6 @@ import {
   getActiveUsersInPeriod,
   getUserRewardGraph,
   getUserRatingCollection,
-  getUserRating,
 } from 'src/core/blockchain/data-loader';
 import {
   PostEntity,
@@ -68,21 +67,15 @@ export async function updateUserRating(
   const user = await userRepository.get(userAddress);
   if (!user) return;
 
-  let rating = 0;
+  let rating = START_USER_RATING;
 
   const userRatingCollection = await getUserRatingCollection(
     userAddress,
     communityId
   );
 
-  if (userRatingCollection) {
-    if (userRatingCollection.isActive) {
-      rating = userRatingCollection.rating;
-    } else {
-      rating = START_USER_RATING;
-    }
-  } else {
-    rating = await getUserRating(userAddress, communityId);
+  if (userRatingCollection.isActive) {
+    rating = userRatingCollection.rating;
   }
 
   const userRatingId = `${communityId} ${userAddress}`;

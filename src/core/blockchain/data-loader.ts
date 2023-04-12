@@ -87,15 +87,6 @@ export async function getUserByAddress(
   }
 }
 
-export async function getUserRating(
-  address: string,
-  communityId: number
-): Promise<number> {
-  const provider = await createRpcProvider();
-  const userContract = new PeeranhaUserWrapper(provider);
-  return userContract.getUserRating(address, communityId);
-}
-
 export async function getUserRewardGraph(
   user: string,
   period: number
@@ -239,18 +230,10 @@ export async function getAchievementCommunity(achievementId: number) {
 export async function getUserRatingCollection(
   address: string,
   communityId: number
-): Promise<UserRating | undefined> {
-  try {
-    const provider = await createRpcProvider();
-    const userContract = new PeeranhaUserWrapper(provider);
-    return new UserRating(
-      await userContract.getUserRatingCollection(address, communityId)
-    );
-  } catch (err: any) {
-    log(
-      `Error during getting user rating collection. Params: user - ${address}, communityId - ${communityId}\n${err}`,
-      LogLevel.ERROR
-    );
-    return undefined;
-  }
+) {
+  const provider = await createRpcProvider();
+  const userContract = new PeeranhaUserWrapper(provider);
+  return new UserRating(
+    await userContract.getUserRatingCollection(address, communityId)
+  );
 }
