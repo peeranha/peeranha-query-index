@@ -78,6 +78,14 @@ functions:
           path: '/polygon-event-listener/second-webhook'
           method: 'POST'
 
+  first-sui-onchain-events-read:
+    handler: src/handlers/first-sui-onchain-events-read.handler
+    timeout: 300
+    events:
+      - schedule:
+          name: first-sui-read-onchain-events-${self:custom.stage}
+          rate: rate(1 minute)
+
   first-indexing-queue:
     handler: src/handlers/first-indexing-queue.handler
     timeout: 50
