@@ -50,10 +50,12 @@ export async function readSuiEvents(
       ]
     }
 
+
     */
 
     /*
-    4. Push results of each transaction to SQS queue for indexing
+    4. Push results of each transaction to SQS queue for indexing.
+       I think it is enough for us just to push value of `objectChanges` property from the response.
     */
 
     /*
