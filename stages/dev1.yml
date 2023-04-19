@@ -12,6 +12,9 @@ environment:
   TOKEN_CONTRACT_ADDRESS: '0xbCf7A789abC7f6D8aAEf378586326668757b7216'
   NFT_CONTRACT_ADDRESS: '0x06B65F0583F4D9E534fc96EA0D777fC7267a0bF3'
 
+  DYNAMODB_ENDPOINT: 'https://dynamodb.us-east-2.amazonaws.com'
+  SQS_ENDPOINT: 'https://sqs.us-east-2.amazonaws.com'
+
   SECURITY_GROUP_ID: 'sg-b90a3dde'
   SUBNET_ID_1: 'subnet-f4be9c8e'
   SUBNET_ID_2: 'subnet-0b05f160'

@@ -107,3 +107,7 @@ export async function processIndexing(eventModel: any) {
   await BaseRepository.transaction(handler, eventModel);
   return eventModel;
 }
+
+export async function processSuiIndexing(eventModel: any) {
+  log(`Sui event model: ${JSON.stringify(eventModel, null, 2)}`);
+}

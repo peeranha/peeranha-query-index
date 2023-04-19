@@ -1,66 +1,110 @@
-import { ReadSuiEventsRequestModel, ReadSuiEventsResponseModel } from 'src/models/sui-models';
+import { SuiTransactionBlockResponse } from '@mysten/sui.js';
+import { createSuiProvider } from 'src/core/blockchain/sui';
+import { SUI_FIRST_QUEUE } from 'src/core/constants';
+import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
+import { Config } from 'src/core/dynamodb/entities/Config';
+import {
+  ConfigRepository,
+  NEXT_CURSOR,
+} from 'src/core/dynamodb/repositories/ConfigRepository';
+import { ConfigurationError } from 'src/core/errors';
+import { log } from 'src/core/utils/logger';
+import { pushToSQS } from 'src/core/utils/sqs';
+import {
+  ReadSuiEventsRequestModel,
+  ReadSuiEventsResponseModel,
+} from 'src/models/sui-models';
+
+const TRANSACTIONS_MAX_NUMBER = 100;
+
+const connDynamoDB = new DynamoDBConnector(process.env);
+const configRepository = new ConfigRepository(connDynamoDB);
 
 export async function readSuiEvents(
-    _readEventsRequest: ReadSuiEventsRequestModel
-  ): Promise<ReadSuiEventsResponseModel> {
+  _readEventsRequest: ReadSuiEventsRequestModel
+): Promise<ReadSuiEventsResponseModel> {
+  if (!process.env.SUI_PACKAGE_ADDRESS || !process.env.SUI_RPC_ENDPOINT) {
+    throw new ConfigurationError(
+      'SUI_PACKAGE_ADDRESS or SUI_RPC_ENDPOINT are not configured'
+    );
+  }
 
-    /*
-    1. Read cursor value from Config repository. 
-    If this is the first call and cursor value is not vailable then use null
-    */
+  const provider = createSuiProvider(); // devnet connection
 
-    /*
-    2. Make POST call to Sui RPC (https://rpc.testnet.sui.io) to method 'suix_queryTransactionBlocks'
+  const cursorConfig = await configRepository.get(NEXT_CURSOR);
+  const CURSOR = cursorConfig ? cursorConfig.value : null;
 
-    {
-      "jsonrpc": "2.0",
-      "id": 1,
-      "method": "suix_queryTransactionBlocks",
-      "params": [
+  const response = await fetch(process.env.SUI_RPC_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'suix_queryTransactionBlocks',
+      params: [
         {
-            "filter": {"MoveFunction": {"package": "0xec596b8c61663eaf9d2037828d591a44eaeb3f79ac3c94f43b85289ebb59472c"}}
+          filter: {
+            MoveFunction: {
+              package: process.env.SUI_PACKAGE_ADDRESS,
+            },
+          },
         },
-        null,
-        100
-      ]
-    }
+        CURSOR,
+        TRANSACTIONS_MAX_NUMBER,
+      ],
+    }),
+  });
+  const responseObject = await response.json();
 
-    null - is cursor. if available then pass cursor value
-    100 - is max number of transactions to pull. Create a constant for that.
-    */
+  const { data, nextCursor } = responseObject.result;
+  const digests: string[] = data.map((block: any) => block.digest);
 
-    /*
+  const transactionBlockPromises: Promise<SuiTransactionBlockResponse>[] = [];
 
-    3. For each transaction received on the previous step call `sui_getTransactionBlock`
+  digests.forEach((digest) =>
+    transactionBlockPromises.push(
+      provider.getTransactionBlock({
+        digest,
+        options: {
+          showInput: false,
+          showEffects: false,
+          showEvents: true,
+          showObjectChanges: false,
+          showBalanceChanges: false,
+        },
+      })
+    )
+  );
 
-    {
-      "jsonrpc": "2.0",
-      "id": 1,
-      "method": "sui_getTransactionBlock",
-      "params": [
-        "DD3uAmzXw3LBJugoKJvG2oQY1zYzLeXNCXBUZZSKopWV",
-        {
-          "showInput": false,
-          "showRawInput": false,
-          "showEffects": true,
-          "showEvents": true,
-          "showObjectChanges": true,
-          "showBalanceChanges": false
-        }
-      ]
-    }
+  const transactionBlocks = await Promise.all(transactionBlockPromises);
 
+  const promises: Promise<any>[] = [];
+  transactionBlocks.forEach((block) => {
+    block.events?.forEach((event) => {
+      promises.push(pushToSQS(SUI_FIRST_QUEUE, event));
+    });
+  });
 
-    */
+  await Promise.all(promises);
 
-    /*
-    4. Push results of each transaction to SQS queue for indexing.
-       I think it is enough for us just to push value of `objectChanges` property from the response.
-    */
-
-    /*
-    5. Save `cursor` value in response from suix_queryTransactionBlocks to config repo for the next run
-    */
-
+  if (nextCursor == null) {
+    log('Next cursor is null');
     return new ReadSuiEventsResponseModel();
   }
+
+  const configBlockNumber = new Config({
+    key: NEXT_CURSOR,
+    value: nextCursor,
+  });
+
+  log(`Updating next cursor in db - ${nextCursor}`);
+  if (!cursorConfig) {
+    await configRepository.put(configBlockNumber);
+  } else {
+    await configRepository.update(NEXT_CURSOR, configBlockNumber);
+  }
+
+  return new ReadSuiEventsResponseModel();
+}

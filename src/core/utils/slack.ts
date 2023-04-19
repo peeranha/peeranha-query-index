@@ -11,7 +11,7 @@ export async function publishSlackMessage(
   const accessToken = await getSecretValue('SLACK_OAUTH_TOKEN');
 
   const client = new WebClient(accessToken, {
-    logLevel: LogLevel.DEBUG,
+    logLevel: LogLevel.ERROR,
   });
 
   const result = await client.chat.postMessage({

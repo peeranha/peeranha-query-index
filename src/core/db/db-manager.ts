@@ -4,6 +4,7 @@ import {
   FIRST_QUEUE,
   SECOND_CLUSTER_CREDENTIALS,
   SECOND_QUEUE,
+  SUI_FIRST_QUEUE,
 } from 'src/core/constants';
 import { ConfigurationError } from 'src/core/errors';
 import { log, LogLevel } from 'src/core/utils/logger';
@@ -14,6 +15,7 @@ const knexServerlessMysql = require('knex-serverless-mysql');
 
 const credentialsSecret = {
   [FIRST_QUEUE]: FIRST_CLUSTER_CREDENTIALS,
+  [SUI_FIRST_QUEUE]: FIRST_CLUSTER_CREDENTIALS,
   [SECOND_QUEUE]: SECOND_CLUSTER_CREDENTIALS,
 };
 

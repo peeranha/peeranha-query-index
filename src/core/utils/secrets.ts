@@ -1,13 +1,10 @@
-import {
-  SecretsManagerClient,
-  GetSecretValueCommand,
-} from '@aws-sdk/client-secrets-manager';
+import { SecretsManager } from 'aws-sdk';
 import { ConfigurationError } from 'src/core/errors';
 import { log } from 'src/core/utils/logger';
 
 export const DB_SECRETS_ENC_KEY_SECRET_NAME = 'DB_SECRETS_ENC_KEY';
 
-const client = new SecretsManagerClient({ region: process.env.REGION });
+const client = new SecretsManager({ region: process.env.REGION });
 
 export async function getSecretValue(secretName: string) {
   if (process.env.ENV === 'offline') {
@@ -21,8 +18,9 @@ export async function getSecretValue(secretName: string) {
   }
   try {
     const fullSecretName = `${process.env.ENV}/${secretName}`;
-    const command = new GetSecretValueCommand({ SecretId: fullSecretName });
-    const data: any = await client.send(command);
+    const data: any = await client
+      .getSecretValue({ SecretId: fullSecretName })
+      .promise();
     if ('SecretString' in data) {
       return data.SecretString;
     }

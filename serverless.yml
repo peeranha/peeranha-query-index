@@ -10,6 +10,25 @@ custom:
     httpPort: 5000
     noPrependStageInUrl: true
     ignoreJWTSignature: true
+  dynamodb:
+    stages:
+      - offline
+    start:
+      port: 4659
+      inMemory: true
+      migrate: true
+  serverless-offline-sqs:
+    autoCreate: true
+    endpoint: http://0.0.0.0:9324
+    region: ${self:custom.region}
+    accessKeyId: root
+    secretAccessKey: root
+  elasticmq:
+    stages:
+      - dev
+    start:
+      port: 9324
+      noStart: false
 
 provider:
   name: aws
@@ -30,6 +49,13 @@ provider:
           Action:
             - secretsmanager:GetSecretValue
             - sqs:SendMessage
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
           Resource: "*"
   vpc:
     securityGroupIds:
@@ -105,9 +131,31 @@ functions:
             Fn::GetAtt:
               - secondQueue
               - Arn
+      
+  first-sui-indexing-queue:
+    handler: src/handlers/sui-first-indexing-queue.handler
+    timeout: 50
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - firstSuiQueue
+              - Arn
 
 resources:
   Resources:
+    configTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.stage}-config
+        AttributeDefinitions:
+          - AttributeName: key
+            AttributeType: S
+        KeySchema:
+          - AttributeName: key
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
     firstQueue:
       Type: AWS::SQS::Queue
       Properties:
@@ -128,6 +176,16 @@ resources:
         DeduplicationScope: messageGroup
         FifoThroughputLimit: perMessageGroupId
 
+    firstSuiQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.stage}-firstSuiQueue.fifo
+        VisibilityTimeout: 50
+        FifoQueue: true
+        ContentBasedDeduplication: true
+        DeduplicationScope: messageGroup
+        FifoThroughputLimit: perMessageGroupId
+
 package:
   individually: true
 
@@ -135,3 +193,6 @@ plugins:
   - serverless-webpack
   - serverless-offline
   - serverless-dotenv-plugin
+  - serverless-dynamodb-local
+  - serverless-offline-sqs
+  - serverless-offline-elasticmq
