@@ -7,7 +7,14 @@ import {
   NEXT_CURSOR,
 } from 'src/core/dynamodb/repositories/ConfigRepository';
 import { ConfigurationError, RuntimeError } from 'src/core/errors';
-import { USER_CREATED_SUI_EVENT_NAME } from 'src/core/sui-blockchain/constants';
+import {
+  USER_CREATED_SUI_EVENT_NAME,
+  COMMUNITY_CREATED_SUI_EVENT_NAME,
+  COMMUNITY_UPDATED_SUI_EVENT_NAME,
+  TAG_CREATED_SUI_EVENT_NAME,
+  TAG_UPDATED_SUI_EVENT_NAME,
+  USER_UPDATED_SUI_EVENT_NAME,
+} from 'src/core/sui-blockchain/constants';
 import {
   createSuiProvider,
   queryTransactionBlocks,
@@ -17,7 +24,12 @@ import { log } from 'src/core/utils/logger';
 import { pushToSQS } from 'src/core/utils/sqs';
 import {
   BaseSuiEventModel,
+  CommunityCreatedSuiEventModel,
+  CommunityUpdatedSuiEventModel,
+  TagCreatedSuiEventModel,
+  TagUpdatedSuiEventModel,
   UserCreatedSuiEventModel,
+  UserUpdatedSuiEventModel,
 } from 'src/models/sui-event-models';
 import {
   ReadSuiEventsRequestModel,
@@ -26,8 +38,41 @@ import {
 
 const TRANSACTIONS_MAX_NUMBER = 100;
 
+const eventOrder = [
+  USER_CREATED_SUI_EVENT_NAME,
+  COMMUNITY_CREATED_SUI_EVENT_NAME,
+  TAG_CREATED_SUI_EVENT_NAME,
+  USER_UPDATED_SUI_EVENT_NAME,
+  COMMUNITY_UPDATED_SUI_EVENT_NAME,
+  TAG_UPDATED_SUI_EVENT_NAME,
+];
+
+const getSortedEventModels = (eventModels: BaseSuiEventModel[]) =>
+  eventModels.sort((a, b) => {
+    if (a.timestamp < b.timestamp) return -1;
+    if (a.timestamp > b.timestamp) return 1;
+    if (
+      eventOrder.indexOf(cleanEventType(a.type)) <
+      eventOrder.indexOf(cleanEventType(b.type))
+    )
+      return -1;
+    if (
+      eventOrder.indexOf(cleanEventType(a.type)) >
+      eventOrder.indexOf(cleanEventType(b.type))
+    )
+      return 1;
+    return 0;
+  });
+
 const eventToModelType: Record<string, typeof BaseSuiEventModel> = {};
 eventToModelType[USER_CREATED_SUI_EVENT_NAME] = UserCreatedSuiEventModel;
+eventToModelType[USER_UPDATED_SUI_EVENT_NAME] = UserUpdatedSuiEventModel;
+eventToModelType[COMMUNITY_CREATED_SUI_EVENT_NAME] =
+  CommunityCreatedSuiEventModel;
+eventToModelType[COMMUNITY_UPDATED_SUI_EVENT_NAME] =
+  CommunityUpdatedSuiEventModel;
+eventToModelType[TAG_CREATED_SUI_EVENT_NAME] = TagCreatedSuiEventModel;
+eventToModelType[TAG_UPDATED_SUI_EVENT_NAME] = TagUpdatedSuiEventModel;
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);
@@ -91,7 +136,8 @@ export async function readSuiEvents(
 
   const transactionBlocks = await Promise.all(transactionBlockPromises);
 
-  const promises: Promise<any>[] = [];
+  const eventModels: BaseSuiEventModel[] = [];
+
   transactionBlocks.forEach((block) => {
     block.events?.forEach((event) => {
       const eventName = cleanEventType(event.type);
@@ -105,9 +151,18 @@ export async function readSuiEvents(
         event,
         block.timestampMs ? Math.floor(Number(block.timestampMs) / 1000) : 0
       );
-      promises.push(pushToSQS(SUI_FIRST_QUEUE, eventModel));
+      eventModels.push(eventModel);
     });
   });
+
+  const promises: Promise<any>[] = [];
+
+  const sortedEventModels = getSortedEventModels(eventModels);
+
+  for (let i = 0; i < sortedEventModels.length; i++) {
+    // eslint-disable-next-line no-await-in-loop
+    await pushToSQS(SUI_FIRST_QUEUE, sortedEventModels[i]);
+  }
 
   await Promise.all(promises);
 
