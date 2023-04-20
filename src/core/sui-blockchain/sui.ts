@@ -50,3 +50,39 @@ export async function queryTransactionBlocks(packageAddress: string, cursor: str
 
   return responseObject.result;
 }
+
+export async function getObject(objectId: string) {
+  if (!process.env.SUI_RPC_ENDPOINT) {
+    throw new ConfigurationError(
+      'SUI_RPC_ENDPOINT are not configured'
+    );
+  }
+  
+  const response = await fetch(process.env.SUI_RPC_ENDPOINT, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'sui_getObject',
+      params: [
+        objectId,
+        {
+          "showType": true,
+          "showOwner": true,
+          "showPreviousTransaction": true,
+          "showDisplay": false,
+          "showContent": true,
+          "showBcs": false,
+          "showStorageRebate": false
+        }
+      ],
+    })
+  });
+
+  const responseObject = await response.json();
+
+  return responseObject.result;
+}

@@ -1,5 +1,5 @@
 import { SuiTransactionBlockResponse } from '@mysten/sui.js';
-import { createSuiProvider, queryTransactionBlocks } from 'src/core/blockchain/sui';
+import { createSuiProvider, queryTransactionBlocks } from 'src/core/sui-blockchain/sui';
 import { SUI_FIRST_QUEUE } from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
@@ -14,8 +14,15 @@ import {
   ReadSuiEventsRequestModel,
   ReadSuiEventsResponseModel,
 } from 'src/models/sui-models';
+import { BaseSuiEventModel, UserCreatedSuiEventModel } from 'src/models/sui-event-models';
+import { USER_CREATED_SUI_EVENT_NAME } from 'src/core/sui-blockchain/constants';
+import { cleanEventType } from 'src/core/sui-blockchain/utils';
 
 const TRANSACTIONS_MAX_NUMBER = 100;
+
+const eventToModelType: Record<string, typeof BaseSuiEventModel> = {};
+eventToModelType[USER_CREATED_SUI_EVENT_NAME] = UserCreatedSuiEventModel;
+
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);
@@ -76,7 +83,15 @@ export async function readSuiEvents(
   const promises: Promise<any>[] = [];
   transactionBlocks.forEach((block) => {
     block.events?.forEach((event) => {
-      promises.push(pushToSQS(SUI_FIRST_QUEUE, event));
+      const eventName = cleanEventType(event.type);
+      const EventModeType = eventToModelType[eventName];
+      if (!EventModeType) {
+        throw new ConfigurationError(
+          `Model type is not configured for event by name ${eventName}`
+        );
+      }
+      const eventModel = new EventModeType(event, block.timestampMs ? parseInt(block.timestampMs): 0);
+      promises.push(pushToSQS(SUI_FIRST_QUEUE, eventModel));
     });
   });
 

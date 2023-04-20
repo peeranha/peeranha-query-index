@@ -1,4 +1,4 @@
-import { processSuiIndexing } from 'src/controllers/indexing-events-controller';
+import { processSuiIndexing } from 'src/controllers/sui-indexing-events-controller';
 import { SUI_FIRST_QUEUE } from 'src/core/constants';
 import { handleSqsEvent } from 'src/core/utils/sqs';
 

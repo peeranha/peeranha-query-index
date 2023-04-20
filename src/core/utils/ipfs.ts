@@ -7,6 +7,10 @@ export const getIpfsHashFromBytes32 = (bytes32Hex: any) => {
   return bs58.encode(hashBytes);
 };
 
+export const byteArrayToHexString = (byteArray: any[]) => {
+  return '0x' + byteArray.map(n => n.toString(16).padStart(2, '0')).join('');
+}
+
 export const getDataFromIpfs = async (hashBytes: any): Promise<any> => {
   return fetch(process.env.IPFS_CDN_URL + hashBytes).then((x) => x.json());
 };
@@ -19,7 +23,9 @@ export async function AddIpfsData(
     bytes32Hex.slice(0, 2) === '0x'
       ? getIpfsHashFromBytes32(bytes32Hex)
       : bytes32Hex;
+  log(`Loading IPFS hash - ${ipfsHash}`);
   const content = await getDataFromIpfs(ipfsHash);
+  log(`Content from IPFS: ${JSON.stringify(content)}`);
   const result = { ...model };
   Object.keys(content).forEach((key) => {
     if (Object.keys(model).some((modelKey) => modelKey === key)) {
