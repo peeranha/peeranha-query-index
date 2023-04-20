@@ -1,5 +1,4 @@
 import { SuiTransactionBlockResponse } from '@mysten/sui.js';
-import { createSuiProvider, queryTransactionBlocks } from 'src/core/sui-blockchain/sui';
 import { SUI_FIRST_QUEUE } from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
@@ -8,21 +7,27 @@ import {
   NEXT_CURSOR,
 } from 'src/core/dynamodb/repositories/ConfigRepository';
 import { ConfigurationError, RuntimeError } from 'src/core/errors';
+import { USER_CREATED_SUI_EVENT_NAME } from 'src/core/sui-blockchain/constants';
+import {
+  createSuiProvider,
+  queryTransactionBlocks,
+} from 'src/core/sui-blockchain/sui';
+import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import { log } from 'src/core/utils/logger';
 import { pushToSQS } from 'src/core/utils/sqs';
+import {
+  BaseSuiEventModel,
+  UserCreatedSuiEventModel,
+} from 'src/models/sui-event-models';
 import {
   ReadSuiEventsRequestModel,
   ReadSuiEventsResponseModel,
 } from 'src/models/sui-models';
-import { BaseSuiEventModel, UserCreatedSuiEventModel } from 'src/models/sui-event-models';
-import { USER_CREATED_SUI_EVENT_NAME } from 'src/core/sui-blockchain/constants';
-import { cleanEventType } from 'src/core/sui-blockchain/utils';
 
 const TRANSACTIONS_MAX_NUMBER = 100;
 
 const eventToModelType: Record<string, typeof BaseSuiEventModel> = {};
 eventToModelType[USER_CREATED_SUI_EVENT_NAME] = UserCreatedSuiEventModel;
-
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);
@@ -31,20 +36,24 @@ export async function readSuiEvents(
   _readEventsRequest: ReadSuiEventsRequestModel
 ): Promise<ReadSuiEventsResponseModel> {
   if (!process.env.SUI_PACKAGE_ADDRESS) {
-    throw new ConfigurationError(
-      'SUI_PACKAGE_ADDRESS is not configured'
-    );
+    throw new ConfigurationError('SUI_PACKAGE_ADDRESS is not configured');
   }
 
   const provider = createSuiProvider();
-  
+
   const cursorConfig = await configRepository.get(NEXT_CURSOR);
   const cursor = cursorConfig ? cursorConfig.value : null;
-  
-  log(`Requesting ${TRANSACTIONS_MAX_NUMBER} transactions with cursor ${cursor}`);
-  const result = await queryTransactionBlocks(process.env.SUI_PACKAGE_ADDRESS, cursor, TRANSACTIONS_MAX_NUMBER);
 
-  console.log(`Response: ${JSON.stringify(result)}`);
+  log(
+    `Requesting ${TRANSACTIONS_MAX_NUMBER} transactions with cursor ${cursor}`
+  );
+  const result = await queryTransactionBlocks(
+    process.env.SUI_PACKAGE_ADDRESS,
+    cursor,
+    TRANSACTIONS_MAX_NUMBER
+  );
+
+  log(`Response: ${JSON.stringify(result)}`);
 
   const { data, nextCursor } = result;
 
@@ -56,8 +65,10 @@ export async function readSuiEvents(
 
   log(`Received digests: ${digests}`);
 
-  if( cursor != null && digests.find(d => d==cursor)) {
-    log(`Latest cursor ${cursor} is included in the list of digests. Skipping.`);
+  if (cursor != null && digests.find((d) => d === cursor)) {
+    log(
+      `Latest cursor ${cursor} is included in the list of digests. Skipping.`
+    );
     return new ReadSuiEventsResponseModel();
   }
 
@@ -90,7 +101,10 @@ export async function readSuiEvents(
           `Model type is not configured for event by name ${eventName}`
         );
       }
-      const eventModel = new EventModeType(event, block.timestampMs ? parseInt(block.timestampMs): 0);
+      const eventModel = new EventModeType(
+        event,
+        block.timestampMs ? Math.floor(Number(block.timestampMs) / 1000) : 0
+      );
       promises.push(pushToSQS(SUI_FIRST_QUEUE, eventModel));
     });
   });

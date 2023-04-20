@@ -1,4 +1,4 @@
-import { SQS } from 'aws-sdk';
+import AWS from 'aws-sdk';
 import fetch from 'cross-fetch';
 import { DatabaseManager } from 'src/core/db/db-manager';
 import { log, LogLevel } from 'src/core/utils/logger';
@@ -7,7 +7,7 @@ import { publishSlackMessage } from 'src/core/utils/slack';
 
 global.fetch = fetch;
 
-const client = new SQS({
+const client = new AWS.SQS({
   endpoint: process.env.SQS_ENDPOINT,
   region: process.env.REGION,
 });

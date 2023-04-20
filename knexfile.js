@@ -1,7 +1,7 @@
 require('dotenv').config();
 
 /**
- * @type { Object.<string, import("knex").Knex.Config> }
+ * @type { Object.<string, import("knex").Knex.MySqlConnectionConfig> }
  */
 module.exports = {
   client: 'mysql',

@@ -16,7 +16,7 @@ export class Community {
 }
 
 export class CommunityData extends Community {
-  public id: number;
+  public id: string;
 
   public avatar: string;
 
@@ -36,7 +36,7 @@ export class CommunityData extends Community {
 
   constructor(community: any) {
     super(community);
-    this.id = community?.id;
+    this.id = String(community?.id);
     this.avatar = community?.avatar;
     this.name = community?.name;
     this.description = community?.description;
