@@ -32,9 +32,9 @@ export async function getSuiUserById(
       fields.followedCommunities,
     ]);
     log(`User Data from contract: ${JSON.stringify(user)}`);
-    await AddIpfsData(user, user.ipfsDoc[0]);
-    log(`User Data with Ipfs info: ${JSON.stringify(user)}`);
-    return user;
+    const userData = await AddIpfsData(user, user.ipfsDoc[0]);
+    log(`User Data with Ipfs info: ${JSON.stringify(userData)}`);
+    return userData;
   } catch (err: any) {
     log(
       `Error during getting user. Params: userId - ${userId}\n${err}`,
