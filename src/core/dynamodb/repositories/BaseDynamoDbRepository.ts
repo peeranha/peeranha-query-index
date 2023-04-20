@@ -1,4 +1,4 @@
-import { DynamoDB } from 'aws-sdk';
+import AWS from 'aws-sdk';
 import { AttributeMap, Key, TransactWriteItem } from 'aws-sdk/clients/dynamodb';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 
@@ -17,7 +17,7 @@ export function copyArray<InputT, OutputT>(
 }
 
 export abstract class BaseDynamoDbRepository<EntityT, KeyT> {
-  protected dynamoDB: DynamoDB;
+  protected dynamoDB: AWS.DynamoDB;
 
   protected tableName: string;
 
@@ -147,7 +147,7 @@ export abstract class BaseDynamoDbRepository<EntityT, KeyT> {
   ): Promise<EntityT | undefined> {
     const preparedValues: { [id: string]: any } = {};
     values.forEach((e) => {
-      preparedValues[`:${e}`] = DynamoDB.Converter.input(e);
+      preparedValues[`:${e}`] = AWS.DynamoDB.Converter.input(e);
     });
     const updateExpression = `SET ${fields
       .map((e) => `${e} = :${e}`)

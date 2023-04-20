@@ -1,10 +1,10 @@
-import { SecretsManager } from 'aws-sdk';
+import AWS from 'aws-sdk';
 import { ConfigurationError } from 'src/core/errors';
 import { log } from 'src/core/utils/logger';
 
 export const DB_SECRETS_ENC_KEY_SECRET_NAME = 'DB_SECRETS_ENC_KEY';
 
-const client = new SecretsManager({ region: process.env.REGION });
+const client = new AWS.SecretsManager({ region: process.env.REGION });
 
 export async function getSecretValue(secretName: string) {
   if (process.env.ENV === 'offline') {

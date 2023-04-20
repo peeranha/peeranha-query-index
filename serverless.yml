@@ -42,6 +42,11 @@ provider:
     httpApi: true
   httpApi:
     cors: true
+  ecr:
+    images:
+      peeranha-ecs-nodejs:
+        path: ./
+        file: Dockerfile
   iam:
     role:
       statements:
@@ -63,6 +68,28 @@ provider:
     subnetIds:
       - ${self:provider.environment.SUBNET_ID_1}
       - ${self:provider.environment.SUBNET_ID_2}
+
+fargate:
+  vpc:
+    securityGroupIds:
+      - ${self:provider.environment.SECURITY_GROUP_ID}
+    subnetIds:
+      - ${self:provider.environment.SUBNET_ID_1}
+      - ${self:provider.environment.SUBNET_ID_2}
+  tasks:
+    sui-events-listener:
+      name: ${self:custom.stage}-sui-events-listener
+      image: peeranha-ecs-nodejs
+      command:
+        - "./dist/sui-events-listener.mjs"
+      environment:
+        ENV: ${self:provider.environment.ENV}
+        REGION: ${self:provider.environment.REGION}
+        SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
+        AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
+        SUI_RPC_ENDPOINT: ${self:provider.environment.SUI_RPC_ENDPOINT}
+        DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
+        SUI_PACKAGE_ADDRESS: ${self:provider.environment.SUI_PACKAGE_ADDRESS}
 
 functions:
   graphql:
