@@ -79,11 +79,11 @@ async function updateTagsPostCount(
 
 async function changedStatusOfficialReply(
   peeranhaPost: PostData,
-  replyId: number,
+  replyId: string,
   post: PostEntity
 ) {
   let { officialReply } = post;
-  let previousOfficialReplyId = 0;
+  let previousOfficialReplyId = '0';
   if (
     peeranhaPost.officialReply === replyId &&
     post.officialReply !== replyId
@@ -91,13 +91,13 @@ async function changedStatusOfficialReply(
     previousOfficialReplyId = post.officialReply;
     officialReply = replyId;
   } else if (
-    peeranhaPost.officialReply === 0 &&
+    peeranhaPost.officialReply === '0' &&
     post.officialReply === replyId
   ) {
-    officialReply = 0;
+    officialReply = '0';
   }
 
-  if (previousOfficialReplyId !== 0) {
+  if (previousOfficialReplyId !== '0') {
     const previousOfficialReply = await replyRepository.get(
       `${post.id}-${previousOfficialReplyId}`
     );
@@ -135,7 +135,7 @@ export async function createPost(
     commentCount: 0,
     replyCount: 0,
     rating: 0,
-    officialReply: 0,
+    officialReply: '0',
     bestReply: peeranhaPost.bestReply,
     ipfsHash: peeranhaPost.ipfsDoc[0],
     ipfsHash2: peeranhaPost.ipfsDoc[1],
@@ -250,10 +250,10 @@ export async function createReply(
 
     const officialReply = await changedStatusOfficialReply(
       peeranhaPost,
-      replyId,
+      String(replyId),
       post
     );
-    reply.isOfficialReply = replyId === officialReply;
+    reply.isOfficialReply = String(replyId) === officialReply;
 
     promises.push(
       postRepository.update(postId, {
@@ -295,7 +295,7 @@ export async function createComment(
   const comment = new CommentEntity({
     id: `${postId}-${parentReplyId}-${commentId}`,
     postId,
-    parentReplyId,
+    parentReplyId: String(parentReplyId),
     content: peeranhaComment.content,
     author: peeranhaComment.author.toLowerCase(),
     isDeleted: false,
@@ -362,7 +362,7 @@ export async function updatePostContent(
   if (editedReplyId) {
     const officialReply = await changedStatusOfficialReply(
       peeranhaPost,
-      editedReplyId,
+      String(editedReplyId),
       post
     );
     postForSave.officialReply = officialReply;
@@ -548,7 +548,7 @@ async function indexingDocumentation(ipfsHash: string) {
 }
 
 export async function generateDocumentationPosts(
-  communityId: number,
+  communityId: string,
   userAddr: string,
   newDocumentationIpfsHash: string,
   timestamp: number,
@@ -622,8 +622,8 @@ export async function generateDocumentationPosts(
       lastMod: timestamp,
       commentCount: 0,
       replyCount: 0,
-      officialReply: 0,
-      bestReply: 0,
+      officialReply: '0',
+      bestReply: '0',
       ipfsHash: post,
       ipfsHash2: '',
     });

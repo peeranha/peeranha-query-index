@@ -28,7 +28,7 @@ export async function createSuiCommunity(id: string) {
   const peeranhaCommunity = await getSuiCommunityById(id);
 
   const communityEntity = new CommunityEntity({
-    id: Number(id), // TODO: replace type of property id to string in all places
+    id,
     name: peeranhaCommunity.name,
     description: peeranhaCommunity.description,
     website: peeranhaCommunity.website,

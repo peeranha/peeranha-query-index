@@ -1,13 +1,13 @@
 export class Tag {
   ipfsDoc: [string, string];
 
-  communityId: number;
+  communityId: string;
 
   tagId: string;
 
   constructor(tag: any) {
     this.ipfsDoc = tag.ipfsDoc;
-    this.communityId = tag.communityId;
+    this.communityId = String(tag.communityId);
     this.tagId = tag.tagId;
   }
 }

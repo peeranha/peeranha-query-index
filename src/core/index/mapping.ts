@@ -702,7 +702,7 @@ export async function handlerChangedStatusBestReply(
   if (!post) {
     post = await createPost(postId, timestamp);
   } else {
-    previousBestReply = post.bestReply;
+    previousBestReply = Number(post.bestReply);
 
     await postRepository.update(postId, {
       bestReply: replyId,

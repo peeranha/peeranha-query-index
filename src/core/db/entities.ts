@@ -53,7 +53,7 @@ export class UserEntity {
 }
 
 export class CommunityEntity {
-  public id: number;
+  public id: string;
 
   public name: string;
 
@@ -88,7 +88,7 @@ export class CommunityEntity {
   public ipfsHash2: string;
 
   constructor(community: {
-    id: number;
+    id: string;
     name: string;
     description: string;
     website: string;
@@ -131,12 +131,12 @@ export class UserCommunityEntity {
 
   public userId: string;
 
-  public communityId: number;
+  public communityId: string;
 
   constructor(userCommunity: {
     id: string;
     userId: string;
-    communityId: number;
+    communityId: string;
   }) {
     this.id = userCommunity.id;
     this.userId = userCommunity.userId;
@@ -165,7 +165,7 @@ export class UserPermissionEntity {
 export class UserCommunityRatingEntity {
   public id: string;
 
-  public communityId: number;
+  public communityId: string;
 
   public rating: number;
 
@@ -173,7 +173,7 @@ export class UserCommunityRatingEntity {
 
   constructor(userCommunityRating: {
     id: string;
-    communityId: number;
+    communityId: string;
     rating: number;
     userId: string;
   }) {
@@ -187,7 +187,7 @@ export class UserCommunityRatingEntity {
 export class TagEntity {
   public id: string;
 
-  public communityId: number;
+  public communityId: string;
 
   public name: string;
 
@@ -203,7 +203,7 @@ export class TagEntity {
 
   constructor(tag: {
     id: string;
-    communityId: number;
+    communityId: string;
     name: string;
     description: string;
     postCount: number;
@@ -239,7 +239,7 @@ export class PostEntity {
 
   public lastMod: number;
 
-  public communityId: number;
+  public communityId: string;
 
   public title: string;
 
@@ -253,9 +253,9 @@ export class PostEntity {
 
   public isDeleted: boolean;
 
-  public officialReply: number;
+  public officialReply: string;
 
-  public bestReply: number;
+  public bestReply: string;
 
   public handle?: string;
 
@@ -270,15 +270,15 @@ export class PostEntity {
     rating: number;
     postTime: number;
     lastMod: number;
-    communityId: number;
+    communityId: string;
     title: string;
     content: string;
     postContent: string;
     commentCount: number;
     replyCount: number;
     isDeleted: boolean;
-    officialReply: number;
-    bestReply: number;
+    officialReply: string;
+    bestReply: string;
     handle?: string;
     messengerType?: number;
   }) {
@@ -333,7 +333,7 @@ export class ReplyEntity {
 
   public postId: string;
 
-  public parentReplyId: number;
+  public parentReplyId: string;
 
   public content: string;
 
@@ -361,7 +361,7 @@ export class ReplyEntity {
     rating: number;
     postTime: number;
     postId: string;
-    parentReplyId: number;
+    parentReplyId: string;
     content: string;
     commentCount: number;
     isDeleted: boolean;
@@ -407,7 +407,7 @@ export class CommentEntity {
 
   public postId: string;
 
-  public parentReplyId: number;
+  public parentReplyId: string;
 
   public content: string;
 
@@ -421,7 +421,7 @@ export class CommentEntity {
     rating: number;
     postTime: number;
     postId: string;
-    parentReplyId: number;
+    parentReplyId: string;
     content: string;
     isDeleted: boolean;
   }) {
@@ -457,9 +457,9 @@ export class AchievementEntity {
 
   public image: string;
 
-  public communityId?: number;
+  public communityId?: string;
 
-  public attrCommunityId?: number;
+  public attrCommunityId?: string;
 
   public attrEvent?: string;
 
@@ -475,12 +475,9 @@ export class AchievementEntity {
     name: string;
     description: string;
     image: string;
-    communityId?: number;
-
-    attrCommunityId?: number;
-
+    communityId?: string;
+    attrCommunityId?: string;
     attrEvent?: string;
-
     attrType?: string;
   }) {
     this.id = achievement.id;
@@ -630,14 +627,14 @@ export class UserAchievementEntity {
 }
 
 export class CommunityDocumentationEntity {
-  public id: number;
+  public id: string;
 
   public documentationJSON: string;
 
   public ipfsHash: string;
 
   constructor(documentation: {
-    id: number;
+    id: string;
     documentationJSON: string;
     ipfsHash: string;
   }) {

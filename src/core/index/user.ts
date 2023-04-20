@@ -62,7 +62,7 @@ export async function createUser(address: string, timestamp: number) {
 
 export async function updateUserRating(
   userAddress: string,
-  communityId: number
+  communityId: string
 ) {
   const user = await userRepository.get(userAddress);
   if (!user) return;

@@ -1,3 +1,4 @@
+import { String } from 'aws-sdk/clients/apigateway';
 import { PeeranhaCommunityWrapper } from 'src/core/blockchain/contracts/peeranha-community-wrapper';
 import { PeeranhaContentWrapper } from 'src/core/blockchain/contracts/peeranha-content-wrapper';
 import { PeeranhaNFTWrapper } from 'src/core/blockchain/contracts/peeranha-nft-wrapper';
@@ -104,17 +105,17 @@ export async function getActiveUsersInPeriod(
   return userContract.getActiveUsersInPeriod(period);
 }
 
-export async function getCommunity(id: number): Promise<CommunityData> {
+export async function getCommunity(id: string): Promise<CommunityData> {
   const provider = await createRpcProvider();
   const contract = new PeeranhaCommunityWrapper(provider);
-  const community = new CommunityData(await contract.getCommunity(id));
+  const community = new CommunityData(await contract.getCommunity(Number(id)));
   return AddIpfsData(community, community.ipfsDoc[0]);
 }
 
-export async function getTags(communityId: number): Promise<TagData[]> {
+export async function getTags(communityId: string): Promise<TagData[]> {
   const provider = await createRpcProvider();
   const contract = new PeeranhaCommunityWrapper(provider);
-  const tags = await contract.getTags(communityId);
+  const tags = await contract.getTags(Number(communityId));
   const tagsWithIpfsData: TagData[] = [];
   const promises: Promise<any>[] = [];
   tags.forEach((tag, index) => {
@@ -135,12 +136,12 @@ export async function getTags(communityId: number): Promise<TagData[]> {
 }
 
 export async function getTag(
-  communityId: number,
+  communityId: string,
   tagId: number
 ): Promise<TagData> {
   const provider = await createRpcProvider();
   const contract = new PeeranhaCommunityWrapper(provider);
-  const tag = new TagData(await contract.getTag(communityId, tagId));
+  const tag = new TagData(await contract.getTag(Number(communityId), tagId));
   const tagWithIpfs = await AddIpfsData(tag, tag.ipfsDoc[0]);
   return {
     ...tagWithIpfs,
@@ -165,11 +166,11 @@ export async function getAchievementsNFTConfig(
 }
 
 export async function getDocumentationTree(
-  communityId: number
+  communityId: String
 ): Promise<Documentation> {
   const provider = await createRpcProvider();
   const contract = new PeeranhaContentWrapper(provider);
-  return contract.getDocumentationTree(communityId);
+  return contract.getDocumentationTree(Number(communityId));
 }
 
 export async function getItemProperty(
@@ -229,11 +230,11 @@ export async function getAchievementCommunity(achievementId: number) {
 
 export async function getUserRatingCollection(
   address: string,
-  communityId: number
+  communityId: string
 ) {
   const provider = await createRpcProvider();
   const userContract = new PeeranhaUserWrapper(provider);
   return new UserRating(
-    await userContract.getUserRatingCollection(address, communityId)
+    await userContract.getUserRatingCollection(address, Number(communityId))
   );
 }

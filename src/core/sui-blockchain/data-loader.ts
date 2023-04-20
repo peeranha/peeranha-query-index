@@ -68,9 +68,9 @@ export async function getSuiCommunityById(communityId: string) {
     tagsCount: Number(fields.tags.fields.size),
   });
   log(`Community Data from contract: ${JSON.stringify(community)}`);
-  await AddIpfsData(community, community.ipfsDoc[0]);
+  const communityData = await AddIpfsData(community, community.ipfsDoc[0]);
   log(`Community Data with Ipfs info: ${JSON.stringify(community)}`);
-  return community;
+  return communityData;
 }
 
 export async function getSuiTagById(tagId: string) {
@@ -93,7 +93,7 @@ export async function getSuiTagById(tagId: string) {
     name: fields.name,
   });
   log(`Tag Data from contract: ${JSON.stringify(tag)}`);
-  await AddIpfsData(tag, tag.ipfsDoc[0]);
+  const tagData = await AddIpfsData(tag, tag.ipfsDoc[0]);
   log(`Tag Data with Ipfs info: ${JSON.stringify(tag)}`);
-  return tag;
+  return tagData;
 }

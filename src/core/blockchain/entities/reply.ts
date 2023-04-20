@@ -7,7 +7,7 @@ export class Reply {
 
   postTime: number;
 
-  parentReplyId: number;
+  parentReplyId: string;
 
   commentCount: number;
 
@@ -20,18 +20,16 @@ export class Reply {
   isDeleted: boolean;
 
   constructor(reply: any) {
-    [
-      this.ipfsDoc,
-      this.author,
-      this.rating,
-      this.postTime,
-      this.parentReplyId,
-      this.commentCount,
-      this.propertyCount,
-      this.isFirstReply,
-      this.isQuickReply,
-      this.isDeleted,
-    ] = reply;
+    this.author = reply.author;
+    this.parentReplyId = String(reply.parentReplyId);
+    this.rating = reply.rating;
+    this.postTime = reply.postTime;
+    this.propertyCount = reply.propertyCount;
+    this.commentCount = reply.commentCount;
+    this.isDeleted = reply.isDeleted;
+    this.ipfsDoc = reply.ipfsDoc;
+    this.isFirstReply = reply.isFirstReply;
+    this.isQuickReply = reply.isQuickReply;
   }
 }
 

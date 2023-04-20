@@ -9,8 +9,8 @@ export const getIpfsHashFromBytes32 = (bytes32Hex: any) => {
 
 export const byteArrayToHexString = (byteArray: any[]) => {
   const uint8Array = new Uint8Array(byteArray);
-  return '0x' + new TextDecoder('utf-8').decode(uint8Array).substring(1);
-}
+  return `0x${new TextDecoder('utf-8').decode(uint8Array).substring(1)}`;
+};
 
 export const getDataFromIpfs = async (hashBytes: any): Promise<any> => {
   return fetch(process.env.IPFS_CDN_URL + hashBytes).then((x) => x.json());
