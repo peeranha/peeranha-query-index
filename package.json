@@ -23,7 +23,8 @@
     "clean": "rimraf dist .webpack .serverless",
     "lint": "eslint --ext .js,.ts .",
     "build-types": "tsc --noEmit --pretty",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "dynamodb:install": "sls dynamodb install & sls dynamodb start --migrate --stage offline"
   },
   "dependencies": {
     "@graphql-mesh/cli": "^0.82.6",
@@ -69,7 +70,7 @@
     "serverless": "^3.27.0",
     "serverless-dotenv-plugin": "^4.0.2",
     "serverless-dynamodb-local": "^0.2.40",
-    "serverless-offline": "^8.8.1",
+    "serverless-offline": "^10.0.2",
     "serverless-offline-elasticmq": "^0.0.11",
     "serverless-offline-sqs": "^7.3.2",
     "serverless-webpack": "^5.11.0",
