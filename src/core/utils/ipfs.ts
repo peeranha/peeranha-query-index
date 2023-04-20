@@ -8,7 +8,8 @@ export const getIpfsHashFromBytes32 = (bytes32Hex: any) => {
 };
 
 export const byteArrayToHexString = (byteArray: any[]) => {
-  return '0x' + byteArray.map(n => n.toString(16).padStart(2, '0')).join('');
+  const uint8Array = new Uint8Array(byteArray);
+  return '0x' + new TextDecoder('utf-8').decode(uint8Array).substring(1);
 }
 
 export const getDataFromIpfs = async (hashBytes: any): Promise<any> => {

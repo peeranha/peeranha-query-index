@@ -20,6 +20,5 @@ export async function processSuiIndexing(eventModel: BaseSuiEventModel) {
     );
   }
   await BaseRepository.transaction(handler, eventModel);
-  await handler(eventModel);
   return eventModel;
 }
