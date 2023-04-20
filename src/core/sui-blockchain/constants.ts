@@ -1,1 +1,1 @@
-export const USER_CREATED_SUI_EVENT_NAME = 'userLib::EvUser';
+export const USER_CREATED_SUI_EVENT_NAME = 'userLib::CreateUserEvent';
