@@ -3,7 +3,7 @@ import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
 import { BaseDynamoDbRepository } from 'src/core/dynamodb/repositories/BaseDynamoDbRepository';
 
-const BASE_TABLE_NAME_CONFIG = 'config';
+const BASE_TABLE_NAME_CONFIG = 'query-index-config';
 
 export const NEXT_CURSOR = 'nextCursor';
 

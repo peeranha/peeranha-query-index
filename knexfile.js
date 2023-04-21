@@ -6,11 +6,11 @@ require('dotenv').config();
 module.exports = {
   client: 'mysql',
   connection: {
-    host: process.env.DB_HOST,
-    port: process.env.DB_PORT,
+    host: '127.0.0.1',
+    port: 3306,
     user: process.env.DB_USERNAME,
     password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    database: 'offline_cluster',
     multipleStatements: true,
     charset: 'utf8mb4',
   },

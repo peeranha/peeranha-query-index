@@ -73,6 +73,7 @@
     "serverless": "^3.27.0",
     "serverless-dotenv-plugin": "^4.0.2",
     "serverless-dynamodb-local": "^0.2.40",
+    "serverless-fargate": "^0.0.11",
     "serverless-offline": "^10.0.2",
     "serverless-offline-elasticmq": "^0.0.11",
     "serverless-offline-sqs": "^7.3.2",
