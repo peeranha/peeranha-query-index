@@ -1,9 +1,17 @@
-import { createSuiCommunity } from 'src/core/sui-index/community';
+import {
+  createSuiCommunity,
+  updateSuiCommunity,
+  createSuiTag,
+  updateSuiTag,
+} from 'src/core/sui-index/community';
 import { createSuiUser, updateSuiUser } from 'src/core/sui-index/user';
 import {
-  CommunityCreatedSuiEventModel,
   UserCreatedSuiEventModel,
   UserUpdatedSuiEventModel,
+  CommunityCreatedSuiEventModel,
+  CommunityUpdatedSuiEventModel,
+  TagCreatedSuiEventModel,
+  TagUpdatedSuiEventModel,
 } from 'src/models/sui-event-models';
 
 export async function handleCreateSuiUser(
@@ -22,4 +30,17 @@ export async function handleCreateSuiCommunity(
   eventModel: CommunityCreatedSuiEventModel
 ) {
   await createSuiCommunity(eventModel.communityId);
+}
+export async function handleUpdateSuiCommunity(
+  eventModel: CommunityUpdatedSuiEventModel
+) {
+  await updateSuiCommunity(eventModel.communityId);
+}
+
+export async function handleCreateSuiTag(eventModel: TagCreatedSuiEventModel) {
+  await createSuiTag(eventModel.communityId, eventModel.tagId);
+}
+
+export async function handleUpdateSuiTag(eventModel: TagUpdatedSuiEventModel) {
+  await updateSuiTag(eventModel.communityId, eventModel.tagId);
 }

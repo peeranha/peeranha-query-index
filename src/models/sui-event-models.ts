@@ -77,7 +77,7 @@ export class TagCreatedSuiEventModel extends BaseSuiEventModel {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.communityId = event.parsedJson.communityId;
-    this.tagId = event.parsedJson.tagId;
+    this.tagId = event.parsedJson.tagKey;
   }
 }
 
@@ -92,6 +92,6 @@ export class TagUpdatedSuiEventModel extends BaseSuiEventModel {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.communityId = event.parsedJson.communityId;
-    this.tagId = event.parsedJson.tagId;
+    this.tagId = event.parsedJson.tagKey;
   }
 }
