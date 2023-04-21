@@ -2,7 +2,7 @@ import { CommunityData } from 'src/core/blockchain/entities/community';
 import { PostData } from 'src/core/blockchain/entities/post';
 import { TagData } from 'src/core/blockchain/entities/tag';
 import { UserData } from 'src/core/blockchain/entities/user';
-import { RuntimeError } from 'src/core/errors';
+import { ConfigurationError, RuntimeError } from 'src/core/errors';
 import { getObject, getDynamicFieldObject } from 'src/core/sui-blockchain/sui';
 import { AddIpfsData, byteArrayToHexString } from 'src/core/utils/ipfs';
 import { log, LogLevel } from 'src/core/utils/logger';
@@ -188,4 +188,24 @@ export async function getSuiPostById(
   const postData = await AddIpfsData(post, post.ipfsDoc[0]);
   log(`Post Data with Ipfs info: ${JSON.stringify(postData)}`);
   return postData;
+}
+
+export async function getSuiUserRating(userId: string, communityId: string) {
+  log(`Getting rating for user ${userId} in community ${communityId}`);
+
+  if (!process.env.SUI_USERS_RATING_COLLECTION) {
+    throw new ConfigurationError(
+      'SUI_USERS_RATING_COLLECTION is not configured'
+    );
+  }
+
+  const collectionObject = await getObject(
+    process.env.SUI_USERS_RATING_COLLECTION
+  );
+
+  const fields = collectionObject.data?.content?.fields;
+
+  if (!fields) {
+    throw new RuntimeError(`Missing 'fields' in response for user collection.`);
+  }
 }

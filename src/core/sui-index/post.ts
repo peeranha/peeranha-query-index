@@ -2,6 +2,7 @@ import { PostEntity, PostTagEntity } from 'src/core/db/entities';
 import { CommunityRepository } from 'src/core/db/repositories/CommunityRepository';
 import { PostRepository } from 'src/core/db/repositories/PostRepository';
 import { PostTagRepository } from 'src/core/db/repositories/PostTagRepository';
+import { TagRepository } from 'src/core/db/repositories/TagRepository';
 import { UserRepository } from 'src/core/db/repositories/UserRepository';
 import { getSuiPostById } from 'src/core/sui-blockchain/data-loader';
 import { getSuiCommunity } from 'src/core/sui-index/community';
@@ -11,6 +12,43 @@ const postRepository = new PostRepository();
 const communityRepository = new CommunityRepository();
 const userRepository = new UserRepository();
 const postTagRepository = new PostTagRepository();
+const tagRepository = new TagRepository();
+
+async function updateTagsPostCount(
+  newTags: string[],
+  oldTags: string[]
+): Promise<string> {
+  let tagNames = '';
+  const promises: Promise<any>[] = [];
+
+  newTags.forEach(async (newTag) => {
+    const tag = await tagRepository.get(newTag);
+    if (tag) {
+      tagNames += ` ${tag.name}`;
+
+      promises.push(
+        tagRepository.update(newTag, {
+          postCount: tag.postCount + 1,
+        })
+      );
+    }
+  });
+
+  oldTags.forEach(async (oldTag) => {
+    const tag = await tagRepository.get(oldTag);
+
+    if (tag) {
+      promises.push(
+        tagRepository.update(oldTag, {
+          postCount: tag.postCount - 1,
+        })
+      );
+    }
+  });
+
+  await Promise.all(promises);
+  return tagNames;
+}
 
 export async function createSuiPost(postMetaDataId: string, timestamp: number) {
   const peeranhaPost = await getSuiPostById(postMetaDataId, timestamp);
@@ -36,7 +74,7 @@ export async function createSuiPost(postMetaDataId: string, timestamp: number) {
   });
 
   const tagIds = peeranhaPost.tags.map((tag) => `${post.communityId}-${tag}`);
-  // post.postContent += await updateTagsPostCount(tagIds, []);
+  post.postContent += await updateTagsPostCount(tagIds, []);
 
   const community = await getSuiCommunity(post.communityId);
 
