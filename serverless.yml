@@ -77,8 +77,8 @@ fargate:
       - ${self:provider.environment.SUBNET_ID_1}
       - ${self:provider.environment.SUBNET_ID_2}
   tasks:
-    sui-events-listener:
-      name: ${self:custom.stage}-sui-events-listener
+    first-sui-events-listener:
+      name: ${self:custom.stage}-first-sui-events-listener
       image: peeranha-ecs-nodejs
       command:
         - "./dist/sui-events-listener.mjs"
@@ -149,15 +149,15 @@ functions:
               - firstQueue
               - Arn
 
-  second-indexing-queue:
-    handler: src/handlers/second-indexing-queue.handler
-    timeout: 50
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - secondQueue
-              - Arn
+  # second-indexing-queue:
+  #   handler: src/handlers/second-indexing-queue.handler
+  #   timeout: 50
+  #   events:
+  #     - sqs:
+  #         arn:
+  #           Fn::GetAtt:
+  #             - secondQueue
+  #             - Arn
       
   first-sui-indexing-queue:
     handler: src/handlers/sui-first-indexing-queue.handler
