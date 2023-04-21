@@ -33,9 +33,10 @@ export async function createSuiTag(
 }
 
 export async function updateSuiTag(communityId: string, tagId: number) {
-  log(`Updating sui tag by id ${communityId}-${tagId}`);
+  const id = `${communityId}-${tagId}`;
+  log(`Updating sui tag by id ${id}`);
 
-  const storedTag = await tagRepository.get(`${communityId}-${tagId}`);
+  const storedTag = await tagRepository.get(id);
   if (!storedTag) {
     await createSuiTag(communityId, tagId);
   } else {
@@ -45,24 +46,17 @@ export async function updateSuiTag(communityId: string, tagId: number) {
     }
 
     const tagForSave = {
-      id: peeranhaTag.tagId,
       name: peeranhaTag.name,
       description: peeranhaTag.description,
-      communityId: peeranhaTag.communityId,
-      postCount: 0,
-      deletedPostCount: 0,
       ipfsHash: peeranhaTag.ipfsDoc[0],
       ipfsHash2: peeranhaTag.ipfsDoc[1],
     };
-    await tagRepository.update(`${communityId}-${tagId}`, tagForSave);
+    await tagRepository.update(id, tagForSave);
   }
 }
 
 export async function createSuiCommunity(communityId: string) {
   const peeranhaCommunity = await getSuiCommunityById(communityId);
-  for (let index = 1; index < peeranhaCommunity.tags.length + 1; index++) {
-    createSuiTag(communityId, index);
-  }
 
   const communityEntity = new CommunityEntity({
     id: communityId,
@@ -85,6 +79,12 @@ export async function createSuiCommunity(communityId: string) {
   });
 
   await communityRepository.create(communityEntity);
+
+  const tagsPromises: Promise<TagEntity>[] = [];
+  for (let index = 1; index <= peeranhaCommunity.tags.length; index++) {
+    tagsPromises.push(createSuiTag(communityId, index));
+  }
+  await Promise.all(tagsPromises);
 
   return communityEntity;
 }

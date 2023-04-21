@@ -32,7 +32,7 @@ export class CommunityData extends Community {
 
   public isBlogger: boolean;
 
-  public tags: any;
+  public tags: any[];
 
   constructor(community: any) {
     super(community);

@@ -14,7 +14,7 @@ export async function getSuiUserById(
   try {
     const userObject = await getObject(userId);
 
-    log(`User object: ${JSON.stringify(userObject, null, 2)}`);
+    log(`User object: ${JSON.stringify(userObject)}`);
 
     const fields = userObject.data?.content?.fields;
 
@@ -35,7 +35,7 @@ export async function getSuiUserById(
     ]);
 
     const userData = await AddIpfsData(user, user.ipfsDoc[0]);
-    log(`User Data with Ipfs info: ${JSON.stringify(userData, null, 2)}`);
+    log(`User Data with Ipfs info: ${JSON.stringify(userData)}`);
     return userData;
   } catch (err: any) {
     log(
@@ -46,10 +46,12 @@ export async function getSuiUserById(
   }
 }
 
-export async function getSuiCommunityById(communityId: string) {
+export async function getSuiCommunityById(
+  communityId: string
+): Promise<CommunityData> {
   const communityObject = await getObject(communityId);
 
-  log(`Community object: ${JSON.stringify(communityObject, null, 2)}`);
+  log(`Community object: ${JSON.stringify(communityObject)}`);
 
   const fields = communityObject.data?.content?.fields;
 
@@ -81,7 +83,7 @@ export async function getSuiCommunityById(communityId: string) {
   });
 
   const communityData = await AddIpfsData(community, community.ipfsDoc[0]);
-  log(`Community Data with Ipfs info: ${JSON.stringify(community, null, 2)}`);
+  log(`Community Data with Ipfs info: ${JSON.stringify(communityData)}`);
   return communityData;
 }
 
@@ -91,7 +93,7 @@ export async function getSuiTagById(
 ): Promise<TagData> {
   const communityObject = await getObject(communityId);
 
-  log(`Community object: ${JSON.stringify(communityObject, null, 2)}`);
+  log(`Community object: ${JSON.stringify(communityObject)}`);
 
   const communityFields = communityObject.data?.content?.fields;
   if (!communityFields) {
@@ -102,7 +104,7 @@ export async function getSuiTagById(
   const tagTable = communityFields.tags.fields.id.id;
   const tagObject = await getDynamicFieldObject(tagTable, tagId.toString());
 
-  log(`Tag object: ${JSON.stringify(tagObject, null, 2)}`);
+  log(`Tag object: ${JSON.stringify(tagObject)}`);
 
   const fields = tagObject.data?.content?.fields;
 
@@ -118,21 +120,20 @@ export async function getSuiTagById(
   );
 
   const tag = new TagData({
-    tagId: `${communityId}-${tagId}`,
     ipfsDoc: [ipfsHash1, ipfsHash2],
-    name: fields.name,
-    communityId,
   });
 
   const tagData = await AddIpfsData(tag, tag.ipfsDoc[0]);
-  log(`Tag Data with Ipfs info: ${JSON.stringify(tag, null, 2)}`);
+  tagData.tagId = `${communityId}-${tagId}`;
+  tagData.communityId = communityId;
+  log(`Tag Data with Ipfs info: ${JSON.stringify(tagData)}`);
   return tagData;
 }
 
 async function getPostIpfsDoc(postId: string) {
   const postObject = await getObject(postId);
 
-  log(`Post meta data object: ${JSON.stringify(postObject, null, 2)}`);
+  log(`Post meta data object: ${JSON.stringify(postObject)}`);
 
   const fields = postObject.data?.content?.fields;
 
@@ -154,7 +155,7 @@ export async function getSuiPostById(
 ): Promise<PostData> {
   const postMetaDataObject = await getObject(postMetaDataId);
 
-  log(`Post meta data object: ${JSON.stringify(postMetaDataObject, null, 2)}`);
+  log(`Post meta data object: ${JSON.stringify(postMetaDataObject)}`);
 
   const fields = postMetaDataObject.data?.content?.fields;
 
@@ -183,9 +184,8 @@ export async function getSuiPostById(
     commentCount: fields.comments.fields.size,
     propertyCount: fields.properties.length,
   });
-  log(`Post Data from contract: ${JSON.stringify(post, null, 2)}`);
 
   const postData = await AddIpfsData(post, post.ipfsDoc[0]);
-  log(`Post Data with Ipfs info: ${JSON.stringify(post, null, 2)}`);
+  log(`Post Data with Ipfs info: ${JSON.stringify(postData)}`);
   return postData;
 }

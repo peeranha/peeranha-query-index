@@ -33,6 +33,7 @@ export async function handleCreateSuiCommunity(
 ) {
   await createSuiCommunity(eventModel.communityId);
 }
+
 export async function handleUpdateSuiCommunity(
   eventModel: CommunityUpdatedSuiEventModel
 ) {
