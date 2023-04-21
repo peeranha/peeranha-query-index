@@ -4,6 +4,7 @@ import {
   createSuiTag,
   updateSuiTag,
 } from 'src/core/sui-index/community';
+import { createSuiPost } from 'src/core/sui-index/post';
 import { createSuiUser, updateSuiUser } from 'src/core/sui-index/user';
 import {
   UserCreatedSuiEventModel,
@@ -12,6 +13,7 @@ import {
   CommunityUpdatedSuiEventModel,
   TagCreatedSuiEventModel,
   TagUpdatedSuiEventModel,
+  PostCreatedSuiEventModel,
 } from 'src/models/sui-event-models';
 
 export async function handleCreateSuiUser(
@@ -43,4 +45,10 @@ export async function handleCreateSuiTag(eventModel: TagCreatedSuiEventModel) {
 
 export async function handleUpdateSuiTag(eventModel: TagUpdatedSuiEventModel) {
   await updateSuiTag(eventModel.communityId, eventModel.tagId);
+}
+
+export async function handleCreateSuiPost(
+  eventModel: PostCreatedSuiEventModel
+) {
+  await createSuiPost(eventModel.postMetaDataId, eventModel.timestamp);
 }

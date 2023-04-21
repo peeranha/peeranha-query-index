@@ -14,6 +14,7 @@ import {
   TAG_CREATED_SUI_EVENT_NAME,
   TAG_UPDATED_SUI_EVENT_NAME,
   USER_UPDATED_SUI_EVENT_NAME,
+  POST_CREATED_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import {
   createSuiProvider,
@@ -26,6 +27,7 @@ import {
   BaseSuiEventModel,
   CommunityCreatedSuiEventModel,
   CommunityUpdatedSuiEventModel,
+  PostCreatedSuiEventModel,
   TagCreatedSuiEventModel,
   TagUpdatedSuiEventModel,
   UserCreatedSuiEventModel,
@@ -42,6 +44,7 @@ const eventOrder = [
   USER_CREATED_SUI_EVENT_NAME,
   COMMUNITY_CREATED_SUI_EVENT_NAME,
   TAG_CREATED_SUI_EVENT_NAME,
+  POST_CREATED_SUI_EVENT_NAME,
   USER_UPDATED_SUI_EVENT_NAME,
   COMMUNITY_UPDATED_SUI_EVENT_NAME,
   TAG_UPDATED_SUI_EVENT_NAME,
@@ -73,6 +76,7 @@ eventToModelType[COMMUNITY_UPDATED_SUI_EVENT_NAME] =
   CommunityUpdatedSuiEventModel;
 eventToModelType[TAG_CREATED_SUI_EVENT_NAME] = TagCreatedSuiEventModel;
 eventToModelType[TAG_UPDATED_SUI_EVENT_NAME] = TagUpdatedSuiEventModel;
+eventToModelType[POST_CREATED_SUI_EVENT_NAME] = PostCreatedSuiEventModel;
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);

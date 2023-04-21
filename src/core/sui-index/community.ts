@@ -82,6 +82,8 @@ export async function createSuiCommunity(communityId: string) {
   });
 
   await communityRepository.create(communityEntity);
+
+  return communityEntity;
 }
 
 export async function updateSuiCommunity(communityId: string) {
@@ -117,4 +119,14 @@ export async function updateSuiCommunity(communityId: string) {
     };
     await communityRepository.update(communityId, communityForSave);
   }
+}
+
+export async function getSuiCommunity(
+  communityId: string
+): Promise<CommunityEntity> {
+  let community = await communityRepository.get(communityId);
+  if (!community) {
+    community = await createSuiCommunity(communityId);
+  }
+  return community;
 }

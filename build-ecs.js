@@ -9,13 +9,14 @@ build({
   plugins: [
     ignorePlugin([
       {
-				resourceRegExp: /knex$/
-			},
+        resourceRegExp: /knex$/,
+      },
       {
-				resourceRegExp: /knex-serverless-mysql$/
-			}
-    ])
+        resourceRegExp: /knex-serverless-mysql$/,
+      },
+    ]),
   ],
   external: Object.keys(dependencies),
   platform: 'node',
-  format: 'esm',});
+  format: 'esm',
+});

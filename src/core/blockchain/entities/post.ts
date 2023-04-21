@@ -1,4 +1,6 @@
 export class Post {
+  id: string;
+
   postType: number;
 
   author: string;
@@ -28,6 +30,7 @@ export class Post {
   ipfsDoc: [string, string];
 
   constructor(post: any) {
+    this.id = post.id;
     this.postType = post.postType;
     this.author = post.author;
     this.rating = post.rating;

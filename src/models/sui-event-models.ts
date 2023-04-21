@@ -95,3 +95,18 @@ export class TagUpdatedSuiEventModel extends BaseSuiEventModel {
     this.tagId = event.parsedJson.tagKey;
   }
 }
+
+export class PostCreatedSuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public communityId: string;
+
+  public postMetaDataId: string;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.communityId = event.parsedJson.communityId;
+    this.postMetaDataId = event.parsedJson.postMetaDataId;
+  }
+}

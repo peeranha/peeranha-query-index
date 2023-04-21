@@ -67,9 +67,9 @@ export async function getObject(objectId: string) {
       params: [
         objectId,
         {
-          showType: true,
-          showOwner: true,
-          showPreviousTransaction: true,
+          showType: false,
+          showOwner: false,
+          showPreviousTransaction: false,
           showDisplay: false,
           showContent: true,
           showBcs: false,
@@ -105,7 +105,7 @@ export async function getDynamicFieldObject(objectId: string, index: string) {
           value: index,
         },
         {
-          showType: true,
+          showType: false,
           showOwner: false,
           showPreviousTransaction: false,
           showDisplay: false,
