@@ -60,6 +60,9 @@ export async function updateSuiTag(communityId: string, tagId: number) {
 
 export async function createSuiCommunity(communityId: string) {
   const peeranhaCommunity = await getSuiCommunityById(communityId);
+  for (let index = 1; index < peeranhaCommunity.tags.length + 1; index++) {
+    createSuiTag(communityId, index);
+  }
 
   const communityEntity = new CommunityEntity({
     id: communityId,
