@@ -6,7 +6,7 @@ import { TagRepository } from 'src/core/db/repositories/TagRepository';
 import { UserRepository } from 'src/core/db/repositories/UserRepository';
 import { getSuiPostById } from 'src/core/sui-blockchain/data-loader';
 import { getSuiCommunity } from 'src/core/sui-index/community';
-import { createSuiUser } from 'src/core/sui-index/user';
+import { createSuiUser, updateSuiUserRating } from 'src/core/sui-index/user';
 
 const postRepository = new PostRepository();
 const communityRepository = new CommunityRepository();
@@ -94,7 +94,7 @@ export async function createSuiPost(postMetaDataId: string, timestamp: number) {
 
     postRepository.create(post),
 
-    // updateUserRating(post.author, post.communityId),
+    updateSuiUserRating(post.author, post.communityId),
   ]);
 
   const promises: Promise<any>[] = [];

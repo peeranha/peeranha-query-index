@@ -1,9 +1,13 @@
-import { UserEntity } from 'src/core/db/entities';
+import { UserCommunityRatingEntity, UserEntity } from 'src/core/db/entities';
 import { UserRepository } from 'src/core/db/repositories/UserRepository';
-import { getSuiUserById } from 'src/core/sui-blockchain/data-loader';
+import { getSuiUserById, getSuiUserRating } from 'src/core/sui-blockchain/data-loader';
 import { log } from 'src/core/utils/logger';
+import { UserCommunityRatingRepository } from 'src/core/db/repositories/UserCommunityRatingRepository';
+
+const START_USER_RATING = 10;
 
 const userRepository = new UserRepository();
+const userCommunityRatingRepository = new UserCommunityRatingRepository();
 
 export async function createSuiUser(userId: string, timestamp: number) {
   log(`Indexing user by id ${userId}`);
@@ -64,5 +68,42 @@ export async function updateSuiUser(userId: string, timestamp: number) {
       ipfsHash2: peeranhaUser.ipfsDoc[1],
     };
     await userRepository.update(userId, userForSave);
+  }
+}
+
+export async function updateSuiUserRating(
+  userAddress: string,
+  communityId: string
+) {
+  const user = await userRepository.get(userAddress);
+  if (!user) return;
+
+  let rating = START_USER_RATING;
+
+  const userRating = await getSuiUserRating(
+    userAddress,
+    communityId
+  );
+
+  if (userRating.isActive) {
+    rating = userRating.rating;
+  }
+
+  const userRatingId = `${communityId} ${userAddress}`;
+  let userComunityRating = await userCommunityRatingRepository.get(
+    userRatingId
+  );
+
+  if (!userComunityRating) {
+    userComunityRating = new UserCommunityRatingEntity({
+      id: userRatingId,
+      userId: userAddress,
+      communityId,
+      rating,
+    });
+
+    await userCommunityRatingRepository.create(userComunityRating);
+  } else {
+    await userCommunityRatingRepository.update(userRatingId, { rating });
   }
 }

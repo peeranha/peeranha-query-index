@@ -7,6 +7,10 @@ import { getObject, getDynamicFieldObject } from 'src/core/sui-blockchain/sui';
 import { AddIpfsData, byteArrayToHexString } from 'src/core/utils/ipfs';
 import { log, LogLevel } from 'src/core/utils/logger';
 import { parseIntArray } from 'src/core/utils/parser';
+import { UserRating } from 'src/core/blockchain/entities/user-rating';
+
+const TAG_DYNAMIC_FIELD_TYPE = 'u64';
+const USER_RATING_DYNAMIC_FIELD_TYPE = '0x2::object::ID';
 
 export async function getSuiUserById(
   userId: string
@@ -68,7 +72,7 @@ export async function getSuiCommunityById(
   const tagTable = fields.tags.fields.id.id;
   const tagsPromises: Promise<any>[] = [];
   for (let index = 1; index < tagsCount + 1; index++) {
-    tagsPromises.push(getDynamicFieldObject(tagTable, index.toString()));
+    tagsPromises.push(getDynamicFieldObject(tagTable, TAG_DYNAMIC_FIELD_TYPE, index.toString()));
   }
 
   const tags = await Promise.all(tagsPromises);
@@ -102,7 +106,7 @@ export async function getSuiTagById(
     );
   }
   const tagTable = communityFields.tags.fields.id.id;
-  const tagObject = await getDynamicFieldObject(tagTable, tagId.toString());
+  const tagObject = await getDynamicFieldObject(tagTable, TAG_DYNAMIC_FIELD_TYPE, tagId.toString());
 
   log(`Tag object: ${JSON.stringify(tagObject)}`);
 
@@ -206,6 +210,41 @@ export async function getSuiUserRating(userId: string, communityId: string) {
   const fields = collectionObject.data?.content?.fields;
 
   if (!fields) {
-    throw new RuntimeError(`Missing 'fields' in response for user collection.`);
+    throw new RuntimeError(`Missing 'fields' in response for user collection ${process.env.SUI_USERS_RATING_COLLECTION}.`);
   }
+
+  const tableId = fields?.usersCommunityRating?.fields?.id?.id;
+  if(!tableId) {
+    throw new RuntimeError(`Missing community rating table id in the response for user collection ${process.env.SUI_USERS_RATING_COLLECTION}.`)
+  }
+
+  log(`Loading user rating obj - ${tableId} ${USER_RATING_DYNAMIC_FIELD_TYPE} ${userId}`)
+  const userRatingObject = await getDynamicFieldObject(tableId, USER_RATING_DYNAMIC_FIELD_TYPE, userId);
+  if(!userRatingObject) {
+    throw new RuntimeError(`User rating object is missing. Table id: ${tableId}. Type: ${USER_RATING_DYNAMIC_FIELD_TYPE}. User id: ${userId}`);
+  }
+
+  const userRatingContent : any[] = userRatingObject.data?.content?.fields?.value?.fields?.userRating?.fields?.contents;
+
+  if(!userRatingContent) {
+    throw new RuntimeError(`User rating content is empty for user rating collection ${process.env.SUI_USERS_RATING_COLLECTION} and user ${userId}`);
+  }
+
+  const communityUserRatings = userRatingContent.filter(communityRating => communityRating?.fields?.key === communityId);
+
+  let active = false;
+  let rating = 0;
+
+  if(communityUserRatings.length >= 1) {
+    const ratingStr = communityUserRatings[0].fields?.value?.fields?.bits;
+    rating = parseInt(ratingStr);
+    active = true;
+  } 
+
+  return new UserRating(
+    {
+      rating: rating,
+      isActive: active
+    }
+  );
 }

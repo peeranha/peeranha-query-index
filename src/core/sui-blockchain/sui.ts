@@ -84,7 +84,7 @@ export async function getObject(objectId: string) {
   return responseObject.result;
 }
 
-export async function getDynamicFieldObject(objectId: string, index: string) {
+export async function getDynamicFieldObject(objectId: string, type: string, index: string) {
   if (!process.env.SUI_RPC_ENDPOINT) {
     throw new ConfigurationError('SUI_RPC_ENDPOINT are not configured');
   }
@@ -101,7 +101,7 @@ export async function getDynamicFieldObject(objectId: string, index: string) {
       params: [
         objectId,
         {
-          type: 'u64',
+          type: type,
           value: index,
         },
         {
