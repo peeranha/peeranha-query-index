@@ -50,8 +50,8 @@ type achievement {
   name: String
   description: String
   image: String
-  communityId: Int
-  attrCommunityId: Int
+  communityId: String
+  attrcommunityId: String
   attrEvent: String
   attrType: String
   userachievement(limit: Int, offset: Int, where: userachievement_WhereInput, orderBy: userachievement_OrderByInput): [userachievement]
@@ -76,7 +76,7 @@ input achievement_WhereInput {
   description: String
   image: String
   communityId: String
-  attrCommunityId: String
+  attrcommunityId: String
   attrEvent: String
   attrType: String
 }
@@ -92,7 +92,7 @@ input achievement_OrderByInput {
   description: OrderBy
   image: OrderBy
   communityId: OrderBy
-  attrCommunityId: OrderBy
+  attrcommunityId: OrderBy
   attrEvent: OrderBy
   attrType: OrderBy
 }
@@ -150,7 +150,7 @@ type post {
   rating: Int
   postTime: Int
   lastMod: Int
-  communityId: Int!
+  communityId: String!
   title: String!
   content: String!
   postContent: String!
@@ -308,7 +308,7 @@ input history_OrderByInput {
 }
 
 type community {
-  id: Int!
+  id: String!
   name: String
   description: String
   website: String
@@ -333,7 +333,7 @@ type community {
 }
 
 type communitydocumentation {
-  id: Int!
+  id: String!
   documentationJSON: String
   ipfsHash: String
   community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
@@ -393,7 +393,7 @@ input communitydocumentation_OrderByInput {
 
 type tag {
   id: String!
-  communityId: Int!
+  communityId: String!
   name: String!
   description: String
   postCount: Int
@@ -449,7 +449,7 @@ input posttag_OrderByInput {
 type usercommunity {
   id: String!
   userId: String!
-  communityId: Int!
+  communityId: String!
   community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
   user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
 }
@@ -468,7 +468,7 @@ input usercommunity_OrderByInput {
 
 type usercommunityrating {
   id: String!
-  communityId: Int!
+  communityId: String!
   rating: Int
   userId: String!
   community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
@@ -693,8 +693,8 @@ input achievement_InsertInput {
   name: String
   description: String
   image: String
-  communityId: Int
-  attrCommunityId: Int
+  communityId: String
+  attrcommunityId: String
   attrEvent: String
   attrType: String
 }
@@ -709,8 +709,8 @@ input achievement_UpdateInput {
   name: String
   description: String
   image: String
-  communityId: Int
-  attrCommunityId: Int
+  communityId: String
+  attrcommunityId: String
   attrEvent: String
   attrType: String
 }
@@ -742,7 +742,7 @@ input comment_UpdateInput {
 }
 
 input community_InsertInput {
-  id: Int!
+  id: String!
   name: String
   description: String
   website: String
@@ -762,7 +762,7 @@ input community_InsertInput {
 }
 
 input community_UpdateInput {
-  id: Int
+  id: String
   name: String
   description: String
   website: String
@@ -782,13 +782,13 @@ input community_UpdateInput {
 }
 
 input communitydocumentation_InsertInput {
-  id: Int!
+  id: String!
   documentationJSON: String
   ipfsHash: String
 }
 
 input communitydocumentation_UpdateInput {
-  id: Int
+  id: String
   documentationJSON: String
   ipfsHash: String
 }
@@ -878,7 +878,7 @@ input post_InsertInput {
   rating: Int
   postTime: Int
   lastMod: Int
-  communityId: Int!
+  communityId: String!
   title: String!
   content: String!
   postContent: String!
@@ -900,7 +900,7 @@ input post_UpdateInput {
   rating: Int
   postTime: Int
   lastMod: Int
-  communityId: Int
+  communityId: String
   title: String
   content: String
   postContent: String
@@ -967,7 +967,7 @@ input reply_UpdateInput {
 
 input tag_InsertInput {
   id: String!
-  communityId: Int!
+  communityId: String!
   name: String!
   description: String
   postCount: Int
@@ -978,7 +978,7 @@ input tag_InsertInput {
 
 input tag_UpdateInput {
   id: String
-  communityId: Int
+  communityId: String
   name: String
   description: String
   postCount: Int
@@ -1032,25 +1032,25 @@ input userachievement_UpdateInput {
 input usercommunity_InsertInput {
   id: String!
   userId: String!
-  communityId: Int!
+  communityId: String!
 }
 
 input usercommunity_UpdateInput {
   id: String
   userId: String
-  communityId: Int
+  communityId: String
 }
 
 input usercommunityrating_InsertInput {
   id: String!
-  communityId: Int!
+  communityId: String!
   rating: Int
   userId: String!
 }
 
 input usercommunityrating_UpdateInput {
   id: String
-  communityId: Int
+  communityId: String
   rating: Int
   userId: String
 }
