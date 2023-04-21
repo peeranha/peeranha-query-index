@@ -4,7 +4,7 @@ import {
   createSuiTag,
   updateSuiTag,
 } from 'src/core/sui-index/community';
-import { createSuiPost } from 'src/core/sui-index/post';
+import { createSuiPost, createSuiReply } from 'src/core/sui-index/post';
 import { createSuiUser, updateSuiUser } from 'src/core/sui-index/user';
 import {
   UserCreatedSuiEventModel,
@@ -14,6 +14,9 @@ import {
   TagCreatedSuiEventModel,
   TagUpdatedSuiEventModel,
   PostCreatedSuiEventModel,
+  ReplyCreatedSuiEventModel,
+  // ReplyEditedSuiEventModel,
+  // ReplyDeletedSuiEventModel,
 } from 'src/models/sui-event-models';
 
 export async function handleCreateSuiUser(
@@ -53,3 +56,24 @@ export async function handleCreateSuiPost(
 ) {
   await createSuiPost(eventModel.postMetaDataId, eventModel.timestamp);
 }
+
+export async function handleCreateSuiReply(
+  eventModel: ReplyCreatedSuiEventModel
+) {
+  await createSuiReply(
+    eventModel.postMetaDataId,
+    eventModel.parentReplyKey,
+    eventModel.replyMetaDataKey,
+    eventModel.timestamp
+  );
+}
+
+// export async function handleEditSuiReply(eventModel: ReplyEditedSuiEventModel) {
+//   await createSuiPost(eventModel.postMetaDataId, eventModel.timestamp);
+// }
+
+// export async function handleDeleteSuiReply(
+//   eventModel: ReplyDeletedSuiEventModel
+// ) {
+//   await createSuiPost(eventModel.postMetaDataId, eventModel.timestamp);
+// }

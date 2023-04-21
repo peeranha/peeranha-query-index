@@ -8,6 +8,9 @@ import {
   TAG_CREATED_SUI_EVENT_NAME,
   TAG_UPDATED_SUI_EVENT_NAME,
   POST_CREATED_SUI_EVENT_NAME,
+  REPLY_CREATED_SUI_EVENT_NAME,
+  // REPLY_EDITED_SUI_EVENT_NAME,
+  // REPLY_DELETED_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import {
@@ -18,6 +21,9 @@ import {
   handleCreateSuiTag,
   handleUpdateSuiTag,
   handleCreateSuiPost,
+  handleCreateSuiReply,
+  // handleEditSuiReply,
+  // handleDeleteSuiReply,
 } from 'src/core/sui-index/mapping';
 import { log } from 'src/core/utils/logger';
 import { BaseSuiEventModel } from 'src/models/sui-event-models';
@@ -30,6 +36,10 @@ eventToHandler[COMMUNITY_UPDATED_SUI_EVENT_NAME] = handleUpdateSuiCommunity;
 eventToHandler[TAG_CREATED_SUI_EVENT_NAME] = handleCreateSuiTag;
 eventToHandler[TAG_UPDATED_SUI_EVENT_NAME] = handleUpdateSuiTag;
 eventToHandler[POST_CREATED_SUI_EVENT_NAME] = handleCreateSuiPost;
+
+eventToHandler[REPLY_CREATED_SUI_EVENT_NAME] = handleCreateSuiReply;
+// eventToHandler[REPLY_EDITED_SUI_EVENT_NAME] = handleEditSuiReply;
+// eventToHandler[REPLY_DELETED_SUI_EVENT_NAME] = handleDeleteSuiReply;
 
 export async function processSuiIndexing(eventModel: BaseSuiEventModel) {
   log(`Starting indexing event ${JSON.stringify(eventModel, null, 2)}`);

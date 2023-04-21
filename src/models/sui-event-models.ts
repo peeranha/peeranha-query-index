@@ -110,3 +110,51 @@ export class PostCreatedSuiEventModel extends BaseSuiEventModel {
     this.postMetaDataId = event.parsedJson.postMetaDataId;
   }
 }
+
+export class ReplyCreatedSuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public postMetaDataId: string;
+
+  public parentReplyKey: number;
+
+  public replyMetaDataKey: number;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.postMetaDataId = event.parsedJson.postMetaDataId;
+    this.parentReplyKey = event.parsedJson.parentReplyKey;
+    this.replyMetaDataKey = event.parsedJson.replyMetaDataKey;
+  }
+}
+
+export class ReplyEditedSuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public postMetaDataId: string;
+
+  public replyMetaDataKey: number;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.postMetaDataId = event.parsedJson.postMetaDataId;
+    this.replyMetaDataKey = event.parsedJson.replyMetaDataKey;
+  }
+}
+
+export class ReplyDeletedSuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public postMetaDataId: string;
+
+  public replyMetaDataKey: number;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.postMetaDataId = event.parsedJson.postMetaDataId;
+    this.replyMetaDataKey = event.parsedJson.replyMetaDataKey;
+  }
+}

@@ -15,6 +15,7 @@ import {
   TAG_UPDATED_SUI_EVENT_NAME,
   USER_UPDATED_SUI_EVENT_NAME,
   POST_CREATED_SUI_EVENT_NAME,
+  REPLY_CREATED_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import {
   createSuiProvider,
@@ -32,6 +33,7 @@ import {
   TagUpdatedSuiEventModel,
   UserCreatedSuiEventModel,
   UserUpdatedSuiEventModel,
+  ReplyCreatedSuiEventModel,
 } from 'src/models/sui-event-models';
 import {
   ReadSuiEventsRequestModel,
@@ -48,6 +50,7 @@ const eventOrder = [
   USER_UPDATED_SUI_EVENT_NAME,
   COMMUNITY_UPDATED_SUI_EVENT_NAME,
   TAG_UPDATED_SUI_EVENT_NAME,
+  REPLY_CREATED_SUI_EVENT_NAME,
 ];
 
 const getSortedEventModels = (eventModels: BaseSuiEventModel[]) =>
@@ -77,6 +80,7 @@ eventToModelType[COMMUNITY_UPDATED_SUI_EVENT_NAME] =
 eventToModelType[TAG_CREATED_SUI_EVENT_NAME] = TagCreatedSuiEventModel;
 eventToModelType[TAG_UPDATED_SUI_EVENT_NAME] = TagUpdatedSuiEventModel;
 eventToModelType[POST_CREATED_SUI_EVENT_NAME] = PostCreatedSuiEventModel;
+eventToModelType[REPLY_CREATED_SUI_EVENT_NAME] = ReplyCreatedSuiEventModel;
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);
