@@ -1,3 +1,3 @@
 export function cleanEventType(eventType: string) {
-  return eventType.substring(67);
+  return eventType.substring(eventType.indexOf(':') + 2);
 }
