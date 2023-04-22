@@ -15,3 +15,5 @@ export const POST_DELETED_SUI_EVENT_NAME = 'postLib::DeletePostEvent';
 export const REPLY_CREATED_SUI_EVENT_NAME = 'postLib::CreateReplyEvent';
 export const REPLY_EDITED_SUI_EVENT_NAME = 'postLib::EditReplyEvent';
 export const REPLY_DELETED_SUI_EVENT_NAME = 'postLib::DeleteReplyEvent';
+export const REPLY_MARKED_THE_BEST_SUI_EVENT_NAME =
+  'postLib::ChangeStatusBestReply';

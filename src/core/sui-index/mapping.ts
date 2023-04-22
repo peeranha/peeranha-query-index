@@ -7,7 +7,13 @@ import {
   createSuiTag,
   updateSuiTag,
 } from 'src/core/sui-index/community';
-import { createSuiPost, createSuiReply } from 'src/core/sui-index/post';
+import {
+  createSuiPost,
+  createSuiReply,
+  editSuiReply,
+  deleteSuiReply,
+  changeStatusBestSuiReply,
+} from 'src/core/sui-index/post';
 import { createSuiUser, updateSuiUser } from 'src/core/sui-index/user';
 import {
   UserCreatedSuiEventModel,
@@ -20,6 +26,7 @@ import {
   ReplyCreatedSuiEventModel,
   ReplyEditedSuiEventModel,
   ReplyDeletedSuiEventModel,
+  ReplyMarkedTheBestSuiEventModel,
 } from 'src/models/sui-event-models';
 
 const postRepository = new PostRepository();
@@ -84,11 +91,31 @@ export async function handleCreateSuiReply(
 }
 
 export async function handleEditSuiReply(eventModel: ReplyEditedSuiEventModel) {
-  console.log(eventModel);
+  await editSuiReply(
+    eventModel.postId,
+    eventModel.replyId,
+    eventModel.timestamp
+  );
+  await createHistory(eventModel, EntityType.Reply, OperationType.Edit);
 }
 
 export async function handleDeleteSuiReply(
   eventModel: ReplyDeletedSuiEventModel
 ) {
-  console.log(eventModel);
+  await deleteSuiReply(
+    eventModel.postId,
+    eventModel.replyId
+    // eventModel.timestamp
+  );
+  await createHistory(eventModel, EntityType.Reply, OperationType.Delete);
+}
+
+export async function handleChangeStatusBestSuiReply(
+  eventModel: ReplyMarkedTheBestSuiEventModel
+) {
+  await changeStatusBestSuiReply(
+    eventModel.postMetaDataId,
+    eventModel.replyMetaDataKey,
+    eventModel.timestamp
+  );
 }

@@ -245,3 +245,140 @@ export async function createSuiReply(
 
   return reply;
 }
+
+export async function editSuiReply(
+  postId: string,
+  replyId: number,
+  timestamp: number
+) {
+  let storedReply = await replyRepository.get(`${postId}-${replyId}`);
+  let createdReply;
+
+  if (!storedReply) {
+    createdReply = await createSuiReply(postId, replyId, timestamp);
+  }
+  if (!createdReply) return;
+
+  if (!storedReply) {
+    storedReply = createdReply;
+  }
+
+  const peeranhaReply = await getSuiReply(postId, replyId, timestamp);
+
+  if (!peeranhaReply) {
+    return;
+  }
+
+  const promises: Promise<any>[] = [];
+
+  promises.push(
+    replyRepository.update(storedReply.id, {
+      content: peeranhaReply.content,
+      ipfsHash: peeranhaReply.ipfsDoc[0],
+      ipfsHash2: peeranhaReply.ipfsDoc[1],
+    })
+  );
+  await Promise.all(promises);
+
+  // await updatePostContent(postId, timestamp, replyId);
+}
+
+export async function deleteSuiReply(
+  postId: string,
+  replyId: number
+  // timestamp: number
+) {
+  const reply = await replyRepository.get(`${postId}-${replyId}`);
+  if (!reply) return;
+
+  await replyRepository.update(reply.id, { isDeleted: true });
+
+  const promises: Promise<any>[] = [];
+
+  const post = await postRepository.get(postId);
+  if (post) {
+    const community = await getSuiCommunity(post.communityId);
+    promises.push(
+      updateSuiUserRating(reply.author, post.communityId),
+
+      communityRepository.update(post.communityId, {
+        replyCount: community.replyCount - 1,
+      }),
+
+      postRepository.update(postId, {
+        bestReply: reply.isBestReply ? 0 : post.bestReply,
+        officialReply: reply.isOfficialReply ? 0 : post.officialReply,
+      })
+    );
+  }
+
+  const user = await userRepository.get(reply.author);
+  if (user) {
+    promises.push(
+      userRepository.update(reply.author, {
+        replyCount: user.replyCount - 1,
+      })
+    );
+  }
+
+  // promises.push(
+  //   updatePostContent(postId, timestamp),
+  // );
+
+  await Promise.all(promises);
+}
+
+export async function changeStatusBestSuiReply(
+  postId: string,
+  replyId: number,
+  timestamp: number
+) {
+  let post = await postRepository.get(postId);
+  let previousBestReply = 0;
+  if (!post) {
+    post = await createSuiPost(postId, timestamp);
+  } else {
+    previousBestReply = Number(post.bestReply);
+
+    await postRepository.update(postId, {
+      bestReply: replyId,
+    });
+  }
+
+  if (previousBestReply) {
+    let previousReply = await replyRepository.get(
+      `${postId}-${previousBestReply}`
+    );
+
+    if (!previousReply)
+      previousReply = await createSuiReply(
+        postId,
+        previousBestReply,
+        timestamp
+      );
+
+    if (previousReply) {
+      await replyRepository.update(previousReply.id, {
+        isBestReply: false,
+      });
+
+      await updateSuiUserRating(previousReply.author, post.communityId);
+    }
+  }
+
+  let reply = await replyRepository.get(`${postId}-${replyId}`);
+  if (!reply) reply = await createSuiReply(postId, replyId, timestamp);
+  if (reply) {
+    if (replyId !== 0) {
+      if (reply.author !== post.author) {
+        await updateSuiUserRating(reply.author, post.communityId);
+      }
+      await replyRepository.update(reply.id, {
+        isBestReply: true,
+      });
+    }
+    if (reply.author !== post.author) {
+      await updateSuiUserRating(post.author, post.communityId);
+    }
+  }
+}

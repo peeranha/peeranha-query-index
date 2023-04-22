@@ -20,6 +20,7 @@ import {
   POST_DELETED_SUI_EVENT_NAME,
   REPLY_DELETED_SUI_EVENT_NAME,
   REPLY_EDITED_SUI_EVENT_NAME,
+  REPLY_MARKED_THE_BEST_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import {
   createSuiProvider,
@@ -42,6 +43,7 @@ import {
   PostDeletedSuiEventModel,
   ReplyEditedSuiEventModel,
   ReplyDeletedSuiEventModel,
+  ReplyMarkedTheBestSuiEventModel,
 } from 'src/models/sui-event-models';
 import {
   ReadSuiEventsRequestModel,
@@ -63,6 +65,7 @@ const eventOrder = [
   REPLY_EDITED_SUI_EVENT_NAME,
   POST_DELETED_SUI_EVENT_NAME,
   REPLY_DELETED_SUI_EVENT_NAME,
+  REPLY_MARKED_THE_BEST_SUI_EVENT_NAME,
 ];
 
 const getSortedEventModels = (eventModels: BaseSuiEventModel[]) =>
@@ -97,6 +100,8 @@ eventToModelType[POST_DELETED_SUI_EVENT_NAME] = PostDeletedSuiEventModel;
 eventToModelType[REPLY_CREATED_SUI_EVENT_NAME] = ReplyCreatedSuiEventModel;
 eventToModelType[REPLY_EDITED_SUI_EVENT_NAME] = ReplyEditedSuiEventModel;
 eventToModelType[REPLY_DELETED_SUI_EVENT_NAME] = ReplyDeletedSuiEventModel;
+eventToModelType[REPLY_MARKED_THE_BEST_SUI_EVENT_NAME] =
+  ReplyMarkedTheBestSuiEventModel;
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);
@@ -163,16 +168,16 @@ export async function readSuiEvents(
 
   const transactionBlocks = await Promise.all(transactionBlockPromises);
 
-  const storedDigest = transactionBlocks.find(
+  const blockByStoredDigest = transactionBlocks.find(
     (block) => block.digest === cursor
   );
-  const timestamp = storedDigest
-    ? Math.floor(Number(storedDigest.timestampMs) / 1000)
+  const storedBlockTimestamp = blockByStoredDigest
+    ? Number(blockByStoredDigest.timestampMs)
     : 0;
   const filteredBlocks = transactionBlocks.filter(
     (block) =>
       block.digest !== cursor &&
-      Math.floor(Number(block.timestampMs) / 1000) > timestamp
+      Number(block.timestampMs) > storedBlockTimestamp
   );
 
   log(
@@ -211,12 +216,24 @@ export async function readSuiEvents(
 
   await Promise.all(promises);
 
+  let maxTimestamp = storedBlockTimestamp;
+  for (let i = 0; i < filteredBlocks.length; i++) {
+    const blockTimestamp = Number(filteredBlocks[i]!.timestampMs);
+    if (blockTimestamp > maxTimestamp) {
+      maxTimestamp = blockTimestamp;
+    }
+  }
+
+  const maxTimestampBlock = filteredBlocks.find(
+    (block) => Number(block.timestampMs!) === maxTimestamp
+  )!;
+
   const configBlockNumber = new Config({
     key: NEXT_CURSOR,
-    value: nextCursor,
+    value: maxTimestampBlock.digest,
   });
 
-  log(`Updating next cursor in db - ${nextCursor}`);
+  log(`Updating next cursor in db - ${maxTimestampBlock.digest}`);
   if (!cursorConfig) {
     await configRepository.put(configBlockNumber);
   } else {
