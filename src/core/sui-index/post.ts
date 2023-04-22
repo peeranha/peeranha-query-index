@@ -63,7 +63,7 @@ async function updateTagsPostCount(
   return tagNames;
 }
 
-async function changedStatusOfficialReply(
+async function changeStatusOfficialReply(
   peeranhaPost: PostData,
   replyId: string,
   post: PostEntity
@@ -98,7 +98,7 @@ async function changedStatusOfficialReply(
   return officialReply;
 }
 
-async function updateSuiPostContent(
+export async function updateSuiPostContent(
   postId: string,
   timestamp: number,
   editedReplyId?: number
@@ -125,7 +125,7 @@ async function updateSuiPostContent(
   postForSave.postContent += ` ${postForSave.content}`;
 
   if (editedReplyId) {
-    const officialReply = await changedStatusOfficialReply(
+    const officialReply = await changeStatusOfficialReply(
       peeranhaPost,
       String(editedReplyId),
       post
@@ -237,8 +237,8 @@ async function updateSuiPostContent(
   await postRepository.update(String(postId), postForSave);
 }
 
-export async function createSuiPost(postMetaDataId: string, timestamp: number) {
-  const peeranhaPost = await getSuiPostById(postMetaDataId, timestamp);
+export async function createSuiPost(postId: string, timestamp: number) {
+  const peeranhaPost = await getSuiPostById(postId, timestamp);
 
   const post = new PostEntity({
     id: peeranhaPost.id,
@@ -296,6 +296,81 @@ export async function createSuiPost(postMetaDataId: string, timestamp: number) {
   await Promise.all(promises);
 
   return post;
+}
+
+export async function deleteSuiPost(postId: string) {
+  const post = await postRepository.get(postId);
+  if (!post) return;
+
+  const promises: Promise<any>[] = [];
+  const { author, communityId, replyCount } = post;
+
+  const postAuthor = await userRepository.get(author);
+  if (postAuthor) {
+    promises.push(
+      userRepository.update(author, {
+        postCount: postAuthor.postCount - 1,
+      })
+    );
+  }
+
+  promises.push(
+    postRepository.update(postId, {
+      isDeleted: true,
+    }),
+
+    updateSuiUserRating(author, communityId)
+  );
+
+  const community = await getSuiCommunity(communityId);
+  let communityReplyCount = community.replyCount;
+
+  for (let i = 1; i <= replyCount; i++) {
+    const reply = await replyRepository.get(`${postId}-${i}`);
+    if (reply && !reply.isDeleted) {
+      promises.push(updateSuiUserRating(reply.author, communityId));
+
+      const replyAuthor = await userRepository.get(reply.author);
+      if (replyAuthor) {
+        promises.push(
+          userRepository.update(reply.author, {
+            replyCount: replyAuthor.replyCount - 1,
+          })
+        );
+      }
+
+      communityReplyCount -= 1;
+    }
+  }
+
+  const tagsResponse = await postTagRepository.getListOfProperties(
+    'tagId',
+    'postId',
+    post.id
+  );
+  const postTags: string[] = tagsResponse.map((tag: any) => tag.tagId);
+
+  postTags.forEach(async (tag) => {
+    const tagEntity = await tagRepository.get(tag);
+    if (tagEntity) {
+      promises.push(
+        tagRepository.update(tag, {
+          postCount: tagEntity.postCount - 1,
+          deletedPostCount: tagEntity.deletedPostCount + 1,
+        })
+      );
+    }
+
+    promises.push(postTagRepository.delete(`${post.id}-${tag}`));
+  });
+
+  await Promise.all(promises);
+
+  await communityRepository.update(communityId, {
+    deletedPostCount: community.deletedPostCount + 1,
+    postCount: community.postCount - 1,
+    replyCount: communityReplyCount,
+  });
 }
 
 export async function createSuiReply(
@@ -358,7 +433,7 @@ export async function createSuiReply(
       })
     );
 
-    const officialReply = await changedStatusOfficialReply(
+    const officialReply = await changeStatusOfficialReply(
       peeranhaPost,
       String(replyId),
       post
@@ -410,16 +485,11 @@ export async function editSuiReply(
     return;
   }
 
-  const promises: Promise<any>[] = [];
-
-  promises.push(
-    replyRepository.update(storedReply.id, {
-      content: peeranhaReply.content,
-      ipfsHash: peeranhaReply.ipfsDoc[0],
-      ipfsHash2: peeranhaReply.ipfsDoc[1],
-    })
-  );
-  await Promise.all(promises);
+  await replyRepository.update(storedReply.id, {
+    content: peeranhaReply.content,
+    ipfsHash: peeranhaReply.ipfsDoc[0],
+    ipfsHash2: peeranhaReply.ipfsDoc[1],
+  });
 
   await updateSuiPostContent(postId, timestamp, replyId);
 }
@@ -458,12 +528,11 @@ export async function deleteSuiReply(
     promises.push(
       userRepository.update(reply.author, {
         replyCount: user.replyCount - 1,
-      }),
-
-      updateSuiPostContent(postId, timestamp)
+      })
     );
   }
 
+  promises.push(updateSuiPostContent(postId, timestamp));
   await Promise.all(promises);
 }
 
@@ -506,7 +575,10 @@ export async function changeStatusBestSuiReply(
   }
 
   let reply = await replyRepository.get(`${postId}-${replyId}`);
-  if (!reply) reply = await createSuiReply(postId, replyId, timestamp);
+  if (!reply) {
+    reply = await createSuiReply(postId, replyId, timestamp);
+  }
+
   if (reply) {
     if (replyId !== 0) {
       if (reply.author !== post.author) {

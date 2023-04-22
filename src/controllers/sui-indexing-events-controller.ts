@@ -12,6 +12,8 @@ import {
   REPLY_EDITED_SUI_EVENT_NAME,
   REPLY_DELETED_SUI_EVENT_NAME,
   REPLY_MARKED_THE_BEST_SUI_EVENT_NAME,
+  POST_DELETED_SUI_EVENT_NAME,
+  POST_EDITED_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import {
@@ -26,6 +28,8 @@ import {
   handleEditSuiReply,
   handleDeleteSuiReply,
   handleChangeStatusBestSuiReply,
+  handleEditSuiPost,
+  handleDeleteSuiPost,
 } from 'src/core/sui-index/mapping';
 import { log } from 'src/core/utils/logger';
 import { BaseSuiEventModel } from 'src/models/sui-event-models';
@@ -38,6 +42,8 @@ eventToHandler[COMMUNITY_UPDATED_SUI_EVENT_NAME] = handleUpdateSuiCommunity;
 eventToHandler[TAG_CREATED_SUI_EVENT_NAME] = handleCreateSuiTag;
 eventToHandler[TAG_UPDATED_SUI_EVENT_NAME] = handleUpdateSuiTag;
 eventToHandler[POST_CREATED_SUI_EVENT_NAME] = handleCreateSuiPost;
+eventToHandler[POST_EDITED_SUI_EVENT_NAME] = handleEditSuiPost;
+eventToHandler[POST_DELETED_SUI_EVENT_NAME] = handleDeleteSuiPost;
 eventToHandler[REPLY_CREATED_SUI_EVENT_NAME] = handleCreateSuiReply;
 eventToHandler[REPLY_EDITED_SUI_EVENT_NAME] = handleEditSuiReply;
 eventToHandler[REPLY_DELETED_SUI_EVENT_NAME] = handleDeleteSuiReply;

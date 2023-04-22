@@ -1,5 +1,9 @@
 export const USER_CREATED_SUI_EVENT_NAME = 'userLib::CreateUserEvent';
 export const USER_UPDATED_SUI_EVENT_NAME = 'userLib::UpdateUserEvent';
+export const FOLLOW_COMMUNITY_SUI_EVENT_NAME =
+  'followCommunityLib::FollowCommunityEvent';
+export const UNFOLLOW_COMMUNITY_SUI_EVENT_NAME =
+  'followCommunityLib::UnfollowCommunityEvent';
 
 export const COMMUNITY_CREATED_SUI_EVENT_NAME =
   'communityLib::CreateCommunityEvent';
