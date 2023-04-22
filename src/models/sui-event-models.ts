@@ -235,8 +235,8 @@ export class CommentCreatedSuiEventModel extends BaseSuiEventModel {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.postMetaDataId = event.parsedJson.postMetaDataId;
-    this.parentReplyKey = event.parsedJson.parentReplyKey;
-    this.commentMetaDataKey = event.parsedJson.commentMetaDataKey;
+    this.parentReplyKey = Number(event.parsedJson.parentReplyKey);
+    this.commentMetaDataKey = Number(event.parsedJson.commentMetaDataKey);
   }
 }
 
@@ -253,8 +253,8 @@ export class CommentEditedSuiEventModel extends BaseSuiEventModel {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.postMetaDataId = event.parsedJson.postMetaDataId;
-    this.parentReplyKey = event.parsedJson.parentReplyKey;
-    this.commentMetaDataKey = event.parsedJson.commentMetaDataKey;
+    this.parentReplyKey = Number(event.parsedJson.parentReplyKey);
+    this.commentMetaDataKey = Number(event.parsedJson.commentMetaDataKey);
   }
 }
 
@@ -267,12 +267,11 @@ export class CommentDeletedSuiEventModel extends BaseSuiEventModel {
 
   public commentMetaDataKey: number;
 
-
   constructor(event: any, timestamp: number) {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.postMetaDataId = event.parsedJson.postMetaDataId;
-    this.parentReplyKey = event.parsedJson.parentReplyKey;
-    this.commentMetaDataKey = event.parsedJson.commentMetaDataKey;
+    this.parentReplyKey = Number(event.parsedJson.parentReplyKey);
+    this.commentMetaDataKey = Number(event.parsedJson.commentMetaDataKey);
   }
 }

@@ -203,7 +203,7 @@ export async function handleNewSuiComment(
     }
   }
 
-  // await createHistory(eventModel, EntityType.Comment, OperationType.Create);
+  await createHistory(eventModel, EntityType.Comment, OperationType.Create);
 }
 
 export async function handleEditedSuiComment(
