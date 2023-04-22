@@ -134,19 +134,19 @@ export async function readSuiEvents(
 
   log(`Received digests: ${digests}`);
 
-  if (cursor != null && digests[digests.length - 1] === cursor) {
-    log(
-      `Latest cursor ${cursor} is included in the list of digests. Skipping.`
-    );
-    return new ReadSuiEventsResponseModel();
-  }
+  // if (cursor != null && digests[digests.length - 1] === cursor) {
+  //   log(
+  //     `Latest cursor ${cursor} is included in the list of digests. Skipping.`
+  //   );
+  //   return new ReadSuiEventsResponseModel();
+  // }
 
-  const cursorIndex = cursor ? digests.indexOf(cursor) + 1 : 0;
-  const newDigests = digests.slice(cursorIndex);
+  // const cursorIndex = cursor ? digests.indexOf(cursor) + 1 : 0;
+  // const newDigests = digests.slice(cursorIndex);
 
   const transactionBlockPromises: Promise<SuiTransactionBlockResponse>[] = [];
 
-  newDigests.forEach((digest) =>
+  digests.forEach((digest) =>
     transactionBlockPromises.push(
       provider.getTransactionBlock({
         digest,
@@ -163,9 +163,27 @@ export async function readSuiEvents(
 
   const transactionBlocks = await Promise.all(transactionBlockPromises);
 
+  const storedDigest = transactionBlocks.find(
+    (block) => block.digest === cursor
+  );
+  const timestamp = storedDigest
+    ? Math.floor(Number(storedDigest.timestampMs) / 1000)
+    : 0;
+  const filteredBlocks = transactionBlocks.filter(
+    (block) =>
+      block.digest !== cursor &&
+      Math.floor(Number(block.timestampMs) / 1000) > timestamp
+  );
+
+  log(
+    `New transaction blocks: ${filteredBlocks
+      .map((block) => block.digest)
+      .join(', ')}`
+  );
+
   const eventModels: BaseSuiEventModel[] = [];
 
-  transactionBlocks.forEach((block) => {
+  filteredBlocks.forEach((block) => {
     block.events?.forEach((event) => {
       const eventName = cleanEventType(event.type);
       const EventModeType = eventToModelType[eventName];

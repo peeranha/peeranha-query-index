@@ -1,3 +1,6 @@
+import { PostRepository } from 'src/core/db/repositories/PostRepository';
+import { createHistory } from 'src/core/index/mapping';
+import { EntityType, OperationType } from 'src/core/index/utils';
 import {
   createSuiCommunity,
   updateSuiCommunity,
@@ -18,6 +21,8 @@ import {
   ReplyEditedSuiEventModel,
   ReplyDeletedSuiEventModel,
 } from 'src/models/sui-event-models';
+
+const postRepository = new PostRepository();
 
 export async function handleCreateSuiUser(
   eventModel: UserCreatedSuiEventModel
@@ -54,17 +59,28 @@ export async function handleUpdateSuiTag(eventModel: TagUpdatedSuiEventModel) {
 export async function handleCreateSuiPost(
   eventModel: PostCreatedSuiEventModel
 ) {
-  await createSuiPost(eventModel.postMetaDataId, eventModel.timestamp);
+  await createSuiPost(eventModel.postId, eventModel.timestamp);
+  await createHistory(eventModel, EntityType.Post, OperationType.Create);
 }
 
 export async function handleCreateSuiReply(
   eventModel: ReplyCreatedSuiEventModel
 ) {
-  await createSuiReply(
-    eventModel.postMetaDataId,
-    eventModel.replyMetaDataKey,
-    eventModel.timestamp
-  );
+  const { postId, replyId, timestamp } = eventModel;
+
+  const reply = await createSuiReply(postId, replyId, timestamp);
+  if (!reply) {
+    const post = await postRepository.get(postId);
+    if (post) {
+      await postRepository.update(postId, {
+        replyCount: post.replyCount + 1,
+      });
+    }
+
+    return;
+  }
+
+  await createHistory(eventModel, EntityType.Reply, OperationType.Create);
 }
 
 export async function handleEditSuiReply(eventModel: ReplyEditedSuiEventModel) {

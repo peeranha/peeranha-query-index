@@ -101,85 +101,85 @@ export class PostCreatedSuiEventModel extends BaseSuiEventModel {
 
   public communityId: string;
 
-  public postMetaDataId: string;
+  public postId: string;
 
   constructor(event: any, timestamp: number) {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.communityId = event.parsedJson.communityId;
-    this.postMetaDataId = event.parsedJson.postMetaDataId;
+    this.postId = event.parsedJson.postMetaDataId;
   }
 }
 
 export class PostEditedSuiEventModel extends BaseSuiEventModel {
   public userId: string;
 
-  public postMetaDataId: string;
+  public postId: string;
 
   constructor(event: any, timestamp: number) {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
-    this.postMetaDataId = event.parsedJson.postMetaDataId;
+    this.postId = event.parsedJson.postMetaDataId;
   }
 }
 
 export class PostDeletedSuiEventModel extends BaseSuiEventModel {
   public userId: string;
 
-  public postMetaDataId: string;
+  public postId: string;
 
   constructor(event: any, timestamp: number) {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
-    this.postMetaDataId = event.parsedJson.postMetaDataId;
+    this.postId = event.parsedJson.postMetaDataId;
   }
 }
 
 export class ReplyCreatedSuiEventModel extends BaseSuiEventModel {
   public userId: string;
 
-  public postMetaDataId: string;
+  public postId: string;
 
   public parentReplyKey: number;
 
-  public replyMetaDataKey: number;
+  public replyId: number;
 
   constructor(event: any, timestamp: number) {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
-    this.postMetaDataId = event.parsedJson.postMetaDataId;
+    this.postId = event.parsedJson.postMetaDataId;
     this.parentReplyKey = event.parsedJson.parentReplyKey;
-    this.replyMetaDataKey = event.parsedJson.replyMetaDataKey;
+    this.replyId = event.parsedJson.replyMetaDataKey;
   }
 }
 
 export class ReplyEditedSuiEventModel extends BaseSuiEventModel {
   public userId: string;
 
-  public postMetaDataId: string;
+  public postId: string;
 
-  public replyMetaDataKey: number;
+  public replyId: number;
 
   constructor(event: any, timestamp: number) {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
-    this.postMetaDataId = event.parsedJson.postMetaDataId;
-    this.replyMetaDataKey = event.parsedJson.replyMetaDataKey;
+    this.postId = event.parsedJson.postMetaDataId;
+    this.replyId = event.parsedJson.replyMetaDataKey;
   }
 }
 
 export class ReplyDeletedSuiEventModel extends BaseSuiEventModel {
   public userId: string;
 
-  public postMetaDataId: string;
+  public postId: string;
 
-  public replyMetaDataKey: number;
+  public replyId: number;
 
   constructor(event: any, timestamp: number) {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
-    this.postMetaDataId = event.parsedJson.postMetaDataId;
-    this.replyMetaDataKey = event.parsedJson.replyMetaDataKey;
+    this.postId = event.parsedJson.postMetaDataId;
+    this.replyId = event.parsedJson.replyMetaDataKey;
   }
 }
 

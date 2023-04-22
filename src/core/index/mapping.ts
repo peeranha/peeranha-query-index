@@ -96,10 +96,10 @@ const communityDocumentationRepository = new CommunityDocumentationRepository();
 
 const POOL_NFT = 1_000_000;
 
-async function createHistory(
+export async function createHistory(
   event: any,
-  entityType: string,
-  operationType: string
+  entityType: EntityType,
+  operationType: OperationType
 ) {
   const history = new HistoryEntity({
     id: event.transaction,
