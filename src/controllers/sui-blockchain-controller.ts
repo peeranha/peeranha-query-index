@@ -52,39 +52,6 @@ import {
 
 const TRANSACTIONS_MAX_NUMBER = 100;
 
-const eventOrder = [
-  USER_CREATED_SUI_EVENT_NAME,
-  COMMUNITY_CREATED_SUI_EVENT_NAME,
-  TAG_CREATED_SUI_EVENT_NAME,
-  POST_CREATED_SUI_EVENT_NAME,
-  REPLY_CREATED_SUI_EVENT_NAME,
-  USER_UPDATED_SUI_EVENT_NAME,
-  COMMUNITY_UPDATED_SUI_EVENT_NAME,
-  TAG_UPDATED_SUI_EVENT_NAME,
-  POST_EDITED_SUI_EVENT_NAME,
-  REPLY_EDITED_SUI_EVENT_NAME,
-  POST_DELETED_SUI_EVENT_NAME,
-  REPLY_DELETED_SUI_EVENT_NAME,
-  REPLY_MARKED_THE_BEST_SUI_EVENT_NAME,
-];
-
-const getSortedEventModels = (eventModels: BaseSuiEventModel[]) =>
-  eventModels.sort((a, b) => {
-    if (a.timestamp < b.timestamp) return -1;
-    if (a.timestamp > b.timestamp) return 1;
-    if (
-      eventOrder.indexOf(cleanEventType(a.type)) <
-      eventOrder.indexOf(cleanEventType(b.type))
-    )
-      return -1;
-    if (
-      eventOrder.indexOf(cleanEventType(a.type)) >
-      eventOrder.indexOf(cleanEventType(b.type))
-    )
-      return 1;
-    return 0;
-  });
-
 const eventToModelType: Record<string, typeof BaseSuiEventModel> = {};
 eventToModelType[USER_CREATED_SUI_EVENT_NAME] = UserCreatedSuiEventModel;
 eventToModelType[USER_UPDATED_SUI_EVENT_NAME] = UserUpdatedSuiEventModel;
@@ -139,16 +106,6 @@ export async function readSuiEvents(
 
   log(`Received digests: ${digests}`);
 
-  // if (cursor != null && digests[digests.length - 1] === cursor) {
-  //   log(
-  //     `Latest cursor ${cursor} is included in the list of digests. Skipping.`
-  //   );
-  //   return new ReadSuiEventsResponseModel();
-  // }
-
-  // const cursorIndex = cursor ? digests.indexOf(cursor) + 1 : 0;
-  // const newDigests = digests.slice(cursorIndex);
-
   const transactionBlockPromises: Promise<SuiTransactionBlockResponse>[] = [];
 
   digests.forEach((digest) =>
@@ -174,70 +131,58 @@ export async function readSuiEvents(
   const storedBlockTimestamp = blockByStoredDigest
     ? Number(blockByStoredDigest.timestampMs)
     : 0;
-  const filteredBlocks = transactionBlocks.filter(
-    (block) =>
-      block.digest !== cursor &&
-      Number(block.timestampMs) > storedBlockTimestamp
-  );
 
-  log(
-    `New transaction blocks: ${filteredBlocks
-      .map((block) => block.digest)
-      .join(', ')}`
-  );
-
-  const eventModels: BaseSuiEventModel[] = [];
-
-  filteredBlocks.forEach((block) => {
-    block.events?.forEach((event) => {
-      const eventName = cleanEventType(event.type);
-      const EventModeType = eventToModelType[eventName];
-      if (!EventModeType) {
-        throw new ConfigurationError(
-          `Model type is not configured for event by name ${eventName}`
-        );
-      }
-      const eventModel = new EventModeType(
-        event,
-        block.timestampMs ? Math.floor(Number(block.timestampMs) / 1000) : 0
-      );
-      eventModels.push(eventModel);
+  const newBlocks = transactionBlocks
+    .filter(
+      (block) =>
+        block.digest !== cursor &&
+        Number(block.timestampMs) > storedBlockTimestamp
+    )
+    .sort((a: any, b: any) => {
+      if (a.timestampMs < b.timestampMs) return -1;
+      if (a.timestampMs > b.timestampMs) return 1;
+      return 0;
     });
-  });
 
-  const promises: Promise<any>[] = [];
+  log(`New transaction blocks: ${JSON.stringify(newBlocks)}`);
 
-  const sortedEventModels = getSortedEventModels(eventModels);
+  if (newBlocks.length > 0) {
+    const eventModels: BaseSuiEventModel[] = [];
 
-  for (let i = 0; i < sortedEventModels.length; i++) {
-    // eslint-disable-next-line no-await-in-loop
-    await pushToSQS(SUI_FIRST_QUEUE, sortedEventModels[i]);
-  }
+    newBlocks.forEach((block) => {
+      block.events?.forEach((event) => {
+        const eventName = cleanEventType(event.type);
+        const EventModeType = eventToModelType[eventName];
+        if (!EventModeType) {
+          throw new ConfigurationError(
+            `Model type is not configured for event by name ${eventName}`
+          );
+        }
+        const eventModel = new EventModeType(
+          event,
+          block.timestampMs ? Math.floor(Number(block.timestampMs) / 1000) : 0
+        );
+        eventModels.push(eventModel);
+      });
+    });
 
-  await Promise.all(promises);
-
-  let maxTimestamp = storedBlockTimestamp;
-  for (let i = 0; i < filteredBlocks.length; i++) {
-    const blockTimestamp = Number(filteredBlocks[i]!.timestampMs);
-    if (blockTimestamp > maxTimestamp) {
-      maxTimestamp = blockTimestamp;
+    for (let i = 0; i < eventModels.length; i++) {
+      // eslint-disable-next-line no-await-in-loop
+      await pushToSQS(SUI_FIRST_QUEUE, eventModels[i]);
     }
-  }
 
-  const maxTimestampBlock = filteredBlocks.find(
-    (block) => Number(block.timestampMs!) === maxTimestamp
-  )!;
+    const newNextCursor = newBlocks[newBlocks.length - 1]?.digest;
+    const configBlockNumber = new Config({
+      key: NEXT_CURSOR,
+      value: newNextCursor,
+    });
 
-  const configBlockNumber = new Config({
-    key: NEXT_CURSOR,
-    value: maxTimestampBlock.digest,
-  });
-
-  log(`Updating next cursor in db - ${maxTimestampBlock.digest}`);
-  if (!cursorConfig) {
-    await configRepository.put(configBlockNumber);
-  } else {
-    await configRepository.update(NEXT_CURSOR, configBlockNumber);
+    log(`Updating next cursor in db - ${newNextCursor}`);
+    if (!cursorConfig) {
+      await configRepository.put(configBlockNumber);
+    } else {
+      await configRepository.update(NEXT_CURSOR, configBlockNumber);
+    }
   }
 
   return new ReadSuiEventsResponseModel();
