@@ -20,6 +20,7 @@ import {
   POST_DELETED_SUI_EVENT_NAME,
   REPLY_DELETED_SUI_EVENT_NAME,
   REPLY_EDITED_SUI_EVENT_NAME,
+  REPLY_MARKED_THE_BEST_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import {
   createSuiProvider,
@@ -42,6 +43,7 @@ import {
   PostDeletedSuiEventModel,
   ReplyEditedSuiEventModel,
   ReplyDeletedSuiEventModel,
+  ReplyMarkedTheBestSuiEventModel,
 } from 'src/models/sui-event-models';
 import {
   ReadSuiEventsRequestModel,
@@ -63,6 +65,7 @@ const eventOrder = [
   REPLY_EDITED_SUI_EVENT_NAME,
   POST_DELETED_SUI_EVENT_NAME,
   REPLY_DELETED_SUI_EVENT_NAME,
+  REPLY_MARKED_THE_BEST_SUI_EVENT_NAME,
 ];
 
 const getSortedEventModels = (eventModels: BaseSuiEventModel[]) =>
@@ -97,6 +100,8 @@ eventToModelType[POST_DELETED_SUI_EVENT_NAME] = PostDeletedSuiEventModel;
 eventToModelType[REPLY_CREATED_SUI_EVENT_NAME] = ReplyCreatedSuiEventModel;
 eventToModelType[REPLY_EDITED_SUI_EVENT_NAME] = ReplyEditedSuiEventModel;
 eventToModelType[REPLY_DELETED_SUI_EVENT_NAME] = ReplyDeletedSuiEventModel;
+eventToModelType[REPLY_MARKED_THE_BEST_SUI_EVENT_NAME] =
+  ReplyMarkedTheBestSuiEventModel;
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);
