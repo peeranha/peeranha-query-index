@@ -3,21 +3,27 @@ import {
   PostEntity,
   UserCommunityRatingEntity,
   UserEntity,
+  UserCommunityEntity,
 } from 'src/core/db/entities';
+import { CommunityRepository } from 'src/core/db/repositories/CommunityRepository';
 import { ReplyRepository } from 'src/core/db/repositories/ReplyRepository';
 import { UserCommunityRatingRepository } from 'src/core/db/repositories/UserCommunityRatingRepository';
+import { UserCommunityRepository } from 'src/core/db/repositories/UserCommunityRepository';
 import { UserRepository } from 'src/core/db/repositories/UserRepository';
 import {
   getSuiUserById,
   getSuiUserRating,
 } from 'src/core/sui-blockchain/data-loader';
+import { getSuiCommunity } from 'src/core/sui-index/community';
 import { log } from 'src/core/utils/logger';
 
 const START_USER_RATING = 10;
 
 const userRepository = new UserRepository();
 const replyRepository = new ReplyRepository();
+const userCommunityRepository = new UserCommunityRepository();
 const userCommunityRatingRepository = new UserCommunityRatingRepository();
+const communityRepository = new CommunityRepository();
 
 export async function createSuiUser(userId: string, timestamp: number) {
   log(`Indexing user by id ${userId}`);
@@ -134,4 +140,40 @@ export async function updateSuiPostUsersRatings(post: PostEntity) {
     }
   }
   await Promise.all(promises);
+}
+export async function followSuiCommunity(
+  userId: string,
+  communityId: string,
+  timestamp: number
+) {
+  let user = await userRepository.get(userId);
+  if (!user) user = await createSuiUser(userId, timestamp);
+
+  const userCommunity = new UserCommunityEntity({
+    id: `${userId}-${communityId}`,
+    userId,
+    communityId,
+  });
+  await userCommunityRepository.create(userCommunity);
+
+  const community = await getSuiCommunity(communityId);
+  await communityRepository.update(communityId, {
+    followingUsers: community.followingUsers + 1,
+  });
+}
+
+export async function unfollowSuiCommunity(
+  userId: string,
+  communityId: string,
+  timestamp: number
+) {
+  let user = await userRepository.get(userId);
+  if (!user) user = await createSuiUser(userId, timestamp);
+
+  await userCommunityRepository.delete(`${userId}-${communityId}`);
+
+  const community = await getSuiCommunity(communityId);
+  await communityRepository.update(communityId, {
+    followingUsers: community.followingUsers - 1,
+  });
 }

@@ -14,6 +14,9 @@ import {
   REPLY_MARKED_THE_BEST_SUI_EVENT_NAME,
   POST_DELETED_SUI_EVENT_NAME,
   POST_EDITED_SUI_EVENT_NAME,
+  ITEM_VOTED_SUI_EVENT_NAME,
+  FOLLOWED_COMMUNITY_SUI_EVENT_NAME,
+  UNFOLLOWED_COMMUNITY_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import {
@@ -30,6 +33,9 @@ import {
   handleChangeStatusBestSuiReply,
   handleEditSuiPost,
   handleDeleteSuiPost,
+  handleVoteSuiItem,
+  handleFollowSuiCommunity,
+  handleUnfollowSuiCommunity,
 } from 'src/core/sui-index/mapping';
 import { log } from 'src/core/utils/logger';
 import { BaseSuiEventModel } from 'src/models/sui-event-models';
@@ -49,6 +55,10 @@ eventToHandler[REPLY_EDITED_SUI_EVENT_NAME] = handleEditSuiReply;
 eventToHandler[REPLY_DELETED_SUI_EVENT_NAME] = handleDeleteSuiReply;
 eventToHandler[REPLY_MARKED_THE_BEST_SUI_EVENT_NAME] =
   handleChangeStatusBestSuiReply;
+eventToHandler[ITEM_VOTED_SUI_EVENT_NAME] = handleVoteSuiItem;
+eventToHandler[FOLLOWED_COMMUNITY_SUI_EVENT_NAME] = handleFollowSuiCommunity;
+eventToHandler[UNFOLLOWED_COMMUNITY_SUI_EVENT_NAME] =
+  handleUnfollowSuiCommunity;
 
 export async function processSuiIndexing(eventModel: BaseSuiEventModel) {
   log(`Starting indexing event ${JSON.stringify(eventModel, null, 2)}`);

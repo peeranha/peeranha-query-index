@@ -15,8 +15,14 @@ import {
   changeStatusBestSuiReply,
   updateSuiPostContent,
   deleteSuiPost,
+  voteSuiItem,
 } from 'src/core/sui-index/post';
-import { createSuiUser, updateSuiUser } from 'src/core/sui-index/user';
+import {
+  createSuiUser,
+  updateSuiUser,
+  followSuiCommunity,
+  unfollowSuiCommunity,
+} from 'src/core/sui-index/user';
 import {
   UserCreatedSuiEventModel,
   UserUpdatedSuiEventModel,
@@ -31,6 +37,9 @@ import {
   ReplyMarkedTheBestSuiEventModel,
   PostDeletedSuiEventModel,
   PostEditedSuiEventModel,
+  ItemVotedSuiEventModel,
+  FollowedCommunitySuiEventModel,
+  UnfollowedCommunitySuiEventModel,
 } from 'src/models/sui-event-models';
 
 const postRepository = new PostRepository();
@@ -140,6 +149,36 @@ export async function handleChangeStatusBestSuiReply(
   await changeStatusBestSuiReply(
     eventModel.postId,
     eventModel.replyId,
+    eventModel.timestamp
+  );
+}
+
+export async function handleVoteSuiItem(eventModel: ItemVotedSuiEventModel) {
+  await voteSuiItem(
+    eventModel.userId,
+    eventModel.postId,
+    eventModel.replyId,
+    eventModel.commentId,
+    eventModel.voteDirection
+  );
+}
+
+export async function handleFollowSuiCommunity(
+  eventModel: FollowedCommunitySuiEventModel
+) {
+  await followSuiCommunity(
+    eventModel.userId,
+    eventModel.communityId,
+    eventModel.timestamp
+  );
+}
+
+export async function handleUnfollowSuiCommunity(
+  eventModel: UnfollowedCommunitySuiEventModel
+) {
+  await unfollowSuiCommunity(
+    eventModel.userId,
+    eventModel.communityId,
     eventModel.timestamp
   );
 }
