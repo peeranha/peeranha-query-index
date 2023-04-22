@@ -168,26 +168,18 @@ export async function handleChangeStatusBestSuiReply(
 export async function handleNewSuiComment(
   eventModel: CommentCreatedSuiEventModel
 ) {
-  const { postMetaDataId, parentReplyKey, commentMetaDataKey, timestamp } =
-    eventModel;
+  const { postId, replyId, commentId, timestamp } = eventModel;
 
-  const comment = await createSuiComment(
-    postMetaDataId,
-    parentReplyKey,
-    commentMetaDataKey,
-    timestamp
-  );
+  const comment = await createSuiComment(postId, replyId, commentId, timestamp);
   if (!comment) {
-    const post = await postRepository.get(postMetaDataId);
+    const post = await postRepository.get(postId);
     if (post) {
-      if (parentReplyKey === 0) {
+      if (replyId === 0) {
         await postRepository.update(post.id, {
           commentCount: post.commentCount + 1,
         });
       } else {
-        const reply = await replyRepository.get(
-          `${postMetaDataId}-${parentReplyKey}`
-        );
+        const reply = await replyRepository.get(`${postId}-${replyId}`);
         if (reply) {
           await replyRepository.update(reply.id, {
             commentCount: reply.commentCount + 1,
@@ -203,31 +195,25 @@ export async function handleNewSuiComment(
 export async function handleEditedSuiComment(
   eventModel: CommentEditedSuiEventModel
 ) {
-  const { postMetaDataId, parentReplyKey, commentMetaDataKey, timestamp } =
-    eventModel;
+  const { postId, replyId, commentId, timestamp } = eventModel;
 
   let storedComment = await commentRepository.get(
-    `${postMetaDataId}-${parentReplyKey}-${commentMetaDataKey}`
+    `${postId}-${replyId}-${commentId}`
   );
   let createdComment;
 
   if (!storedComment)
     createdComment = await createSuiComment(
-      postMetaDataId,
-      parentReplyKey,
-      commentMetaDataKey,
+      postId,
+      replyId,
+      commentId,
       timestamp
     );
   if (!createdComment) return;
 
   if (!storedComment) storedComment = createdComment;
 
-  const comment = await getSuiComment(
-    postMetaDataId,
-    parentReplyKey,
-    commentMetaDataKey,
-    0
-  );
+  const comment = await getSuiComment(postId, replyId, commentId, 0);
 
   if (!comment) return;
   if (!storedComment) return;
@@ -242,16 +228,16 @@ export async function handleEditedSuiComment(
     createHistory(eventModel, EntityType.Comment, OperationType.Edit),
   ]);
 
-  await updateSuiPostContent(postMetaDataId, timestamp);
+  await updateSuiPostContent(postId, timestamp);
 }
 
 export async function handleDeletedSuiComment(
   eventModel: CommentDeletedSuiEventModel
 ) {
-  const { postMetaDataId, parentReplyKey, commentMetaDataKey } = eventModel;
+  const { postId, replyId, commentId } = eventModel;
 
   const comment = await commentRepository.get(
-    `${postMetaDataId}-${parentReplyKey}-${commentMetaDataKey}`
+    `${postId}-${replyId}-${commentId}`
   );
   if (!comment) return;
 
@@ -261,7 +247,7 @@ export async function handleDeletedSuiComment(
 
   const promises: Promise<any>[] = [];
 
-  const post = await postRepository.get(postMetaDataId);
+  const post = await postRepository.get(postId);
   if (post && comment.author !== post.author) {
     promises.push(updateSuiUserRating(comment.author, post.communityId));
   }
@@ -270,7 +256,7 @@ export async function handleDeletedSuiComment(
     createHistory(eventModel, EntityType.Comment, OperationType.Delete)
   );
 
-  await updateSuiPostContent(postMetaDataId, eventModel.timestamp);
+  await updateSuiPostContent(postId, eventModel.timestamp);
 
   await Promise.all(promises);
 }

@@ -111,7 +111,7 @@ export async function createHistory(
       : undefined,
     eventEntity: entityType,
     eventName: operationType,
-    actionUser: event.user,
+    actionUser: event.user ?? event.userId,
     timestamp: event.timestamp,
   });
 
