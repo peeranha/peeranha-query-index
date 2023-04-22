@@ -1,12 +1,22 @@
-import { UserCommunityRatingEntity, UserEntity } from 'src/core/db/entities';
-import { UserRepository } from 'src/core/db/repositories/UserRepository';
-import { getSuiUserById, getSuiUserRating } from 'src/core/sui-blockchain/data-loader';
-import { log } from 'src/core/utils/logger';
+/* eslint-disable no-await-in-loop */
+import {
+  PostEntity,
+  UserCommunityRatingEntity,
+  UserEntity,
+} from 'src/core/db/entities';
+import { ReplyRepository } from 'src/core/db/repositories/ReplyRepository';
 import { UserCommunityRatingRepository } from 'src/core/db/repositories/UserCommunityRatingRepository';
+import { UserRepository } from 'src/core/db/repositories/UserRepository';
+import {
+  getSuiUserById,
+  getSuiUserRating,
+} from 'src/core/sui-blockchain/data-loader';
+import { log } from 'src/core/utils/logger';
 
 const START_USER_RATING = 10;
 
 const userRepository = new UserRepository();
+const replyRepository = new ReplyRepository();
 const userCommunityRatingRepository = new UserCommunityRatingRepository();
 
 export async function createSuiUser(userId: string, timestamp: number) {
@@ -80,10 +90,7 @@ export async function updateSuiUserRating(
 
   let rating = START_USER_RATING;
 
-  const userRating = await getSuiUserRating(
-    userAddress,
-    communityId
-  );
+  const userRating = await getSuiUserRating(userAddress, communityId);
 
   if (userRating.isActive) {
     rating = userRating.rating;
@@ -106,4 +113,25 @@ export async function updateSuiUserRating(
   } else {
     await userCommunityRatingRepository.update(userRatingId, { rating });
   }
+}
+
+export async function updateSuiPostUsersRatings(post: PostEntity) {
+  const promises: Promise<any>[] = [];
+  promises.push(updateSuiUserRating(post.author, post.communityId));
+
+  for (let i = 1; i <= post.replyCount; i++) {
+    const reply = await replyRepository.get(`${post.id}-${i}`);
+
+    if (
+      reply &&
+      !reply.isDeleted &&
+      (reply.isFirstReply ||
+        reply.isQuickReply ||
+        reply.rating !== 0 ||
+        reply.isBestReply)
+    ) {
+      promises.push(updateSuiUserRating(reply.author, post.communityId));
+    }
+  }
+  await Promise.all(promises);
 }

@@ -104,8 +104,8 @@ export async function handleDeleteSuiReply(
 ) {
   await deleteSuiReply(
     eventModel.postId,
-    eventModel.replyId
-    // eventModel.timestamp
+    eventModel.replyId,
+    eventModel.timestamp
   );
   await createHistory(eventModel, EntityType.Reply, OperationType.Delete);
 }
