@@ -111,6 +111,30 @@ export class PostCreatedSuiEventModel extends BaseSuiEventModel {
   }
 }
 
+export class PostEditedSuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public postMetaDataId: string;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.postMetaDataId = event.parsedJson.postMetaDataId;
+  }
+}
+
+export class PostDeletedSuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public postMetaDataId: string;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.postMetaDataId = event.parsedJson.postMetaDataId;
+  }
+}
+
 export class ReplyCreatedSuiEventModel extends BaseSuiEventModel {
   public userId: string;
 
@@ -156,5 +180,29 @@ export class ReplyDeletedSuiEventModel extends BaseSuiEventModel {
     this.userId = event.parsedJson.userId;
     this.postMetaDataId = event.parsedJson.postMetaDataId;
     this.replyMetaDataKey = event.parsedJson.replyMetaDataKey;
+  }
+}
+
+export class FollowedCommunitySuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public communityId: string;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.communityId = event.parsedJson.communityId;
+  }
+}
+
+export class UnfollowedCommunitySuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public communityId: string;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.communityId = event.parsedJson.communityId;
   }
 }

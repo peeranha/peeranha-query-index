@@ -7,9 +7,13 @@ import { PostTagRepository } from 'src/core/db/repositories/PostTagRepository';
 import { ReplyRepository } from 'src/core/db/repositories/ReplyRepository';
 import { TagRepository } from 'src/core/db/repositories/TagRepository';
 import { UserRepository } from 'src/core/db/repositories/UserRepository';
-import { getSuiPostById, getSuiReply } from 'src/core/sui-blockchain/data-loader';
+import {
+  getSuiPostById,
+  getSuiReply,
+} from 'src/core/sui-blockchain/data-loader';
 import { getSuiCommunity } from 'src/core/sui-index/community';
 import { createSuiUser, updateSuiUserRating } from 'src/core/sui-index/user';
+
 import { PostData } from '../blockchain/entities/post';
 
 const postRepository = new PostRepository();
@@ -158,7 +162,6 @@ export async function createSuiReply(
   replyId: number,
   timestamp: number
 ): Promise<ReplyEntity | undefined> {
-  
   const peeranhaPost = await getSuiPostById(postId, 0);
   const peeranhaReply = await getSuiReply(postId, replyId, timestamp);
   // const messengerUserData = getItemProperty(ItemProperties.MessengerSender, Number(postId), replyId)

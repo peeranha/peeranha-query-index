@@ -9,6 +9,8 @@ export const TAG_CREATED_SUI_EVENT_NAME = 'communityLib::CreateTagEvent';
 export const TAG_UPDATED_SUI_EVENT_NAME = 'communityLib::UpdateTagEvent';
 
 export const POST_CREATED_SUI_EVENT_NAME = 'postLib::CreatePostEvent';
+export const POST_EDITED_SUI_EVENT_NAME = 'postLib::EditPostEvent';
+export const POST_DELETED_SUI_EVENT_NAME = 'postLib::DeletePostEvent';
 
 export const REPLY_CREATED_SUI_EVENT_NAME = 'postLib::CreateReplyEvent';
 export const REPLY_EDITED_SUI_EVENT_NAME = 'postLib::EditReplyEvent';

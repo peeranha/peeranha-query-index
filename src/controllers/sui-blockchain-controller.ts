@@ -16,6 +16,10 @@ import {
   USER_UPDATED_SUI_EVENT_NAME,
   POST_CREATED_SUI_EVENT_NAME,
   REPLY_CREATED_SUI_EVENT_NAME,
+  POST_EDITED_SUI_EVENT_NAME,
+  POST_DELETED_SUI_EVENT_NAME,
+  REPLY_DELETED_SUI_EVENT_NAME,
+  REPLY_EDITED_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import {
   createSuiProvider,
@@ -34,6 +38,10 @@ import {
   UserCreatedSuiEventModel,
   UserUpdatedSuiEventModel,
   ReplyCreatedSuiEventModel,
+  PostEditedSuiEventModel,
+  PostDeletedSuiEventModel,
+  ReplyEditedSuiEventModel,
+  ReplyDeletedSuiEventModel,
 } from 'src/models/sui-event-models';
 import {
   ReadSuiEventsRequestModel,
@@ -47,10 +55,14 @@ const eventOrder = [
   COMMUNITY_CREATED_SUI_EVENT_NAME,
   TAG_CREATED_SUI_EVENT_NAME,
   POST_CREATED_SUI_EVENT_NAME,
+  REPLY_CREATED_SUI_EVENT_NAME,
   USER_UPDATED_SUI_EVENT_NAME,
   COMMUNITY_UPDATED_SUI_EVENT_NAME,
   TAG_UPDATED_SUI_EVENT_NAME,
-  REPLY_CREATED_SUI_EVENT_NAME,
+  POST_EDITED_SUI_EVENT_NAME,
+  REPLY_EDITED_SUI_EVENT_NAME,
+  POST_DELETED_SUI_EVENT_NAME,
+  REPLY_DELETED_SUI_EVENT_NAME,
 ];
 
 const getSortedEventModels = (eventModels: BaseSuiEventModel[]) =>
@@ -80,7 +92,11 @@ eventToModelType[COMMUNITY_UPDATED_SUI_EVENT_NAME] =
 eventToModelType[TAG_CREATED_SUI_EVENT_NAME] = TagCreatedSuiEventModel;
 eventToModelType[TAG_UPDATED_SUI_EVENT_NAME] = TagUpdatedSuiEventModel;
 eventToModelType[POST_CREATED_SUI_EVENT_NAME] = PostCreatedSuiEventModel;
+eventToModelType[POST_EDITED_SUI_EVENT_NAME] = PostEditedSuiEventModel;
+eventToModelType[POST_DELETED_SUI_EVENT_NAME] = PostDeletedSuiEventModel;
 eventToModelType[REPLY_CREATED_SUI_EVENT_NAME] = ReplyCreatedSuiEventModel;
+eventToModelType[REPLY_EDITED_SUI_EVENT_NAME] = ReplyEditedSuiEventModel;
+eventToModelType[REPLY_DELETED_SUI_EVENT_NAME] = ReplyDeletedSuiEventModel;
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);
@@ -118,16 +134,19 @@ export async function readSuiEvents(
 
   log(`Received digests: ${digests}`);
 
-  if (cursor != null && digests.find((d) => d === cursor)) {
+  if (cursor != null && digests[digests.length - 1] === cursor) {
     log(
       `Latest cursor ${cursor} is included in the list of digests. Skipping.`
     );
     return new ReadSuiEventsResponseModel();
   }
 
+  const cursorIndex = cursor ? digests.indexOf(cursor) + 1 : 0;
+  const newDigests = digests.slice(cursorIndex);
+
   const transactionBlockPromises: Promise<SuiTransactionBlockResponse>[] = [];
 
-  digests.forEach((digest) =>
+  newDigests.forEach((digest) =>
     transactionBlockPromises.push(
       provider.getTransactionBlock({
         digest,

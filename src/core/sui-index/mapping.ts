@@ -15,8 +15,8 @@ import {
   TagUpdatedSuiEventModel,
   PostCreatedSuiEventModel,
   ReplyCreatedSuiEventModel,
-  // ReplyEditedSuiEventModel,
-  // ReplyDeletedSuiEventModel,
+  ReplyEditedSuiEventModel,
+  ReplyDeletedSuiEventModel,
 } from 'src/models/sui-event-models';
 
 export async function handleCreateSuiUser(
@@ -67,12 +67,12 @@ export async function handleCreateSuiReply(
   );
 }
 
-// export async function handleEditSuiReply(eventModel: ReplyEditedSuiEventModel) {
-//   await createSuiPost(eventModel.postMetaDataId, eventModel.timestamp);
-// }
+export async function handleEditSuiReply(eventModel: ReplyEditedSuiEventModel) {
+  console.log(eventModel);
+}
 
-// export async function handleDeleteSuiReply(
-//   eventModel: ReplyDeletedSuiEventModel
-// ) {
-//   await createSuiPost(eventModel.postMetaDataId, eventModel.timestamp);
-// }
+export async function handleDeleteSuiReply(
+  eventModel: ReplyDeletedSuiEventModel
+) {
+  console.log(eventModel);
+}

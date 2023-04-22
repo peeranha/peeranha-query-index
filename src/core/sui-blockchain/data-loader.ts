@@ -1,14 +1,14 @@
 import { CommunityData } from 'src/core/blockchain/entities/community';
 import { PostData } from 'src/core/blockchain/entities/post';
+import { ReplyData } from 'src/core/blockchain/entities/reply';
 import { TagData } from 'src/core/blockchain/entities/tag';
 import { UserData } from 'src/core/blockchain/entities/user';
+import { UserRating } from 'src/core/blockchain/entities/user-rating';
 import { ConfigurationError, RuntimeError } from 'src/core/errors';
 import { getObject, getDynamicFieldObject } from 'src/core/sui-blockchain/sui';
 import { AddIpfsData, byteArrayToHexString } from 'src/core/utils/ipfs';
 import { log, LogLevel } from 'src/core/utils/logger';
 import { parseIntArray } from 'src/core/utils/parser';
-import { UserRating } from 'src/core/blockchain/entities/user-rating';
-import { ReplyData } from '../blockchain/entities/reply';
 
 const TAG_DYNAMIC_FIELD_TYPE = 'u64';
 const REPLY_DYNAMIC_FIELD_TYPE = 'u64';
@@ -74,7 +74,9 @@ export async function getSuiCommunityById(
   const tagTable = fields.tags.fields.id.id;
   const tagsPromises: Promise<any>[] = [];
   for (let index = 1; index < tagsCount + 1; index++) {
-    tagsPromises.push(getDynamicFieldObject(tagTable, TAG_DYNAMIC_FIELD_TYPE, index.toString()));
+    tagsPromises.push(
+      getDynamicFieldObject(tagTable, TAG_DYNAMIC_FIELD_TYPE, index.toString())
+    );
   }
 
   const tags = await Promise.all(tagsPromises);
@@ -108,7 +110,11 @@ export async function getSuiTagById(
     );
   }
   const tagTable = communityFields.tags.fields.id.id;
-  const tagObject = await getDynamicFieldObject(tagTable, TAG_DYNAMIC_FIELD_TYPE, tagId.toString());
+  const tagObject = await getDynamicFieldObject(
+    tagTable,
+    TAG_DYNAMIC_FIELD_TYPE,
+    tagId.toString()
+  );
 
   log(`Tag object: ${JSON.stringify(tagObject)}`);
 
@@ -136,35 +142,16 @@ export async function getSuiTagById(
   return tagData;
 }
 
-async function getPostIpfsDoc(postId: string) {
-  const postObject = await getObject(postId);
+export async function getItemIpfsDoc(itemId: string) {
+  const replyObject = await getObject(itemId);
 
-  log(`Post object: ${JSON.stringify(postObject)}`);
-
-  const fields = postObject.data?.content?.fields;
-
-  if (!fields) {
-    throw new RuntimeError(
-      `Missing 'fields' in response for post ${postObject}.`
-    );
-  }
-
-  const ipfsHash1 = byteArrayToHexString(fields.ipfsDoc.fields.hash);
-  const ipfsHash2 = byteArrayToHexString(fields.ipfsDoc.fields.hash2);
-
-  return [ipfsHash1, ipfsHash2];
-}
-
-export async function getReplyIpfsDoc(replyId: string) {
-  const replyObject = await getObject(replyId);
-
-  log(`Reply object: ${JSON.stringify(replyObject)}`);
+  log(`Item object: ${JSON.stringify(replyObject)}`);
 
   const fields = replyObject.data?.content?.fields;
 
   if (!fields) {
     throw new RuntimeError(
-      `Missing 'fields' in response for reply ${replyObject}.`
+      `Missing 'fields' in response for item ${replyObject}.`
     );
   }
 
@@ -190,7 +177,7 @@ export async function getSuiPostById(
     );
   }
 
-  const ipfsDoc = await getPostIpfsDoc(fields.postId);
+  const ipfsDoc = await getItemIpfsDoc(fields.postId);
 
   const post = new PostData({
     id: postMetaDataId,
@@ -229,21 +216,26 @@ export async function getSuiReply(
       );
     }
     const replyTableId = fields.replies?.fields?.id?.id;
-    if(!replyTableId) {
+    if (!replyTableId) {
       throw new RuntimeError(
         `Missing 'replies' in response for post meta data ${postId}.`
       );
     }
 
-    const replyMetadataObject = await getDynamicFieldObject(replyTableId, REPLY_DYNAMIC_FIELD_TYPE, replyId.toString());
+    const replyMetadataObject = await getDynamicFieldObject(
+      replyTableId,
+      REPLY_DYNAMIC_FIELD_TYPE,
+      replyId.toString()
+    );
     log(`Reply: ${JSON.stringify(replyMetadataObject)}`);
-    if(!replyMetadataObject) {
+    if (!replyMetadataObject) {
       throw new RuntimeError(
         `Unable to load reply ${replyId} from reply table ${replyTableId}.`
       );
     }
 
-    const replyFields = replyMetadataObject.data?.content?.fields?.value?.fields;
+    const replyFields =
+      replyMetadataObject.data?.content?.fields?.value?.fields;
 
     if (!replyFields) {
       throw new RuntimeError(
@@ -251,7 +243,7 @@ export async function getSuiReply(
       );
     }
 
-    const ipfsDoc = await getReplyIpfsDoc(replyFields.replyId);
+    const ipfsDoc = await getItemIpfsDoc(replyFields.replyId);
 
     const reply = new ReplyData({
       author: replyFields.author,
@@ -260,10 +252,10 @@ export async function getSuiReply(
       rating: Number(replyFields.rating?.fields?.bits),
       postTime: timestamp,
       propertyCount: 0,
-      commentCount: parseInt(replyFields.comments?.fields?.size),
+      commentCount: Number(replyFields.comments?.fields?.size),
       isDeleted: replyFields.isDeleted,
       isFirstReply: replyFields.isFirstReply,
-      isQuickReply: replyFields.isQuickReply
+      isQuickReply: replyFields.isQuickReply,
     });
 
     return await AddIpfsData(reply, reply.ipfsDoc[0]);
@@ -292,41 +284,57 @@ export async function getSuiUserRating(userId: string, communityId: string) {
   const fields = collectionObject.data?.content?.fields;
 
   if (!fields) {
-    throw new RuntimeError(`Missing 'fields' in response for user collection ${process.env.SUI_USERS_RATING_COLLECTION}.`);
+    throw new RuntimeError(
+      `Missing 'fields' in response for user collection ${process.env.SUI_USERS_RATING_COLLECTION}.`
+    );
   }
 
   const tableId = fields?.usersCommunityRating?.fields?.id?.id;
-  if(!tableId) {
-    throw new RuntimeError(`Missing community rating table id in the response for user collection ${process.env.SUI_USERS_RATING_COLLECTION}.`)
+  if (!tableId) {
+    throw new RuntimeError(
+      `Missing community rating table id in the response for user collection ${process.env.SUI_USERS_RATING_COLLECTION}.`
+    );
   }
 
-  log(`Loading user rating obj - ${tableId} ${USER_RATING_DYNAMIC_FIELD_TYPE} ${userId}`)
-  const userRatingObject = await getDynamicFieldObject(tableId, USER_RATING_DYNAMIC_FIELD_TYPE, userId);
-  if(!userRatingObject) {
-    throw new RuntimeError(`User rating object is missing. Table id: ${tableId}. Type: ${USER_RATING_DYNAMIC_FIELD_TYPE}. User id: ${userId}`);
+  log(
+    `Loading user rating obj - ${tableId} ${USER_RATING_DYNAMIC_FIELD_TYPE} ${userId}`
+  );
+  const userRatingObject = await getDynamicFieldObject(
+    tableId,
+    USER_RATING_DYNAMIC_FIELD_TYPE,
+    userId
+  );
+  if (!userRatingObject) {
+    throw new RuntimeError(
+      `User rating object is missing. Table id: ${tableId}. Type: ${USER_RATING_DYNAMIC_FIELD_TYPE}. User id: ${userId}`
+    );
   }
 
-  const userRatingContent : any[] = userRatingObject.data?.content?.fields?.value?.fields?.userRating?.fields?.contents;
+  const userRatingContent: any[] =
+    userRatingObject.data?.content?.fields?.value?.fields?.userRating?.fields
+      ?.contents;
 
-  if(!userRatingContent) {
-    throw new RuntimeError(`User rating content is empty for user rating collection ${process.env.SUI_USERS_RATING_COLLECTION} and user ${userId}`);
+  if (!userRatingContent) {
+    throw new RuntimeError(
+      `User rating content is empty for user rating collection ${process.env.SUI_USERS_RATING_COLLECTION} and user ${userId}`
+    );
   }
 
-  const communityUserRatings = userRatingContent.filter(communityRating => communityRating?.fields?.key === communityId);
+  const communityUserRatings = userRatingContent.filter(
+    (communityRating) => communityRating?.fields?.key === communityId
+  );
 
   let active = false;
   let rating = 0;
 
-  if(communityUserRatings.length >= 1) {
+  if (communityUserRatings.length >= 1) {
     const ratingStr = communityUserRatings[0].fields?.value?.fields?.bits;
-    rating = parseInt(ratingStr);
+    rating = Number(ratingStr);
     active = true;
-  } 
+  }
 
-  return new UserRating(
-    {
-      rating: rating,
-      isActive: active
-    }
-  );
+  return new UserRating({
+    rating,
+    isActive: active,
+  });
 }
