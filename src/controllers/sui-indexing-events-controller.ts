@@ -1,3 +1,8 @@
+import {
+  COMMENT_CREATED_EVENT_NAME,
+  COMMENT_DELETED_EVENT_NAME,
+  COMMENT_EDITED_EVENT_NAME,
+} from 'src/core/blockchain/constants';
 import { BaseRepository } from 'src/core/db/repositories/BaseRepository';
 import { ConfigurationError } from 'src/core/errors';
 import {
@@ -30,6 +35,9 @@ import {
   handleChangeStatusBestSuiReply,
   handleEditSuiPost,
   handleDeleteSuiPost,
+  handleNewSuiComment,
+  handleEditedSuiComment,
+  handleDeletedSuiComment,
 } from 'src/core/sui-index/mapping';
 import { log } from 'src/core/utils/logger';
 import { BaseSuiEventModel } from 'src/models/sui-event-models';
@@ -49,6 +57,10 @@ eventToHandler[REPLY_EDITED_SUI_EVENT_NAME] = handleEditSuiReply;
 eventToHandler[REPLY_DELETED_SUI_EVENT_NAME] = handleDeleteSuiReply;
 eventToHandler[REPLY_MARKED_THE_BEST_SUI_EVENT_NAME] =
   handleChangeStatusBestSuiReply;
+
+eventToHandler[COMMENT_CREATED_EVENT_NAME] = handleNewSuiComment;
+eventToHandler[COMMENT_EDITED_EVENT_NAME] = handleEditedSuiComment;
+eventToHandler[COMMENT_DELETED_EVENT_NAME] = handleDeletedSuiComment;
 
 export async function processSuiIndexing(eventModel: BaseSuiEventModel) {
   log(`Starting indexing event ${JSON.stringify(eventModel, null, 2)}`);

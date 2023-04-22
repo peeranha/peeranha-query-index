@@ -1,5 +1,5 @@
 export class BaseSuiEventModel {
-  public txDigest: string;
+  public transaction: string;
 
   public eventSeq: string;
 
@@ -14,7 +14,7 @@ export class BaseSuiEventModel {
   public timestamp: number;
 
   constructor(event: any, timestamp: number) {
-    this.txDigest = event.id.txDigest;
+    this.transaction = event.id.txDigest;
     this.eventSeq = event.id.eventSeq;
     this.packageId = event.packageId;
     this.transactionModule = event.transactionModule;
@@ -219,5 +219,60 @@ export class UnfollowedCommunitySuiEventModel extends BaseSuiEventModel {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.communityId = event.parsedJson.communityId;
+  }
+}
+
+export class CommentCreatedSuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public postMetaDataId: string;
+
+  public parentReplyKey: number;
+
+  public commentMetaDataKey: number;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.postMetaDataId = event.parsedJson.postMetaDataId;
+    this.parentReplyKey = event.parsedJson.parentReplyKey;
+    this.commentMetaDataKey = event.parsedJson.commentMetaDataKey;
+  }
+}
+
+export class CommentEditedSuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public postMetaDataId: string;
+
+  public parentReplyKey: number;
+
+  public commentMetaDataKey: number;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.postMetaDataId = event.parsedJson.postMetaDataId;
+    this.parentReplyKey = event.parsedJson.parentReplyKey;
+    this.commentMetaDataKey = event.parsedJson.commentMetaDataKey;
+  }
+}
+
+export class CommentDeletedSuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public postMetaDataId: string;
+
+  public parentReplyKey: number;
+
+  public commentMetaDataKey: number;
+
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.postMetaDataId = event.parsedJson.postMetaDataId;
+    this.parentReplyKey = event.parsedJson.parentReplyKey;
+    this.commentMetaDataKey = event.parsedJson.commentMetaDataKey;
   }
 }

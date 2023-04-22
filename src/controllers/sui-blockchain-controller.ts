@@ -23,6 +23,9 @@ import {
   REPLY_MARKED_THE_BEST_SUI_EVENT_NAME,
   UNFOLLOW_COMMUNITY_SUI_EVENT_NAME,
   FOLLOW_COMMUNITY_SUI_EVENT_NAME,
+  COMMENT_CREATED_SUI_EVENT_NAME,
+  COMMENT_EDITED_SUI_EVENT_NAME,
+  COMMENT_DELETED_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import {
   createSuiProvider,
@@ -48,6 +51,9 @@ import {
   ReplyMarkedTheBestSuiEventModel,
   FollowedCommunitySuiEventModel,
   UnfollowedCommunitySuiEventModel,
+  CommentCreatedSuiEventModel,
+  CommentEditedSuiEventModel,
+  CommentDeletedSuiEventModel,
 } from 'src/models/sui-event-models';
 import {
   ReadSuiEventsRequestModel,
@@ -77,6 +83,10 @@ eventToModelType[FOLLOW_COMMUNITY_SUI_EVENT_NAME] =
   FollowedCommunitySuiEventModel;
 eventToModelType[UNFOLLOW_COMMUNITY_SUI_EVENT_NAME] =
   UnfollowedCommunitySuiEventModel;
+
+eventToModelType[COMMENT_CREATED_SUI_EVENT_NAME] = CommentCreatedSuiEventModel;
+eventToModelType[COMMENT_EDITED_SUI_EVENT_NAME] = CommentEditedSuiEventModel;
+eventToModelType[COMMENT_DELETED_SUI_EVENT_NAME] = CommentDeletedSuiEventModel;
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);

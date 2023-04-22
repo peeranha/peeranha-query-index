@@ -1,3 +1,4 @@
+import { CommentData } from 'src/core/blockchain/entities/comment';
 import { CommunityData } from 'src/core/blockchain/entities/community';
 import { PostData } from 'src/core/blockchain/entities/post';
 import { ReplyData } from 'src/core/blockchain/entities/reply';
@@ -337,4 +338,67 @@ export async function getSuiUserRating(userId: string, communityId: string) {
     rating,
     isActive: active,
   });
+}
+
+export async function getSuiComment(
+  postId: string,
+  replyId: number,
+  commentId: number,
+  timestamp: number
+): Promise<CommentData | undefined> {
+  try {
+    const postMetaDataObject = await getObject(postId);
+    const fields = postMetaDataObject.data?.content?.fields;
+    if (!fields) {
+      throw new RuntimeError(
+        `Missing 'fields' in response for post meta data ${postId}.`
+      );
+    }
+    const commentTableId = fields.comments?.fields?.id?.id;
+    if (!commentTableId) {
+      throw new RuntimeError(
+        `Missing 'comments' in response for post meta data ${postId}.`
+      );
+    }
+
+    const commentMetadataObject = await getDynamicFieldObject(
+      commentTableId,
+      REPLY_DYNAMIC_FIELD_TYPE,
+      replyId.toString()
+    );
+    log(`Reply: ${JSON.stringify(commentMetadataObject)}`);
+    if (!commentMetadataObject) {
+      throw new RuntimeError(
+        `Unable to load reply ${commentId} from comment table ${commentTableId}.`
+      );
+    }
+
+    const commentFields =
+      commentMetadataObject.data?.content?.fields?.value?.fields;
+
+    if (!commentFields) {
+      throw new RuntimeError(
+        `Missing 'fields' in response for comment meta data ${postId}, ${replyId}, ${commentId}.`
+      );
+    }
+
+    const ipfsDoc = await getItemIpfsDoc(commentFields.commentId);
+
+    const comment = new CommentData({
+      author: commentFields.author,
+      ipfsDoc,
+      rating: Number(commentFields.rating?.fields?.bits),
+      postTime: timestamp,
+      commentCount: parseInt(commentFields.comments?.fields?.size, 10),
+      isDeleted: commentFields.isDeleted,
+    });
+
+    return await AddIpfsData(comment, comment.ipfsDoc[0]);
+  } catch (err) {
+    log(
+      `Error during getting comment with id ${commentId}, replyId - ${replyId}, postId - ${postId}.\n${err}`,
+      LogLevel.ERROR
+    );
+    return undefined;
+  }
 }

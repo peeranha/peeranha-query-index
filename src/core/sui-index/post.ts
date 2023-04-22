@@ -1,7 +1,13 @@
 /* eslint-disable no-await-in-loop */
 import { PostData } from 'src/core/blockchain/entities/post';
-import { PostEntity, PostTagEntity, ReplyEntity } from 'src/core/db/entities';
+import {
+  CommentEntity,
+  PostEntity,
+  PostTagEntity,
+  ReplyEntity,
+} from 'src/core/db/entities';
 import { CommentRepository } from 'src/core/db/repositories/CommentRepository';
+// import { CommunityDocumentationRepository } from 'src/core/db/repositories/CommunityDocumentationRepository';
 import { CommunityRepository } from 'src/core/db/repositories/CommunityRepository';
 import { PostRepository } from 'src/core/db/repositories/PostRepository';
 import { PostTagRepository } from 'src/core/db/repositories/PostTagRepository';
@@ -11,6 +17,7 @@ import { UserRepository } from 'src/core/db/repositories/UserRepository';
 import {
   getSuiPostById,
   getSuiReply,
+  getSuiComment,
 } from 'src/core/sui-blockchain/data-loader';
 import { getSuiCommunity } from 'src/core/sui-index/community';
 import {
@@ -592,4 +599,62 @@ export async function changeStatusBestSuiReply(
       await updateSuiUserRating(post.author, post.communityId);
     }
   }
+}
+
+export async function createSuiComment(
+  postId: string,
+  parentReplyId: number,
+  commentId: number,
+  timestamp: number
+): Promise<CommentEntity | undefined> {
+  const peeranhaComment = await getSuiComment(
+    postId,
+    parentReplyId,
+    commentId,
+    timestamp
+  );
+
+  if (!peeranhaComment) {
+    return undefined;
+  }
+
+  const comment = new CommentEntity({
+    id: `${postId}-${parentReplyId}-${commentId}`,
+    postId,
+    parentReplyId: String(parentReplyId),
+    content: peeranhaComment.content,
+    author: peeranhaComment.author.toLowerCase(),
+    isDeleted: false,
+    postTime: peeranhaComment.postTime,
+    rating: 0,
+    ipfsHash: peeranhaComment.ipfsDoc[0],
+    ipfsHash2: peeranhaComment.ipfsDoc[1],
+  });
+  await commentRepository.create(comment);
+
+  const post = await postRepository.get(postId);
+  if (post) {
+    const postCommentCount =
+      parentReplyId === 0 ? post.commentCount + 1 : post.commentCount;
+    if (parentReplyId !== 0) {
+      const reply = await replyRepository.get(`${postId}-${parentReplyId}`);
+      if (reply) {
+        await replyRepository.update(reply.id, {
+          commentCount: reply.commentCount + 1,
+        });
+      }
+    }
+
+    await Promise.all([
+      postRepository.update(postId, {
+        commentCount: postCommentCount,
+        postContent: `${post.postContent} ${comment.content}`,
+        lastMod: comment.postTime,
+      }),
+
+      updateSuiUserRating(post.author, post.communityId),
+    ]);
+  }
+
+  return comment;
 }
