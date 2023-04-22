@@ -658,3 +658,78 @@ export async function createSuiComment(
 
   return comment;
 }
+
+export async function voteSuiItem(
+  userId: string,
+  postId: string,
+  replyId: number,
+  commentId: number,
+  timestamp: number
+) {
+  if (commentId !== 0) {
+    let comment = await commentRepository.get(
+      `${postId}-${replyId}-${commentId}`
+    );
+
+    if (!comment) {
+      comment = await createSuiComment(postId, replyId, commentId, 0);
+    }
+
+    if (comment) {
+      const peeranhaComment = await getSuiComment(
+        postId,
+        replyId,
+        commentId,
+        0
+      );
+      if (peeranhaComment)
+        await commentRepository.update(comment.id, {
+          rating: peeranhaComment.rating,
+        });
+    }
+  } else if (replyId !== 0) {
+    let post = await postRepository.get(postId);
+    if (!post) post = await createSuiPost(postId, timestamp);
+
+    let reply = await replyRepository.get(`${postId}-${replyId}`);
+    if (!reply) reply = await createSuiReply(postId, replyId, timestamp);
+
+    const promises: Promise<any>[] = [];
+
+    if (reply) {
+      const peeranhaReply = await getSuiReply(postId, replyId, timestamp);
+      if (peeranhaReply) {
+        promises.push(
+          replyRepository.update(reply.id, {
+            rating: peeranhaReply.rating,
+          })
+        );
+      }
+      promises.push(updateSuiUserRating(reply.author, post.communityId));
+    }
+
+    promises.push(updateSuiUserRating(userId, post.communityId));
+    await Promise.all(promises);
+  } else {
+    let post = await postRepository.get(postId);
+    if (!post) post = await createSuiPost(postId, timestamp);
+
+    const promises: Promise<any>[] = [];
+
+    const peeranhaPost = await getSuiPostById(postId, timestamp);
+    if (peeranhaPost) {
+      promises.push(
+        postRepository.update(postId, {
+          rating: peeranhaPost.rating,
+        })
+      );
+    }
+
+    promises.push(
+      updateSuiUserRating(post.author, post.communityId),
+      updateSuiUserRating(userId, post.communityId)
+    );
+
+    await Promise.all(promises);
+  }
+}

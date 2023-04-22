@@ -20,7 +20,7 @@ export class BaseSuiEventModel {
     this.transactionModule = event.transactionModule;
     this.sender = event.sender;
     this.type = event.type;
-    this.timestamp = timestamp;
+    this.timestamp = Number(timestamp);
   }
 }
 
@@ -77,7 +77,7 @@ export class TagCreatedSuiEventModel extends BaseSuiEventModel {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.communityId = event.parsedJson.communityId;
-    this.tagId = event.parsedJson.tagKey;
+    this.tagId = Number(event.parsedJson.tagKey);
   }
 }
 
@@ -92,7 +92,7 @@ export class TagUpdatedSuiEventModel extends BaseSuiEventModel {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.communityId = event.parsedJson.communityId;
-    this.tagId = event.parsedJson.tagKey;
+    this.tagId = Number(event.parsedJson.tagKey);
   }
 }
 
@@ -148,8 +148,8 @@ export class ReplyCreatedSuiEventModel extends BaseSuiEventModel {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.postId = event.parsedJson.postMetaDataId;
-    this.parentReplyKey = event.parsedJson.parentReplyKey;
-    this.replyId = event.parsedJson.replyMetaDataKey;
+    this.parentReplyKey = Number(event.parsedJson.parentReplyKey);
+    this.replyId = Number(event.parsedJson.replyMetaDataKey);
   }
 }
 
@@ -164,7 +164,7 @@ export class ReplyEditedSuiEventModel extends BaseSuiEventModel {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.postId = event.parsedJson.postMetaDataId;
-    this.replyId = event.parsedJson.replyMetaDataKey;
+    this.replyId = Number(event.parsedJson.replyMetaDataKey);
   }
 }
 
@@ -179,7 +179,7 @@ export class ReplyDeletedSuiEventModel extends BaseSuiEventModel {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.postId = event.parsedJson.postMetaDataId;
-    this.replyId = event.parsedJson.replyMetaDataKey;
+    this.replyId = Number(event.parsedJson.replyMetaDataKey);
   }
 }
 
@@ -194,7 +194,28 @@ export class ReplyMarkedTheBestSuiEventModel extends BaseSuiEventModel {
     super(event, timestamp);
     this.userId = event.parsedJson.userId;
     this.postId = event.parsedJson.postMetaDataId;
-    this.replyId = event.parsedJson.replyMetaDataKey;
+    this.replyId = Number(event.parsedJson.replyMetaDataKey);
+  }
+}
+
+export class ItemVotedSuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public postId: string;
+
+  public replyId: number;
+
+  public commentId: number;
+
+  public voteDirection: number;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.postId = event.parsedJson.postMetaDataId;
+    this.replyId = Number(event.parsedJson.replyMetaDataKey);
+    this.commentId = Number(event.parsedJson.commentMetaDataKey);
+    this.voteDirection = Number(event.parsedJson.voteDirection);
   }
 }
 

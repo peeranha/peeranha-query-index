@@ -16,11 +16,14 @@ import {
   updateSuiPostContent,
   deleteSuiPost,
   createSuiComment,
+  voteSuiItem,
 } from 'src/core/sui-index/post';
 import {
   createSuiUser,
   updateSuiUser,
   updateSuiUserRating,
+  followSuiCommunity,
+  unfollowSuiCommunity,
 } from 'src/core/sui-index/user';
 import {
   UserCreatedSuiEventModel,
@@ -39,8 +42,9 @@ import {
   CommentCreatedSuiEventModel,
   CommentDeletedSuiEventModel,
   CommentEditedSuiEventModel,
-  // ReplyEditedSuiEventModel,
-  // ReplyDeletedSuiEventModel,
+  ItemVotedSuiEventModel,
+  FollowedCommunitySuiEventModel,
+  UnfollowedCommunitySuiEventModel,
 } from 'src/models/sui-event-models';
 
 import { PostRepository } from '../db/repositories/PostRepository';
@@ -161,16 +165,6 @@ export async function handleChangeStatusBestSuiReply(
   );
 }
 
-// export async function handleEditSuiReply(eventModel: ReplyEditedSuiEventModel) {
-//   await createSuiPost(eventModel.postMetaDataId, eventModel.timestamp);
-// }
-
-// export async function handleDeleteSuiReply(
-//   eventModel: ReplyDeletedSuiEventModel
-// ) {
-//   await createSuiPost(eventModel.postMetaDataId, eventModel.timestamp);
-// }
-
 export async function handleNewSuiComment(
   eventModel: CommentCreatedSuiEventModel
 ) {
@@ -245,10 +239,10 @@ export async function handleEditedSuiComment(
       ipfsHash2: comment.ipfsDoc[1],
     }),
 
-    // createHistory(eventModel, EntityType.Comment, OperationType.Edit),
+    createHistory(eventModel, EntityType.Comment, OperationType.Edit),
   ]);
 
-  // await updatePostContent(postId, timestamp);
+  await updateSuiPostContent(postMetaDataId, timestamp);
 }
 
 export async function handleDeletedSuiComment(
@@ -279,4 +273,34 @@ export async function handleDeletedSuiComment(
   await updateSuiPostContent(postMetaDataId, eventModel.timestamp);
 
   await Promise.all(promises);
+}
+
+export async function handleVoteSuiItem(eventModel: ItemVotedSuiEventModel) {
+  await voteSuiItem(
+    eventModel.userId,
+    eventModel.postId,
+    eventModel.replyId,
+    eventModel.commentId,
+    eventModel.voteDirection
+  );
+}
+
+export async function handleFollowSuiCommunity(
+  eventModel: FollowedCommunitySuiEventModel
+) {
+  await followSuiCommunity(
+    eventModel.userId,
+    eventModel.communityId,
+    eventModel.timestamp
+  );
+}
+
+export async function handleUnfollowSuiCommunity(
+  eventModel: UnfollowedCommunitySuiEventModel
+) {
+  await unfollowSuiCommunity(
+    eventModel.userId,
+    eventModel.communityId,
+    eventModel.timestamp
+  );
 }

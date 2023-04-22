@@ -17,6 +17,9 @@ import {
   COMMENT_CREATED_SUI_EVENT_NAME,
   COMMENT_EDITED_SUI_EVENT_NAME,
   COMMENT_DELETED_SUI_EVENT_NAME,
+  ITEM_VOTED_SUI_EVENT_NAME,
+  FOLLOWED_COMMUNITY_SUI_EVENT_NAME,
+  UNFOLLOWED_COMMUNITY_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import {
@@ -36,6 +39,9 @@ import {
   handleNewSuiComment,
   handleEditedSuiComment,
   handleDeletedSuiComment,
+  handleVoteSuiItem,
+  handleFollowSuiCommunity,
+  handleUnfollowSuiCommunity,
 } from 'src/core/sui-index/mapping';
 import { log } from 'src/core/utils/logger';
 import { BaseSuiEventModel } from 'src/models/sui-event-models';
@@ -55,6 +61,10 @@ eventToHandler[REPLY_EDITED_SUI_EVENT_NAME] = handleEditSuiReply;
 eventToHandler[REPLY_DELETED_SUI_EVENT_NAME] = handleDeleteSuiReply;
 eventToHandler[REPLY_MARKED_THE_BEST_SUI_EVENT_NAME] =
   handleChangeStatusBestSuiReply;
+eventToHandler[ITEM_VOTED_SUI_EVENT_NAME] = handleVoteSuiItem;
+eventToHandler[FOLLOWED_COMMUNITY_SUI_EVENT_NAME] = handleFollowSuiCommunity;
+eventToHandler[UNFOLLOWED_COMMUNITY_SUI_EVENT_NAME] =
+  handleUnfollowSuiCommunity;
 
 eventToHandler[COMMENT_CREATED_SUI_EVENT_NAME] = handleNewSuiComment;
 eventToHandler[COMMENT_EDITED_SUI_EVENT_NAME] = handleEditedSuiComment;
