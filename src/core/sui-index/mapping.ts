@@ -62,7 +62,6 @@ export async function handleCreateSuiReply(
 ) {
   await createSuiReply(
     eventModel.postMetaDataId,
-    eventModel.parentReplyKey,
     eventModel.replyMetaDataKey,
     eventModel.timestamp
   );

@@ -1,6 +1,5 @@
 import { CommunityData } from 'src/core/blockchain/entities/community';
 import { PostData } from 'src/core/blockchain/entities/post';
-// import { ReplyData } from 'src/core/blockchain/entities/reply';
 import { TagData } from 'src/core/blockchain/entities/tag';
 import { UserData } from 'src/core/blockchain/entities/user';
 import { ConfigurationError, RuntimeError } from 'src/core/errors';
@@ -9,8 +8,10 @@ import { AddIpfsData, byteArrayToHexString } from 'src/core/utils/ipfs';
 import { log, LogLevel } from 'src/core/utils/logger';
 import { parseIntArray } from 'src/core/utils/parser';
 import { UserRating } from 'src/core/blockchain/entities/user-rating';
+import { ReplyData } from '../blockchain/entities/reply';
 
 const TAG_DYNAMIC_FIELD_TYPE = 'u64';
+const REPLY_DYNAMIC_FIELD_TYPE = 'u64';
 const USER_RATING_DYNAMIC_FIELD_TYPE = '0x2::object::ID';
 
 export async function getSuiUserById(
@@ -138,13 +139,32 @@ export async function getSuiTagById(
 async function getPostIpfsDoc(postId: string) {
   const postObject = await getObject(postId);
 
-  log(`Post meta data object: ${JSON.stringify(postObject)}`);
+  log(`Post object: ${JSON.stringify(postObject)}`);
 
   const fields = postObject.data?.content?.fields;
 
   if (!fields) {
     throw new RuntimeError(
       `Missing 'fields' in response for post ${postObject}.`
+    );
+  }
+
+  const ipfsHash1 = byteArrayToHexString(fields.ipfsDoc.fields.hash);
+  const ipfsHash2 = byteArrayToHexString(fields.ipfsDoc.fields.hash2);
+
+  return [ipfsHash1, ipfsHash2];
+}
+
+export async function getReplyIpfsDoc(replyId: string) {
+  const replyObject = await getObject(replyId);
+
+  log(`Reply object: ${JSON.stringify(replyObject)}`);
+
+  const fields = replyObject.data?.content?.fields;
+
+  if (!fields) {
+    throw new RuntimeError(
+      `Missing 'fields' in response for reply ${replyObject}.`
     );
   }
 
@@ -173,7 +193,7 @@ export async function getSuiPostById(
   const ipfsDoc = await getPostIpfsDoc(fields.postId);
 
   const post = new PostData({
-    id: fields.postId,
+    id: postMetaDataId,
     ipfsDoc,
     postType: fields.postType,
     communityId: fields.communityId,
@@ -193,6 +213,67 @@ export async function getSuiPostById(
   const postData = await AddIpfsData(post, post.ipfsDoc[0]);
   log(`Post Data with Ipfs info: ${JSON.stringify(postData)}`);
   return postData;
+}
+
+export async function getSuiReply(
+  postId: string,
+  replyId: number,
+  timestamp: number
+): Promise<ReplyData | undefined> {
+  try {
+    const postMetaDataObject = await getObject(postId);
+    const fields = postMetaDataObject.data?.content?.fields;
+    if (!fields) {
+      throw new RuntimeError(
+        `Missing 'fields' in response for post meta data ${postId}.`
+      );
+    }
+    const replyTableId = fields.replies?.fields?.id?.id;
+    if(!replyTableId) {
+      throw new RuntimeError(
+        `Missing 'replies' in response for post meta data ${postId}.`
+      );
+    }
+
+    const replyMetadataObject = await getDynamicFieldObject(replyTableId, REPLY_DYNAMIC_FIELD_TYPE, replyId.toString());
+    log(`Reply: ${JSON.stringify(replyMetadataObject)}`);
+    if(!replyMetadataObject) {
+      throw new RuntimeError(
+        `Unable to load reply ${replyId} from reply table ${replyTableId}.`
+      );
+    }
+
+    const replyFields = replyMetadataObject.data?.content?.fields?.value?.fields;
+
+    if (!replyFields) {
+      throw new RuntimeError(
+        `Missing 'fields' in response for reply meta data ${postId}, ${replyId}.`
+      );
+    }
+
+    const ipfsDoc = await getReplyIpfsDoc(replyFields.replyId);
+
+    const reply = new ReplyData({
+      author: replyFields.author,
+      ipfsDoc,
+      parentReplyId: replyFields.parentReplyMetaDataKey,
+      rating: Number(replyFields.rating?.fields?.bits),
+      postTime: timestamp,
+      propertyCount: 0,
+      commentCount: parseInt(replyFields.comments?.fields?.size),
+      isDeleted: replyFields.isDeleted,
+      isFirstReply: replyFields.isFirstReply,
+      isQuickReply: replyFields.isQuickReply
+    });
+
+    return await AddIpfsData(reply, reply.ipfsDoc[0]);
+  } catch (err) {
+    log(
+      `Error during getting reply with id ${replyId} for postId ${postId}.\n${err}`,
+      LogLevel.ERROR
+    );
+    return undefined;
+  }
 }
 
 export async function getSuiUserRating(userId: string, communityId: string) {
@@ -249,67 +330,3 @@ export async function getSuiUserRating(userId: string, communityId: string) {
     }
   );
 }
-// export async function getSuiReplyById(
-//   postMetaDataId: string,
-//   replyMetaDataKey: number
-// ): Promise<ReplyData> {
-//   const postMetaDataObject = await getObject(postMetaDataId);
-
-//   log(`Post object: ${JSON.stringify(postMetaDataObject)}`);
-
-//   const postFields = postMetaDataObject.data?.content?.fields;
-//   if (!postFields) {
-//     throw new RuntimeError(
-//       `Missing 'fields' in response for post ${postMetaDataId}.`
-//     );
-//   }
-//   const replyTable = postFields.tags.fields.id.id;
-//   log(`Tag object: ${JSON.stringify(tagObject)}`);
-
-//   const fields = tagObject.data?.content?.fields;
-
-//   if (!fields) {
-//     throw new RuntimeError(`Missing 'fields' in response for tag ${tagId}.`);
-//   }
-
-//   const ipfsHash1 = byteArrayToHexString(
-//     fields.value.fields.ipfsDoc.fields.hash
-//   );
-//   const ipfsHash2 = byteArrayToHexString(
-//     fields.value.fields.ipfsDoc.fields.hash2
-//   );
-
-//   const tag = new TagData({
-//     ipfsDoc: [ipfsHash1, ipfsHash2],
-//   });
-
-//   const tagData = await AddIpfsData(tag, tag.ipfsDoc[0]);
-//   tagData.tagId = `${communityId}-${tagId}`;
-//   tagData.communityId = communityId;
-//   log(`Tag Data with Ipfs info: ${JSON.stringify(tagData)}`);
-//   return tagData;
-
-//   const ipfsDoc = await getPostIpfsDoc(fields.postId);
-
-//   const post = new PostData({
-//     id: fields.postId,
-//     ipfsDoc,
-//     postType: fields.postType,
-//     communityId: fields.communityId,
-//     author: fields.author,
-//     deletedReplyCount: fields.deletedReplyCount,
-//     postTime: timestamp,
-//     rating: Number(fields.rating.fields.bits),
-//     isDeleted: fields.isDeleted,
-//     tags: parseIntArray(fields.tags),
-//     officialReply: fields.officialReplyMetaDataKey,
-//     bestReply: fields.bestReplyMetaDataKey,
-//     replyCount: fields.replies.fields.size,
-//     commentCount: fields.comments.fields.size,
-//     propertyCount: fields.properties.length,
-//   });
-
-//   const postData = await AddIpfsData(post, post.ipfsDoc[0]);
-//   log(`Post Data with Ipfs info: ${JSON.stringify(postData)}`);
-//   return postData;
-// }
