@@ -29,6 +29,8 @@ import {
   UNFOLLOWED_COMMUNITY_SUI_EVENT_NAME,
   ROLE_GRANTED_SUI_EVENT_NAME,
   ROLE_REVOKED_SUI_EVENT_NAME,
+  MODERATOR_POST_EDITED_SUI_EVENT_NAME,
+  MODERATOR_REPLY_EDITED_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import {
   createSuiProvider,
@@ -79,9 +81,13 @@ eventToModelType[TAG_CREATED_SUI_EVENT_NAME] = TagCreatedSuiEventModel;
 eventToModelType[TAG_UPDATED_SUI_EVENT_NAME] = TagUpdatedSuiEventModel;
 eventToModelType[POST_CREATED_SUI_EVENT_NAME] = PostCreatedSuiEventModel;
 eventToModelType[POST_EDITED_SUI_EVENT_NAME] = PostEditedSuiEventModel;
+eventToModelType[MODERATOR_POST_EDITED_SUI_EVENT_NAME] =
+  PostEditedSuiEventModel;
 eventToModelType[POST_DELETED_SUI_EVENT_NAME] = PostDeletedSuiEventModel;
 eventToModelType[REPLY_CREATED_SUI_EVENT_NAME] = ReplyCreatedSuiEventModel;
 eventToModelType[REPLY_EDITED_SUI_EVENT_NAME] = ReplyEditedSuiEventModel;
+eventToModelType[MODERATOR_REPLY_EDITED_SUI_EVENT_NAME] =
+  ReplyEditedSuiEventModel;
 eventToModelType[REPLY_DELETED_SUI_EVENT_NAME] = ReplyDeletedSuiEventModel;
 eventToModelType[REPLY_MARKED_THE_BEST_SUI_EVENT_NAME] =
   ReplyMarkedTheBestSuiEventModel;

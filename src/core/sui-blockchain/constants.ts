@@ -14,11 +14,15 @@ export const TAG_UPDATED_SUI_EVENT_NAME = 'communityLib::UpdateTagEvent';
 
 export const POST_CREATED_SUI_EVENT_NAME = 'postLib::CreatePostEvent';
 export const POST_EDITED_SUI_EVENT_NAME = 'postLib::EditPostEvent';
+export const MODERATOR_POST_EDITED_SUI_EVENT_NAME =
+  'postLib::ModeratorEditPostEvent';
 export const POST_DELETED_SUI_EVENT_NAME = 'postLib::DeletePostEvent';
 export const ITEM_VOTED_SUI_EVENT_NAME = 'postLib::VoteItem';
 
 export const REPLY_CREATED_SUI_EVENT_NAME = 'postLib::CreateReplyEvent';
 export const REPLY_EDITED_SUI_EVENT_NAME = 'postLib::EditReplyEvent';
+export const MODERATOR_REPLY_EDITED_SUI_EVENT_NAME =
+  'postLib::ModeratorEditReplyEvent';
 export const REPLY_DELETED_SUI_EVENT_NAME = 'postLib::DeleteReplyEvent';
 export const REPLY_MARKED_THE_BEST_SUI_EVENT_NAME =
   'postLib::ChangeStatusBestReply';

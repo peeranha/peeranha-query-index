@@ -22,6 +22,8 @@ import {
   UNFOLLOWED_COMMUNITY_SUI_EVENT_NAME,
   ROLE_GRANTED_SUI_EVENT_NAME,
   ROLE_REVOKED_SUI_EVENT_NAME,
+  MODERATOR_POST_EDITED_SUI_EVENT_NAME,
+  MODERATOR_REPLY_EDITED_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import {
@@ -59,9 +61,11 @@ eventToHandler[TAG_CREATED_SUI_EVENT_NAME] = handleCreateSuiTag;
 eventToHandler[TAG_UPDATED_SUI_EVENT_NAME] = handleUpdateSuiTag;
 eventToHandler[POST_CREATED_SUI_EVENT_NAME] = handleCreateSuiPost;
 eventToHandler[POST_EDITED_SUI_EVENT_NAME] = handleEditSuiPost;
+eventToHandler[MODERATOR_POST_EDITED_SUI_EVENT_NAME] = handleEditSuiPost;
 eventToHandler[POST_DELETED_SUI_EVENT_NAME] = handleDeleteSuiPost;
 eventToHandler[REPLY_CREATED_SUI_EVENT_NAME] = handleCreateSuiReply;
 eventToHandler[REPLY_EDITED_SUI_EVENT_NAME] = handleEditSuiReply;
+eventToHandler[MODERATOR_REPLY_EDITED_SUI_EVENT_NAME] = handleEditSuiReply;
 eventToHandler[REPLY_DELETED_SUI_EVENT_NAME] = handleDeleteSuiReply;
 eventToHandler[REPLY_MARKED_THE_BEST_SUI_EVENT_NAME] =
   handleChangeStatusBestSuiReply;
