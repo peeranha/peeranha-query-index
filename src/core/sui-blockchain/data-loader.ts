@@ -7,7 +7,8 @@ import { UserData } from 'src/core/blockchain/entities/user';
 import { UserRating } from 'src/core/blockchain/entities/user-rating';
 import { ConfigurationError, RuntimeError } from 'src/core/errors';
 import { getObject, getDynamicFieldObject } from 'src/core/sui-blockchain/sui';
-import { AddIpfsData, byteArrayToHexString } from 'src/core/utils/ipfs';
+import { vectorU8ToString } from 'src/core/sui-blockchain/utils';
+import { AddIpfsData } from 'src/core/utils/ipfs';
 import { log, LogLevel } from 'src/core/utils/logger';
 import { parseIntArray } from 'src/core/utils/parser';
 
@@ -34,8 +35,8 @@ export async function getSuiUserById(
       );
     }
 
-    const ipfsHash1 = byteArrayToHexString(fields.ipfsDoc.fields.hash);
-    const ipfsHash2 = byteArrayToHexString(fields.ipfsDoc.fields.hash2);
+    const ipfsHash1 = vectorU8ToString(fields.ipfsDoc.fields.hash);
+    const ipfsHash2 = vectorU8ToString(fields.ipfsDoc.fields.hash2);
 
     const user = new UserData([
       [ipfsHash1, ipfsHash2],
@@ -71,8 +72,8 @@ export async function getSuiCommunityById(
     );
   }
 
-  const ipfsHash1 = byteArrayToHexString(fields.ipfsDoc.fields.hash);
-  const ipfsHash2 = byteArrayToHexString(fields.ipfsDoc.fields.hash2);
+  const ipfsHash1 = vectorU8ToString(fields.ipfsDoc.fields.hash);
+  const ipfsHash2 = vectorU8ToString(fields.ipfsDoc.fields.hash2);
 
   const tagsCount = Number(fields.tags.fields.size);
   const tagTable = fields.tags.fields.id.id;
@@ -128,12 +129,8 @@ export async function getSuiTagById(
     throw new RuntimeError(`Missing 'fields' in response for tag ${tagId}.`);
   }
 
-  const ipfsHash1 = byteArrayToHexString(
-    fields.value.fields.ipfsDoc.fields.hash
-  );
-  const ipfsHash2 = byteArrayToHexString(
-    fields.value.fields.ipfsDoc.fields.hash2
-  );
+  const ipfsHash1 = vectorU8ToString(fields.value.fields.ipfsDoc.fields.hash);
+  const ipfsHash2 = vectorU8ToString(fields.value.fields.ipfsDoc.fields.hash2);
 
   const tag = new TagData({
     ipfsDoc: [ipfsHash1, ipfsHash2],
@@ -159,8 +156,8 @@ export async function getItemIpfsDoc(itemId: string) {
     );
   }
 
-  const ipfsHash1 = byteArrayToHexString(fields.ipfsDoc.fields.hash);
-  const ipfsHash2 = byteArrayToHexString(fields.ipfsDoc.fields.hash2);
+  const ipfsHash1 = vectorU8ToString(fields.ipfsDoc.fields.hash);
+  const ipfsHash2 = vectorU8ToString(fields.ipfsDoc.fields.hash2);
 
   return [ipfsHash1, ipfsHash2];
 }

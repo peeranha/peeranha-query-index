@@ -45,15 +45,22 @@ import {
   ItemVotedSuiEventModel,
   FollowedCommunitySuiEventModel,
   UnfollowedCommunitySuiEventModel,
+  RoleGrantedSuiEventModel,
+  RoleRevokedSuiEventModel,
 } from 'src/models/sui-event-models';
 
+import { UserPermissionEntity } from '../db/entities';
 import { PostRepository } from '../db/repositories/PostRepository';
 import { ReplyRepository } from '../db/repositories/ReplyRepository';
+import { UserPermissionRepository } from '../db/repositories/UserPermissionRepository';
+import { UserRepository } from '../db/repositories/UserRepository';
 import { getSuiComment } from '../sui-blockchain/data-loader';
 
 const commentRepository = new CommentRepository();
 const postRepository = new PostRepository();
 const replyRepository = new ReplyRepository();
+const userRepository = new UserRepository();
+const userPermissionRepository = new UserPermissionRepository();
 // const historyRepository = new HistoryRepository();
 
 export async function handleCreateSuiUser(
@@ -289,4 +296,26 @@ export async function handleUnfollowSuiCommunity(
     eventModel.communityId,
     eventModel.timestamp
   );
+}
+
+export async function handlerGrantedSuiRole(
+  eventModel: RoleGrantedSuiEventModel
+) {
+  const { role, timestamp, userId } = eventModel;
+  if (!(await userRepository.get(userId))) {
+    await createSuiUser(userId, timestamp);
+  }
+  const userPermission = new UserPermissionEntity({
+    id: `${userId}-${role}`,
+    userId,
+    permission: role,
+  });
+  await userPermissionRepository.create(userPermission);
+}
+
+export async function handlerRevokedSuiRole(
+  eventModel: RoleRevokedSuiEventModel
+) {
+  const { role, userId } = eventModel;
+  await userPermissionRepository.delete(`${userId}-${role}`);
 }

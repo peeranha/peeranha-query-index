@@ -27,6 +27,8 @@ import {
   ITEM_VOTED_SUI_EVENT_NAME,
   FOLLOWED_COMMUNITY_SUI_EVENT_NAME,
   UNFOLLOWED_COMMUNITY_SUI_EVENT_NAME,
+  ROLE_GRANTED_SUI_EVENT_NAME,
+  ROLE_REVOKED_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import {
   createSuiProvider,
@@ -56,6 +58,8 @@ import {
   CommentCreatedSuiEventModel,
   CommentEditedSuiEventModel,
   CommentDeletedSuiEventModel,
+  RoleGrantedSuiEventModel,
+  RoleRevokedSuiEventModel,
 } from 'src/models/sui-event-models';
 import {
   ReadSuiEventsRequestModel,
@@ -90,6 +94,9 @@ eventToModelType[UNFOLLOWED_COMMUNITY_SUI_EVENT_NAME] =
 eventToModelType[COMMENT_CREATED_SUI_EVENT_NAME] = CommentCreatedSuiEventModel;
 eventToModelType[COMMENT_EDITED_SUI_EVENT_NAME] = CommentEditedSuiEventModel;
 eventToModelType[COMMENT_DELETED_SUI_EVENT_NAME] = CommentDeletedSuiEventModel;
+
+eventToModelType[ROLE_GRANTED_SUI_EVENT_NAME] = RoleGrantedSuiEventModel;
+eventToModelType[ROLE_REVOKED_SUI_EVENT_NAME] = RoleRevokedSuiEventModel;
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);

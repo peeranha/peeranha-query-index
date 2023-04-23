@@ -26,3 +26,6 @@ export const REPLY_MARKED_THE_BEST_SUI_EVENT_NAME =
 export const COMMENT_CREATED_SUI_EVENT_NAME = 'postLib::CreateCommentEvent';
 export const COMMENT_EDITED_SUI_EVENT_NAME = 'postLib::EditCommentEvent';
 export const COMMENT_DELETED_SUI_EVENT_NAME = 'postLib::DeleteCommentEvent';
+
+export const ROLE_GRANTED_SUI_EVENT_NAME = 'accessControl::RoleGranted';
+export const ROLE_REVOKED_SUI_EVENT_NAME = 'accessControl::RoleRevoked';

@@ -1,3 +1,5 @@
+import { toHexString } from 'src/core/utils/parser';
+
 export class BaseSuiEventModel {
   public transaction: string;
 
@@ -294,5 +296,29 @@ export class CommentDeletedSuiEventModel extends BaseSuiEventModel {
     this.postId = event.parsedJson.postMetaDataId;
     this.replyId = Number(event.parsedJson.parentReplyKey);
     this.commentId = Number(event.parsedJson.commentMetaDataKey);
+  }
+}
+
+export class RoleGrantedSuiEventModel extends BaseSuiEventModel {
+  public role: string;
+
+  public userId: string;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.role = toHexString(event.parsedJson.role);
+    this.userId = event.parsedJson.userId;
+  }
+}
+
+export class RoleRevokedSuiEventModel extends BaseSuiEventModel {
+  public role: string;
+
+  public userId: string;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.role = toHexString(event.parsedJson.role);
+    this.userId = event.parsedJson.userId;
   }
 }
