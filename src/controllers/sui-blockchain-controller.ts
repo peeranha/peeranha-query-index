@@ -178,20 +178,22 @@ export async function readSuiEvents(
     const eventModels: BaseSuiEventModel[] = [];
 
     newBlocks.forEach((block) => {
-      block.events?.forEach((event) => {
-        const eventName = cleanEventType(event.type);
-        const EventModeType = eventToModelType[eventName];
-        if (!EventModeType) {
-          throw new ConfigurationError(
-            `Model type is not configured for event by name ${eventName}`
+      block.events
+        ?.filter((event) => eventToModelType[cleanEventType(event.type)])
+        .forEach((event) => {
+          const eventName = cleanEventType(event.type);
+          const EventModeType = eventToModelType[eventName];
+          if (!EventModeType) {
+            throw new ConfigurationError(
+              `Model type is not configured for event by name ${eventName}`
+            );
+          }
+          const eventModel = new EventModeType(
+            event,
+            block.timestampMs ? Math.floor(Number(block.timestampMs) / 1000) : 0
           );
-        }
-        const eventModel = new EventModeType(
-          event,
-          block.timestampMs ? Math.floor(Number(block.timestampMs) / 1000) : 0
-        );
-        eventModels.push(eventModel);
-      });
+          eventModels.push(eventModel);
+        });
     });
 
     for (let i = 0; i < eventModels.length; i++) {
