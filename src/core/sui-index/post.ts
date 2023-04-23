@@ -26,6 +26,8 @@ import {
   updateSuiUserRating,
 } from 'src/core/sui-index/user';
 
+import { RuntimeError } from '../errors';
+
 const postRepository = new PostRepository();
 const replyRepository = new ReplyRepository();
 const commentRepository = new CommentRepository();
@@ -494,6 +496,10 @@ export async function editSuiReply(
 
   if (!peeranhaReply) {
     return;
+  }
+
+  if (!storedReply) {
+    throw new RuntimeError('Unexpected null stored reply');
   }
 
   await replyRepository.update(storedReply.id, {

@@ -79,6 +79,8 @@ import {
   ReplyMarkedTheBestEventModel,
 } from 'src/models/event-models';
 
+import { RuntimeError } from '../errors';
+
 const userAchievementRepository = new UserAchievementRepository();
 const achievementRepository = new AchievementRepository();
 const postRepository = new PostRepository();
@@ -470,6 +472,10 @@ export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
 
   const peeranhaReply = await getReply(Number(postId), replyId);
   if (!peeranhaReply) return;
+
+  if (!storedReply) {
+    throw new RuntimeError('Unexpected null stored reply');
+  }
 
   await Promise.all([
     replyRepository.update(storedReply.id, {
