@@ -11,6 +11,8 @@ import { AddIpfsData, byteArrayToHexString } from 'src/core/utils/ipfs';
 import { log, LogLevel } from 'src/core/utils/logger';
 import { parseIntArray } from 'src/core/utils/parser';
 
+import { parseIntFromSuiBits } from './utils';
+
 const TAG_DYNAMIC_FIELD_TYPE = 'u64';
 const REPLY_DYNAMIC_FIELD_TYPE = 'u64';
 const COMMETN_DYNAMIC_FIELD_TYPE = 'u64';
@@ -189,7 +191,7 @@ export async function getSuiPostById(
     author: fields.author,
     deletedReplyCount: fields.deletedReplyCount,
     postTime: timestamp,
-    rating: Number(fields.rating.fields.bits),
+    rating: parseIntFromSuiBits(fields.rating.fields.bits),
     isDeleted: fields.isDeleted,
     tags: parseIntArray(fields.tags),
     officialReply: fields.officialReplyMetaDataKey,
@@ -251,7 +253,7 @@ export async function getSuiReply(
       author: replyFields.author,
       ipfsDoc,
       parentReplyId: replyFields.parentReplyMetaDataKey,
-      rating: Number(replyFields.rating?.fields?.bits),
+      rating: parseIntFromSuiBits(replyFields.rating?.fields?.bits),
       postTime: timestamp,
       propertyCount: 0,
       commentCount: Number(replyFields.comments?.fields?.size),
@@ -349,7 +351,7 @@ export async function getSuiComment(
     const comment = new CommentData([
       ipfsDoc,
       commentFields.author,
-      Number(commentFields.rating?.fields?.bits),
+      parseIntFromSuiBits(commentFields.rating?.fields?.bits),
       timestamp,
       0,
       commentFields.isDeleted,
@@ -426,7 +428,7 @@ export async function getSuiUserRating(userId: string, communityId: string) {
 
   if (communityUserRatings.length >= 1) {
     const ratingStr = communityUserRatings[0].fields?.value?.fields?.bits;
-    rating = Number(ratingStr);
+    rating = parseIntFromSuiBits(ratingStr);
     active = true;
   }
 
