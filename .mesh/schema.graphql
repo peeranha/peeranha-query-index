@@ -128,6 +128,7 @@ type user {
 
 type comment {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String!
@@ -143,6 +144,7 @@ type comment {
 
 type post {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   postType: Int!
@@ -171,6 +173,7 @@ type post {
 
 input comment_WhereInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String
@@ -184,6 +187,7 @@ input comment_WhereInput {
 
 input comment_OrderByInput {
   id: OrderBy
+  id2: OrderBy
   ipfsHash: OrderBy
   ipfsHash2: OrderBy
   author: OrderBy
@@ -211,6 +215,7 @@ type history {
 
 input post_WhereInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   postType: String
@@ -233,6 +238,7 @@ input post_WhereInput {
 
 input post_OrderByInput {
   id: OrderBy
+  id2: OrderBy
   ipfsHash: OrderBy
   ipfsHash2: OrderBy
   postType: OrderBy
@@ -491,6 +497,7 @@ input usercommunityrating_OrderByInput {
 
 type reply {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String!
@@ -513,6 +520,7 @@ type reply {
 
 input reply_WhereInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String
@@ -533,6 +541,7 @@ input reply_WhereInput {
 
 input reply_OrderByInput {
   id: OrderBy
+  id2: OrderBy
   ipfsHash: OrderBy
   ipfsHash2: OrderBy
   author: OrderBy
@@ -717,6 +726,7 @@ input achievement_UpdateInput {
 
 input comment_InsertInput {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String!
@@ -730,6 +740,7 @@ input comment_InsertInput {
 
 input comment_UpdateInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String
@@ -871,6 +882,7 @@ input period_UpdateInput {
 
 input post_InsertInput {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   postType: Int!
@@ -893,6 +905,7 @@ input post_InsertInput {
 
 input post_UpdateInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   postType: Int
@@ -927,6 +940,7 @@ input posttag_UpdateInput {
 
 input reply_InsertInput {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String!
@@ -947,6 +961,7 @@ input reply_InsertInput {
 
 input reply_UpdateInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String
