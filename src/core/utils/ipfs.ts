@@ -1,6 +1,8 @@
 import bs58 from 'bs58';
 import { log } from 'src/core/utils/logger';
 
+import { fetchWithTimeout } from './http';
+
 export const getIpfsHashFromBytes32 = (bytes32Hex: any) => {
   const hashHex = `1220${bytes32Hex.slice(2)}`;
   const hashBytes = Buffer.from(hashHex, 'hex');
@@ -13,7 +15,18 @@ export const byteArrayToHexString = (byteArray: any[]) => {
 };
 
 export const getDataFromIpfs = async (hashBytes: any): Promise<any> => {
-  return fetch(process.env.IPFS_CDN_URL + hashBytes).then((x) => x.json());
+  try {
+    return await fetchWithTimeout(process.env.IPFS_CDN_URL + hashBytes).then(
+      (x) => x.json()
+    );
+  } catch (error) {
+    log(
+      `Unable to fetch IPFS document with hash ${hashBytes}. Error: ${JSON.stringify(
+        error
+      )}`
+    );
+    return {};
+  }
 };
 
 export async function AddIpfsData(

@@ -26,6 +26,8 @@ import {
   updateSuiUserRating,
 } from 'src/core/sui-index/user';
 
+import { log } from '../utils/logger';
+
 const postRepository = new PostRepository();
 const replyRepository = new ReplyRepository();
 const commentRepository = new CommentRepository();
@@ -390,6 +392,7 @@ export async function createSuiReply(
   // const messengerUserData = getItemProperty(ItemProperties.MessengerSender, Number(postId), replyId)
 
   if (!peeranhaReply) {
+    log(`No peeranha reply`);
     return undefined;
   }
 
@@ -474,18 +477,23 @@ export async function editSuiReply(
   replyId: number,
   timestamp: number
 ) {
+  log(`Edit reply 1`);
   let storedReply = await replyRepository.get(`${postId}-${replyId}`);
   let createdReply;
 
   if (!storedReply) {
     createdReply = await createSuiReply(postId, replyId, timestamp);
   }
-  if (!createdReply) return;
+  if (!createdReply) {
+    log(`No created reply`);
+    return;
+  }
 
   if (!storedReply) {
     storedReply = createdReply;
   }
 
+  log(`Edit reply 2`);
   const peeranhaReply = await getSuiReply(postId, replyId, timestamp);
 
   if (!peeranhaReply) {
