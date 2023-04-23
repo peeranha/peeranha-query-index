@@ -462,7 +462,7 @@ export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
   if (!storedReply) {
     createdReply = await createReply(postId, replyId, timestamp);
   }
-  if (!createdReply) return;
+  if (createdReply) return;
 
   if (!storedReply) {
     storedReply = createdReply;

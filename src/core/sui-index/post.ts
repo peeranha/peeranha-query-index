@@ -482,7 +482,7 @@ export async function editSuiReply(
   if (!storedReply) {
     createdReply = await createSuiReply(postId, replyId, timestamp);
   }
-  if (!createdReply) {
+  if (createdReply) {
     return;
   }
 
