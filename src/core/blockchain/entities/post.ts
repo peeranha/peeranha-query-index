@@ -1,6 +1,8 @@
 export class Post {
   id: string;
 
+  id2: string;
+
   postType: number;
 
   author: string;
@@ -31,6 +33,7 @@ export class Post {
 
   constructor(post: any) {
     this.id = post.id;
+    this.id2 = post.id2;
     this.postType = post.postType;
     this.author = post.author;
     this.rating = post.rating;

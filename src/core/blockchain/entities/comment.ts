@@ -24,10 +24,13 @@ export class Comment {
 }
 
 export class CommentData extends Comment {
+  id2: string;
+
   content: string;
 
-  constructor(comment: any) {
+  constructor(comment: any, extra: any = {}) {
     super(comment);
     this.content = comment?.content;
+    this.id2 = extra?.id2;
   }
 }

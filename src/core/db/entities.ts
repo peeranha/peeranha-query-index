@@ -225,6 +225,8 @@ export class TagEntity {
 export class PostEntity {
   public id: string;
 
+  public id2: string;
+
   public ipfsHash: string;
 
   public ipfsHash2: string;
@@ -263,6 +265,7 @@ export class PostEntity {
 
   constructor(post: {
     id: string;
+    id2: string;
     ipfsHash: string;
     ipfsHash2: string;
     postType: number;
@@ -283,6 +286,7 @@ export class PostEntity {
     messengerType?: number;
   }) {
     this.id = post.id;
+    this.id2 = post.id2;
     this.communityId = post.communityId;
     this.postType = post.postType;
     this.title = post.title;
@@ -321,6 +325,8 @@ export class PostTagEntity {
 export class ReplyEntity {
   public id: string;
 
+  public id2: string;
+
   public ipfsHash: string;
 
   public ipfsHash2: string;
@@ -355,6 +361,7 @@ export class ReplyEntity {
 
   constructor(reply: {
     id: string;
+    id2: string;
     ipfsHash: string;
     ipfsHash2: string;
     author: string;
@@ -373,6 +380,7 @@ export class ReplyEntity {
     messengerType?: number;
   }) {
     this.id = reply.id;
+    this.id2 = reply.id2;
     this.postId = reply.postId;
     this.parentReplyId = reply.parentReplyId;
     this.content = reply.content;
@@ -395,6 +403,8 @@ export class ReplyEntity {
 export class CommentEntity {
   public id: string;
 
+  public id2: string;
+
   public ipfsHash: string;
 
   public ipfsHash2: string;
@@ -415,6 +425,7 @@ export class CommentEntity {
 
   constructor(comment: {
     id: string;
+    id2: string;
     ipfsHash: string;
     ipfsHash2: string;
     author: string;
@@ -426,6 +437,7 @@ export class CommentEntity {
     isDeleted: boolean;
   }) {
     this.id = comment.id;
+    this.id2 = comment.id2;
     this.postId = comment.postId;
     this.parentReplyId = comment.parentReplyId;
     this.content = comment.content;

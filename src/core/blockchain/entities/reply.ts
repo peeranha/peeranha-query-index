@@ -1,4 +1,6 @@
 export class Reply {
+  id2: string;
+
   ipfsDoc: [string, string];
 
   author: string;
@@ -20,6 +22,7 @@ export class Reply {
   isDeleted: boolean;
 
   constructor(reply: any) {
+    this.id2 = reply.id2;
     this.author = reply.author;
     this.parentReplyId = String(reply.parentReplyId);
     this.rating = reply.rating;

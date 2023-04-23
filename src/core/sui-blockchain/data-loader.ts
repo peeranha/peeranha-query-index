@@ -182,6 +182,7 @@ export async function getSuiPostById(
 
   const post = new PostData({
     id: postMetaDataId,
+    id2: fields.postId,
     ipfsDoc,
     postType: fields.postType,
     communityId: fields.communityId,
@@ -247,6 +248,7 @@ export async function getSuiReply(
     const ipfsDoc = await getItemIpfsDoc(replyFields.replyId);
 
     const reply = new ReplyData({
+      id2: replyFields.replyId,
       author: replyFields.author,
       ipfsDoc,
       parentReplyId: replyFields.parentReplyMetaDataKey,
@@ -345,14 +347,19 @@ export async function getSuiComment(
 
     const ipfsDoc = await getItemIpfsDoc(commentFields.commentId);
 
-    const comment = new CommentData([
-      ipfsDoc,
-      commentFields.author,
-      parseIntFromSuiBits(commentFields.rating?.fields?.bits),
-      timestamp,
-      0,
-      commentFields.isDeleted,
-    ]);
+    const comment = new CommentData(
+      [
+        ipfsDoc,
+        commentFields.author,
+        parseIntFromSuiBits(commentFields.rating?.fields?.bits),
+        timestamp,
+        0,
+        commentFields.isDeleted,
+      ],
+      {
+        id2: commentFields.commentId,
+      }
+    );
 
     return await AddIpfsData(comment, comment.ipfsDoc[0]);
   } catch (err) {

@@ -249,6 +249,7 @@ export async function createSuiPost(postId: string, timestamp: number) {
 
   const post = new PostEntity({
     id: peeranhaPost.id,
+    id2: peeranhaPost.id2,
     postType: peeranhaPost.postType,
     communityId: peeranhaPost.communityId,
     title: peeranhaPost.title,
@@ -395,6 +396,7 @@ export async function createSuiReply(
 
   const reply = new ReplyEntity({
     id: `${postId}-${replyId}`,
+    id2: peeranhaReply.id2,
     postId,
     content: peeranhaReply.content,
     author: peeranhaReply.author.toLowerCase(),
@@ -622,6 +624,7 @@ export async function createSuiComment(
 
   const comment = new CommentEntity({
     id: `${postId}-${parentReplyId}-${commentId}`,
+    id2: peeranhaComment.id2,
     postId,
     parentReplyId: String(parentReplyId),
     content: peeranhaComment.content,

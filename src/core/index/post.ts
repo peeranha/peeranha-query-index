@@ -123,6 +123,7 @@ export async function createPost(
 
   const post = new PostEntity({
     id: postId,
+    id2: '',
     postType: peeranhaPost.postType,
     communityId: peeranhaPost.communityId,
     title: peeranhaPost.title,
@@ -203,6 +204,7 @@ export async function createReply(
 
   const reply = new ReplyEntity({
     id: `${postId}-${replyId}`,
+    id2: '',
     postId,
     content: peeranhaReply.content,
     author: peeranhaReply.author.toLowerCase(),
@@ -294,6 +296,7 @@ export async function createComment(
 
   const comment = new CommentEntity({
     id: `${postId}-${parentReplyId}-${commentId}`,
+    id2: '',
     postId,
     parentReplyId: String(parentReplyId),
     content: peeranhaComment.content,
@@ -610,6 +613,7 @@ export async function generateDocumentationPosts(
 
     const postEntity = new PostEntity({
       id: post,
+      id2: '',
       postType: PostTypes.Documentation,
       communityId,
       title: postData.title,
