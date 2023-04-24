@@ -4,11 +4,13 @@ import {
   UserCommunityRatingEntity,
   UserEntity,
   UserCommunityEntity,
+  UserPermissionEntity,
 } from 'src/core/db/entities';
 import { CommunityRepository } from 'src/core/db/repositories/CommunityRepository';
 import { ReplyRepository } from 'src/core/db/repositories/ReplyRepository';
 import { UserCommunityRatingRepository } from 'src/core/db/repositories/UserCommunityRatingRepository';
 import { UserCommunityRepository } from 'src/core/db/repositories/UserCommunityRepository';
+import { UserPermissionRepository } from 'src/core/db/repositories/UserPermissionRepository';
 import { UserRepository } from 'src/core/db/repositories/UserRepository';
 import {
   getSuiUserById,
@@ -24,6 +26,7 @@ const replyRepository = new ReplyRepository();
 const userCommunityRepository = new UserCommunityRepository();
 const userCommunityRatingRepository = new UserCommunityRatingRepository();
 const communityRepository = new CommunityRepository();
+const userPermissionRepository = new UserPermissionRepository();
 
 export async function createSuiUser(userId: string, timestamp: number) {
   log(`Indexing user by id ${userId}`);
@@ -176,4 +179,24 @@ export async function unfollowSuiCommunity(
   await communityRepository.update(communityId, {
     followingUsers: community.followingUsers - 1,
   });
+}
+
+export async function grantSuiRole(
+  userId: string,
+  timestamp: number,
+  role: string
+) {
+  if (!(await userRepository.get(userId))) {
+    await createSuiUser(userId, timestamp);
+  }
+  const userPermission = new UserPermissionEntity({
+    id: `${userId}-${role}`,
+    userId,
+    permission: role,
+  });
+  await userPermissionRepository.create(userPermission);
+}
+
+export async function revokeSuiRole(userId: string, role: string) {
+  await userPermissionRepository.delete(`${userId}-${role}`);
 }

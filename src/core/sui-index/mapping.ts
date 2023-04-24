@@ -1,4 +1,3 @@
-import { CommentRepository } from 'src/core/db/repositories/CommentRepository';
 import { createHistory } from 'src/core/index/mapping';
 import { EntityType, OperationType } from 'src/core/index/utils';
 import {
@@ -17,13 +16,16 @@ import {
   deleteSuiPost,
   createSuiComment,
   voteSuiItem,
+  deleteSuiComment,
+  editSuiComment,
 } from 'src/core/sui-index/post';
 import {
   createSuiUser,
   updateSuiUser,
-  updateSuiUserRating,
   followSuiCommunity,
   unfollowSuiCommunity,
+  revokeSuiRole,
+  grantSuiRole,
 } from 'src/core/sui-index/user';
 import {
   UserCreatedSuiEventModel,
@@ -48,20 +50,6 @@ import {
   RoleGrantedSuiEventModel,
   RoleRevokedSuiEventModel,
 } from 'src/models/sui-event-models';
-
-import { UserPermissionEntity } from '../db/entities';
-import { PostRepository } from '../db/repositories/PostRepository';
-import { ReplyRepository } from '../db/repositories/ReplyRepository';
-import { UserPermissionRepository } from '../db/repositories/UserPermissionRepository';
-import { UserRepository } from '../db/repositories/UserRepository';
-import { getSuiComment } from '../sui-blockchain/data-loader';
-
-const commentRepository = new CommentRepository();
-const postRepository = new PostRepository();
-const replyRepository = new ReplyRepository();
-const userRepository = new UserRepository();
-const userPermissionRepository = new UserPermissionRepository();
-// const historyRepository = new HistoryRepository();
 
 export async function handleCreateSuiUser(
   eventModel: UserCreatedSuiEventModel
@@ -103,16 +91,8 @@ export async function handleCreateSuiPost(
 }
 
 export async function handleEditSuiPost(eventModel: PostEditedSuiEventModel) {
-  const { postId, timestamp } = eventModel;
-
-  if (!(await postRepository.get(postId))) {
-    await createSuiPost(postId, timestamp);
-  }
-
-  await Promise.all([
-    updateSuiPostContent(postId, timestamp),
-    createHistory(eventModel, EntityType.Post, OperationType.Edit),
-  ]);
+  await createSuiPost(eventModel.postId, eventModel.timestamp);
+  await createHistory(eventModel, EntityType.Post, OperationType.Edit);
 }
 
 export async function handleDeleteSuiPost(
@@ -127,39 +107,27 @@ export async function handleCreateSuiReply(
 ) {
   const { postId, replyId, timestamp } = eventModel;
 
-  const reply = await createSuiReply(postId, replyId, timestamp);
-  if (!reply) {
-    const post = await postRepository.get(postId);
-    if (post) {
-      await postRepository.update(postId, {
-        replyCount: post.replyCount + 1,
-      });
-    }
-
-    return;
-  }
-
+  await createSuiReply(postId, replyId, timestamp);
   await createHistory(eventModel, EntityType.Reply, OperationType.Create);
 }
 
 export async function handleEditSuiReply(eventModel: ReplyEditedSuiEventModel) {
-  await editSuiReply(
-    eventModel.postId,
-    eventModel.replyId,
-    eventModel.timestamp
-  );
+  const { postId, timestamp, replyId } = eventModel;
+
+  await editSuiReply(postId, replyId, timestamp);
   await createHistory(eventModel, EntityType.Reply, OperationType.Edit);
+  await updateSuiPostContent(postId, timestamp, replyId);
 }
 
 export async function handleDeleteSuiReply(
   eventModel: ReplyDeletedSuiEventModel
 ) {
-  await deleteSuiReply(
-    eventModel.postId,
-    eventModel.replyId,
-    eventModel.timestamp
-  );
-  await createHistory(eventModel, EntityType.Reply, OperationType.Delete);
+  const { postId, timestamp, replyId } = eventModel;
+
+  await Promise.all([
+    deleteSuiReply(postId, replyId, timestamp),
+    createHistory(eventModel, EntityType.Reply, OperationType.Delete),
+  ]);
 }
 
 export async function handleChangeStatusBestSuiReply(
@@ -177,25 +145,7 @@ export async function handleNewSuiComment(
 ) {
   const { postId, replyId, commentId, timestamp } = eventModel;
 
-  const comment = await createSuiComment(postId, replyId, commentId, timestamp);
-  if (!comment) {
-    const post = await postRepository.get(postId);
-    if (post) {
-      if (replyId === 0) {
-        await postRepository.update(post.id, {
-          commentCount: post.commentCount + 1,
-        });
-      } else {
-        const reply = await replyRepository.get(`${postId}-${replyId}`);
-        if (reply) {
-          await replyRepository.update(reply.id, {
-            commentCount: reply.commentCount + 1,
-          });
-        }
-      }
-    }
-  }
-
+  await createSuiComment(postId, replyId, commentId, timestamp);
   await createHistory(eventModel, EntityType.Comment, OperationType.Create);
 }
 
@@ -204,68 +154,19 @@ export async function handleEditedSuiComment(
 ) {
   const { postId, replyId, commentId, timestamp } = eventModel;
 
-  let storedComment = await commentRepository.get(
-    `${postId}-${replyId}-${commentId}`
-  );
-  let createdComment;
-
-  if (!storedComment)
-    createdComment = await createSuiComment(
-      postId,
-      replyId,
-      commentId,
-      timestamp
-    );
-  if (!createdComment) return;
-
-  if (!storedComment) storedComment = createdComment;
-
-  const comment = await getSuiComment(postId, replyId, commentId, 0);
-
-  if (!comment) return;
-  if (!storedComment) return;
-
-  await Promise.all([
-    commentRepository.update(storedComment.id, {
-      content: comment.content,
-      ipfsHash: comment.ipfsDoc[0],
-      ipfsHash2: comment.ipfsDoc[1],
-    }),
-
-    createHistory(eventModel, EntityType.Comment, OperationType.Edit),
-  ]);
-
-  await updateSuiPostContent(postId, timestamp);
+  await editSuiComment(postId, replyId, commentId, timestamp);
+  await createHistory(eventModel, EntityType.Comment, OperationType.Edit);
 }
 
 export async function handleDeletedSuiComment(
   eventModel: CommentDeletedSuiEventModel
 ) {
-  const { postId, replyId, commentId } = eventModel;
+  const { postId, replyId, commentId, timestamp } = eventModel;
 
-  const comment = await commentRepository.get(
-    `${postId}-${replyId}-${commentId}`
-  );
-  if (!comment) return;
-
-  await commentRepository.update(comment.id, {
-    isDeleted: true,
-  });
-
-  const promises: Promise<any>[] = [];
-
-  const post = await postRepository.get(postId);
-  if (post && comment.author !== post.author) {
-    promises.push(updateSuiUserRating(comment.author, post.communityId));
-  }
-
-  promises.push(
-    createHistory(eventModel, EntityType.Comment, OperationType.Delete)
-  );
-
-  await updateSuiPostContent(postId, eventModel.timestamp);
-
-  await Promise.all(promises);
+  await Promise.all([
+    deleteSuiComment(postId, replyId, commentId, timestamp),
+    createHistory(eventModel, EntityType.Comment, OperationType.Delete),
+  ]);
 }
 
 export async function handleVoteSuiItem(eventModel: ItemVotedSuiEventModel) {
@@ -302,20 +203,12 @@ export async function handlerGrantedSuiRole(
   eventModel: RoleGrantedSuiEventModel
 ) {
   const { role, timestamp, userId } = eventModel;
-  if (!(await userRepository.get(userId))) {
-    await createSuiUser(userId, timestamp);
-  }
-  const userPermission = new UserPermissionEntity({
-    id: `${userId}-${role}`,
-    userId,
-    permission: role,
-  });
-  await userPermissionRepository.create(userPermission);
+  await grantSuiRole(userId, timestamp, role);
 }
 
 export async function handlerRevokedSuiRole(
   eventModel: RoleRevokedSuiEventModel
 ) {
   const { role, userId } = eventModel;
-  await userPermissionRepository.delete(`${userId}-${role}`);
+  await revokeSuiRole(userId, role);
 }

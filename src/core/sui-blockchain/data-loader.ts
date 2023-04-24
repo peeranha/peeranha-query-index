@@ -208,15 +208,76 @@ export async function getSuiReply(
   postId: string,
   replyId: number,
   timestamp: number
-): Promise<ReplyData | undefined> {
-  try {
-    const postMetaDataObject = await getObject(postId);
-    const fields = postMetaDataObject.data?.content?.fields;
-    if (!fields) {
-      throw new RuntimeError(
-        `Missing 'fields' in response for post meta data ${postId}.`
-      );
-    }
+): Promise<ReplyData> {
+  const postMetaDataObject = await getObject(postId);
+  const fields = postMetaDataObject.data?.content?.fields;
+  if (!fields) {
+    throw new RuntimeError(
+      `Missing 'fields' in response for post meta data ${postId}.`
+    );
+  }
+  const replyTableId = fields.replies?.fields?.id?.id;
+  if (!replyTableId) {
+    throw new RuntimeError(
+      `Missing 'replies' in response for post meta data ${postId}.`
+    );
+  }
+
+  const replyMetadataObject = await getDynamicFieldObject(
+    replyTableId,
+    REPLY_DYNAMIC_FIELD_TYPE,
+    replyId.toString()
+  );
+  log(`Reply: ${JSON.stringify(replyMetadataObject)}`);
+  if (!replyMetadataObject) {
+    throw new RuntimeError(
+      `Unable to load reply ${replyId} from reply table ${replyTableId}.`
+    );
+  }
+
+  const replyFields = replyMetadataObject.data?.content?.fields?.value?.fields;
+
+  if (!replyFields) {
+    throw new RuntimeError(
+      `Missing 'fields' in response for reply meta data ${postId}, ${replyId}.`
+    );
+  }
+
+  const ipfsDoc = await getItemIpfsDoc(replyFields.replyId);
+
+  const reply = new ReplyData({
+    id2: replyFields.replyId,
+    author: replyFields.author,
+    ipfsDoc,
+    parentReplyId: replyFields.parentReplyMetaDataKey,
+    rating: parseIntFromSuiBits(replyFields.rating?.fields?.bits),
+    postTime: timestamp,
+    propertyCount: 0,
+    commentCount: Number(replyFields.comments?.fields?.size),
+    isDeleted: replyFields.isDeleted,
+    isFirstReply: replyFields.isFirstReply,
+    isQuickReply: replyFields.isQuickReply,
+  });
+
+  return AddIpfsData(reply, reply.ipfsDoc[0]);
+}
+
+export async function getSuiComment(
+  postId: string,
+  replyId: number,
+  commentId: number,
+  timestamp: number
+): Promise<CommentData> {
+  const postMetaDataObject = await getObject(postId);
+  const fields = postMetaDataObject.data?.content?.fields;
+  if (!fields) {
+    throw new RuntimeError(
+      `Missing 'fields' in response for post meta data ${postId}.`
+    );
+  }
+
+  let commentTableId;
+  if (replyId > 0) {
     const replyTableId = fields.replies?.fields?.id?.id;
     if (!replyTableId) {
       throw new RuntimeError(
@@ -229,7 +290,6 @@ export async function getSuiReply(
       REPLY_DYNAMIC_FIELD_TYPE,
       replyId.toString()
     );
-    log(`Reply: ${JSON.stringify(replyMetadataObject)}`);
     if (!replyMetadataObject) {
       throw new RuntimeError(
         `Unable to load reply ${replyId} from reply table ${replyTableId}.`
@@ -244,131 +304,54 @@ export async function getSuiReply(
         `Missing 'fields' in response for reply meta data ${postId}, ${replyId}.`
       );
     }
+    commentTableId = replyFields.comments?.fields?.id?.id;
+  } else {
+    commentTableId = fields.comments?.fields?.id?.id;
+    if (!commentTableId) {
+      throw new RuntimeError(
+        `Missing 'comments' in response for post meta data ${postId}.`
+      );
+    }
+  }
 
-    const ipfsDoc = await getItemIpfsDoc(replyFields.replyId);
+  const commentMetadataObject = await getDynamicFieldObject(
+    commentTableId,
+    COMMETN_DYNAMIC_FIELD_TYPE,
+    commentId.toString()
+  );
+  log(`Comment: ${JSON.stringify(commentMetadataObject)}`);
+  if (!commentMetadataObject) {
+    throw new RuntimeError(
+      `Unable to load comment ${commentId} from comment table ${commentTableId}.`
+    );
+  }
 
-    const reply = new ReplyData({
-      id2: replyFields.replyId,
-      author: replyFields.author,
+  const commentFields =
+    commentMetadataObject.data?.content?.fields?.value?.fields;
+
+  if (!commentFields) {
+    throw new RuntimeError(
+      `Missing 'fields' in response for comment meta data ${postId}, ${replyId}, ${commentId}.`
+    );
+  }
+
+  const ipfsDoc = await getItemIpfsDoc(commentFields.commentId);
+
+  const comment = new CommentData(
+    [
       ipfsDoc,
-      parentReplyId: replyFields.parentReplyMetaDataKey,
-      rating: parseIntFromSuiBits(replyFields.rating?.fields?.bits),
-      postTime: timestamp,
-      propertyCount: 0,
-      commentCount: Number(replyFields.comments?.fields?.size),
-      isDeleted: replyFields.isDeleted,
-      isFirstReply: replyFields.isFirstReply,
-      isQuickReply: replyFields.isQuickReply,
-    });
-
-    return await AddIpfsData(reply, reply.ipfsDoc[0]);
-  } catch (err) {
-    log(
-      `Error during getting reply with id ${replyId} for postId ${postId}.\n${err}`,
-      LogLevel.ERROR
-    );
-    return undefined;
-  }
-}
-
-export async function getSuiComment(
-  postId: string,
-  replyId: number,
-  commentId: number,
-  timestamp: number
-): Promise<CommentData | undefined> {
-  try {
-    const postMetaDataObject = await getObject(postId);
-    const fields = postMetaDataObject.data?.content?.fields;
-    if (!fields) {
-      throw new RuntimeError(
-        `Missing 'fields' in response for post meta data ${postId}.`
-      );
+      commentFields.author,
+      parseIntFromSuiBits(commentFields.rating?.fields?.bits),
+      timestamp,
+      0,
+      commentFields.isDeleted,
+    ],
+    {
+      id2: commentFields.commentId,
     }
+  );
 
-    let commentTableId;
-    if (replyId > 0) {
-      const replyTableId = fields.replies?.fields?.id?.id;
-      if (!replyTableId) {
-        throw new RuntimeError(
-          `Missing 'replies' in response for post meta data ${postId}.`
-        );
-      }
-
-      const replyMetadataObject = await getDynamicFieldObject(
-        replyTableId,
-        REPLY_DYNAMIC_FIELD_TYPE,
-        replyId.toString()
-      );
-      if (!replyMetadataObject) {
-        throw new RuntimeError(
-          `Unable to load reply ${replyId} from reply table ${replyTableId}.`
-        );
-      }
-
-      const replyFields =
-        replyMetadataObject.data?.content?.fields?.value?.fields;
-
-      if (!replyFields) {
-        throw new RuntimeError(
-          `Missing 'fields' in response for reply meta data ${postId}, ${replyId}.`
-        );
-      }
-      commentTableId = replyFields.comments?.fields?.id?.id;
-    } else {
-      commentTableId = fields.comments?.fields?.id?.id;
-      if (!commentTableId) {
-        throw new RuntimeError(
-          `Missing 'comments' in response for post meta data ${postId}.`
-        );
-      }
-    }
-
-    const commentMetadataObject = await getDynamicFieldObject(
-      commentTableId,
-      COMMETN_DYNAMIC_FIELD_TYPE,
-      commentId.toString()
-    );
-    log(`Comment: ${JSON.stringify(commentMetadataObject)}`);
-    if (!commentMetadataObject) {
-      throw new RuntimeError(
-        `Unable to load comment ${commentId} from comment table ${commentTableId}.`
-      );
-    }
-
-    const commentFields =
-      commentMetadataObject.data?.content?.fields?.value?.fields;
-
-    if (!commentFields) {
-      throw new RuntimeError(
-        `Missing 'fields' in response for comment meta data ${postId}, ${replyId}, ${commentId}.`
-      );
-    }
-
-    const ipfsDoc = await getItemIpfsDoc(commentFields.commentId);
-
-    const comment = new CommentData(
-      [
-        ipfsDoc,
-        commentFields.author,
-        parseIntFromSuiBits(commentFields.rating?.fields?.bits),
-        timestamp,
-        0,
-        commentFields.isDeleted,
-      ],
-      {
-        id2: commentFields.commentId,
-      }
-    );
-
-    return await AddIpfsData(comment, comment.ipfsDoc[0]);
-  } catch (err) {
-    log(
-      `Error during getting comment with id ${commentId}, replyId - ${replyId}, postId - ${postId}.\n${err}`,
-      LogLevel.ERROR
-    );
-    return undefined;
-  }
+  return AddIpfsData(comment, comment.ipfsDoc[0]);
 }
 
 export async function getSuiUserRating(userId: string, communityId: string) {

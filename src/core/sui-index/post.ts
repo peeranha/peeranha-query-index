@@ -14,6 +14,7 @@ import { PostTagRepository } from 'src/core/db/repositories/PostTagRepository';
 import { ReplyRepository } from 'src/core/db/repositories/ReplyRepository';
 import { TagRepository } from 'src/core/db/repositories/TagRepository';
 import { UserRepository } from 'src/core/db/repositories/UserRepository';
+import { RuntimeError } from 'src/core/errors';
 import {
   getSuiPostById,
   getSuiReply,
@@ -25,8 +26,6 @@ import {
   updateSuiPostUsersRatings,
   updateSuiUserRating,
 } from 'src/core/sui-index/user';
-
-import { RuntimeError } from '../errors';
 
 const postRepository = new PostRepository();
 const replyRepository = new ReplyRepository();
@@ -308,6 +307,14 @@ export async function createSuiPost(postId: string, timestamp: number) {
   return post;
 }
 
+export async function editSuiPost(postId: string, timestamp: number) {
+  if (!(await postRepository.get(postId))) {
+    await createSuiPost(postId, timestamp);
+  }
+
+  await updateSuiPostContent(postId, timestamp);
+}
+
 export async function deleteSuiPost(postId: string) {
   const post = await postRepository.get(postId);
   if (!post) return;
@@ -387,14 +394,10 @@ export async function createSuiReply(
   postId: string,
   replyId: number,
   timestamp: number
-): Promise<ReplyEntity | undefined> {
+): Promise<ReplyEntity> {
   const peeranhaPost = await getSuiPostById(postId, 0);
   const peeranhaReply = await getSuiReply(postId, replyId, timestamp);
   // const messengerUserData = getItemProperty(ItemProperties.MessengerSender, Number(postId), replyId)
-
-  if (!peeranhaReply) {
-    return undefined;
-  }
 
   const reply = new ReplyEntity({
     id: `${postId}-${replyId}`,
@@ -478,7 +481,7 @@ export async function editSuiReply(
   replyId: number,
   timestamp: number
 ) {
-  let storedReply = await replyRepository.get(`${postId}-${replyId}`);
+  const storedReply = await replyRepository.get(`${postId}-${replyId}`);
   let createdReply;
 
   if (!storedReply) {
@@ -489,23 +492,23 @@ export async function editSuiReply(
   }
 
   if (!storedReply) {
-    storedReply = createdReply;
-  }
-
-  const peeranhaReply = await getSuiReply(postId, replyId, timestamp);
-
-  if (!peeranhaReply) {
-    return;
-  }
-
-  if (!storedReply) {
     throw new RuntimeError('Unexpected null stored reply');
+  }
+
+  const [peeranhaReply, peeranhaPost] = await Promise.all([
+    getSuiReply(postId, replyId, timestamp),
+    getSuiPostById(postId, 0),
+  ]);
+
+  if (!(peeranhaReply && peeranhaPost)) {
+    return;
   }
 
   await replyRepository.update(storedReply.id, {
     content: peeranhaReply.content,
     ipfsHash: peeranhaReply.ipfsDoc[0],
     ipfsHash2: peeranhaReply.ipfsDoc[1],
+    isOfficialReply: String(replyId) === peeranhaPost.officialReply,
   });
 
   await updateSuiPostContent(postId, timestamp, replyId);
@@ -616,17 +619,13 @@ export async function createSuiComment(
   parentReplyId: number,
   commentId: number,
   timestamp: number
-): Promise<CommentEntity | undefined> {
+): Promise<CommentEntity> {
   const peeranhaComment = await getSuiComment(
     postId,
     parentReplyId,
     commentId,
     timestamp
   );
-
-  if (!peeranhaComment) {
-    return undefined;
-  }
 
   const comment = new CommentEntity({
     id: `${postId}-${parentReplyId}-${commentId}`,
@@ -668,6 +667,68 @@ export async function createSuiComment(
   }
 
   return comment;
+}
+
+export async function editSuiComment(
+  postId: string,
+  replyId: number,
+  commentId: number,
+  timestamp: number
+) {
+  let storedComment = await commentRepository.get(
+    `${postId}-${replyId}-${commentId}`
+  );
+
+  if (!storedComment)
+    storedComment = await createSuiComment(
+      postId,
+      replyId,
+      commentId,
+      timestamp
+    );
+
+  const comment = await getSuiComment(postId, replyId, commentId, 0);
+
+  if (!comment) {
+    return;
+  }
+
+  await commentRepository.update(storedComment.id, {
+    content: comment.content,
+    ipfsHash: comment.ipfsDoc[0],
+    ipfsHash2: comment.ipfsDoc[1],
+  });
+
+  await updateSuiPostContent(postId, timestamp);
+}
+
+export async function deleteSuiComment(
+  postId: string,
+  replyId: number,
+  commentId: number,
+  timestamp: number
+) {
+  const comment = await commentRepository.get(
+    `${postId}-${replyId}-${commentId}`
+  );
+  if (!comment) {
+    return;
+  }
+
+  await commentRepository.update(comment.id, {
+    isDeleted: true,
+  });
+
+  const promises: Promise<any>[] = [];
+
+  const post = await postRepository.get(postId);
+  if (post && comment.author !== post.author) {
+    promises.push(updateSuiUserRating(comment.author, post.communityId));
+  }
+
+  promises.push(updateSuiPostContent(postId, timestamp));
+
+  await Promise.all(promises);
 }
 
 export async function voteSuiItem(
