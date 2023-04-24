@@ -1,6 +1,6 @@
 region: 'us-east-2'
 environment:
-  ENV: 'dev2'
+  ENV: 'dev3'
   REGION: 'us-east-2'
   AWS_ACCOUNT_ID: '939077196930'
 
