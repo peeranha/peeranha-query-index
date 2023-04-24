@@ -15,6 +15,15 @@ export class Community {
   }
 }
 
+export type CommunityTranslation = {
+  communityId: number;
+  id: string;
+  description: string;
+  enableAutotranslation: boolean;
+  language: string;
+  name: string;
+};
+
 export class CommunityData extends Community {
   public id: string;
 
@@ -30,7 +39,7 @@ export class CommunityData extends Community {
 
   public communitySite: string;
 
-  public isBlogger: boolean;
+  public translations?: CommunityTranslation[];
 
   public tags: any[];
 
@@ -43,7 +52,7 @@ export class CommunityData extends Community {
     this.language = community?.language;
     this.website = community?.website;
     this.communitySite = community?.communitySite;
-    this.isBlogger = community?.isBlogger;
+    this.translations = community?.translations;
     this.tags = community?.tags;
   }
 }

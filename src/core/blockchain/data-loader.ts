@@ -238,3 +238,26 @@ export async function getUserRatingCollection(
     await userContract.getUserRatingCollection(address, Number(communityId))
   );
 }
+
+export async function getItemLanguage(
+  postId: number,
+  replyId?: number,
+  commentId?: number
+): Promise<number | undefined> {
+  try {
+    const provider = await createRpcProvider();
+    const contract = new PeeranhaContentWrapper(provider);
+    const itemLanguage = await contract.getItemLanguage(
+      postId,
+      replyId,
+      commentId
+    );
+    return itemLanguage.toNumber();
+  } catch (error) {
+    log(
+      `Could not get item language for postId ${postId}, replyId ${replyId} & commentId ${commentId}`
+    );
+    log(error);
+    return undefined;
+  }
+}

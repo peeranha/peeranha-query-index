@@ -18,12 +18,13 @@ export abstract class BaseRepository<EntityT, KeyT> {
   }
 
   public async getListOfProperties(
-    property: string,
+    properties: string | string[],
     key: string,
     value: any
   ): Promise<any[]> {
     const result = await DatabaseManager.getInstance()
-      .select(property)
+      .column(properties)
+      .select()
       .from(this.tableName)
       .where(key, value);
 

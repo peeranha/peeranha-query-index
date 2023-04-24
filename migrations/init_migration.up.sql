@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS tag (
   description TEXT,
   postCount INT DEFAULT 0,
   deletedPostCount INT DEFAULT 0,
+  language INT,
   ipfsHash VARCHAR(66),
   ipfsHash2 VARCHAR(66),
 
@@ -92,6 +93,7 @@ CREATE TABLE IF NOT EXISTS post (
   isDeleted BOOLEAN DEFAULT 0,
   officialReply INT DEFAULT 0,
   bestReply INT DEFAULT 0,
+  language INT,
   handle VARCHAR(66),
   messengerType INT,
 
@@ -125,6 +127,7 @@ CREATE TABLE IF NOT EXISTS reply (
   isBestReply BOOLEAN DEFAULT 0,
   isFirstReply BOOLEAN DEFAULT 0,
   isQuickReply BOOLEAN DEFAULT 0,
+  language INT,
   handle VARCHAR(66),
   messengerType INT,
 
@@ -143,6 +146,7 @@ CREATE TABLE IF NOT EXISTS comment (
   postId VARCHAR(66) NOT NULL,
   parentReplyId SMALLINT,
   content TEXT NOT NULL,
+  language INT,
   isDeleted BOOLEAN DEFAULT 0,
 
   FOREIGN KEY (author) REFERENCES user (id),
@@ -220,4 +224,62 @@ CREATE TABLE IF NOT EXISTS communitydocumentation (
   ipfsHash VARCHAR(66),
 
   FOREIGN KEY (id) REFERENCES community (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS communitytranslation (
+  id VARCHAR(70) NOT NULL PRIMARY KEY,
+  communityId VARCHAR(66) NOT NULL,
+  name VARCHAR(40),
+  description VARCHAR(250),
+  language VARCHAR(5),
+  enableAutotranslation BOOLEAN,
+
+  FOREIGN KEY (communityId) REFERENCES community (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS tagtranslation (
+  id VARCHAR(75) NOT NULL PRIMARY KEY,
+  tagId VARCHAR(71) NOT NULL,
+  name VARCHAR(40) NOT NULL,
+  description TEXT,
+  language INT,
+
+  FOREIGN KEY (tagId) REFERENCES tag (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS posttranslation (
+  id VARCHAR(70) NOT NULL PRIMARY KEY,
+  postId VARCHAR(66) NOT NULL,
+  language INT,
+  author VARCHAR(66) NOT NULL,
+  ipfsHash VARCHAR(66),
+  title VARCHAR(130) NOT NULL,
+  content TEXT,
+
+  FOREIGN KEY (author) REFERENCES user (id),
+  FOREIGN KEY (postId) REFERENCES post (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS replytranslation (
+  id VARCHAR(137) NOT NULL PRIMARY KEY,
+  replyId VARCHAR(133) NOT NULL,
+  language INT,
+  author VARCHAR(66) NOT NULL,
+  ipfsHash VARCHAR(66),
+  content TEXT,
+
+  FOREIGN KEY (author) REFERENCES user (id),
+  FOREIGN KEY (replyId) REFERENCES reply (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS commenttranslation (
+  id VARCHAR(204) NOT NULL PRIMARY KEY,
+  commentId VARCHAR(200) NOT NULL,
+  language INT,
+  author VARCHAR(66) NOT NULL,
+  ipfsHash VARCHAR(66),
+  content TEXT,
+
+  FOREIGN KEY (author) REFERENCES user (id),
+  FOREIGN KEY (commentId) REFERENCES comment (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

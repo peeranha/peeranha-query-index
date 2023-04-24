@@ -40,9 +40,6 @@ export async function createSuiUser(userId: string, timestamp: number) {
   }
 
   const peeranhaUser = await getSuiUserById(userId);
-  if (!peeranhaUser) {
-    return undefined;
-  }
 
   const user = new UserEntity({
     id: userId,

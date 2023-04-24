@@ -15,6 +15,8 @@ export class Reply {
 
   propertyCount: number;
 
+  language: number;
+
   isFirstReply: boolean;
 
   isQuickReply: boolean;
@@ -33,6 +35,7 @@ export class Reply {
     this.ipfsDoc = reply.ipfsDoc;
     this.isFirstReply = reply.isFirstReply;
     this.isQuickReply = reply.isQuickReply;
+    this.language = reply.language;
   }
 }
 

@@ -140,6 +140,7 @@ export async function createPost(
     bestReply: peeranhaPost.bestReply,
     ipfsHash: peeranhaPost.ipfsDoc[0],
     ipfsHash2: peeranhaPost.ipfsDoc[1],
+    language: 0,
   });
 
   if (messengerUserData) {
@@ -219,6 +220,7 @@ export async function createReply(
     isOfficialReply: false,
     ipfsHash: peeranhaReply.ipfsDoc[0],
     ipfsHash2: peeranhaReply.ipfsDoc[1],
+    language: 0,
   });
 
   if (messengerUserData) {
@@ -306,6 +308,7 @@ export async function createComment(
     rating: 0,
     ipfsHash: peeranhaComment.ipfsDoc[0],
     ipfsHash2: peeranhaComment.ipfsDoc[1],
+    language: 0,
   });
   await commentRepository.create(comment);
 
@@ -630,6 +633,7 @@ export async function generateDocumentationPosts(
       bestReply: '0',
       ipfsHash: post,
       ipfsHash2: '',
+      language: 0,
     });
 
     postPromises.push(postRepository.create(postEntity));

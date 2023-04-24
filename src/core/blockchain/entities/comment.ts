@@ -9,6 +9,8 @@ export class Comment {
 
   propertyCount: number;
 
+  language: number;
+
   isDeleted: boolean;
 
   constructor(comment: any) {
@@ -19,6 +21,7 @@ export class Comment {
       this.postTime,
       this.propertyCount,
       this.isDeleted,
+      this.language,
     ] = comment;
   }
 }

@@ -1,3 +1,8 @@
+DROP TABLE communitytranslation;
+DROP TABLE tagtranslation;
+DROP TABLE posttranslation;
+DROP TABLE replytranslation;
+DROP TABLE commenttranslation;
 DROP TABLE userreward;
 DROP TABLE communitydocumentation;
 DROP TABLE usercommunityrating;

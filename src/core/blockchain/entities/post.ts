@@ -27,6 +27,8 @@ export class Post {
 
   isDeleted: boolean;
 
+  language: number;
+
   tags: number[];
 
   ipfsDoc: [string, string];
@@ -48,6 +50,7 @@ export class Post {
     this.isDeleted = post.isDeleted;
     this.tags = post.tags;
     this.ipfsDoc = post.ipfsDoc;
+    this.language = post.language;
   }
 }
 

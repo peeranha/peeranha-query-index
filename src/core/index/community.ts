@@ -17,6 +17,7 @@ export async function createTag(tag: TagData): Promise<TagEntity> {
     deletedPostCount: 0,
     ipfsHash: tag.ipfsDoc[0],
     ipfsHash2: tag.ipfsDoc[1],
+    language: 0,
   });
 
   await tagRepository.create(tagEntity);

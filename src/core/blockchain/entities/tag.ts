@@ -17,9 +17,15 @@ export class TagData extends Tag {
 
   description: string;
 
+  language?: number;
+
+  translations?: { name: string; description: string; language: number }[];
+
   constructor(tag: any) {
     super(tag);
     this.name = tag.name;
     this.description = tag.description;
+    this.language = tag.language;
+    this.translations = tag.translations;
   }
 }
