@@ -18,6 +18,7 @@ import {
   voteSuiItem,
   deleteSuiComment,
   editSuiComment,
+  editSuiPost,
 } from 'src/core/sui-index/post';
 import {
   createSuiUser,
@@ -91,7 +92,7 @@ export async function handleCreateSuiPost(
 }
 
 export async function handleEditSuiPost(eventModel: PostEditedSuiEventModel) {
-  await createSuiPost(eventModel.postId, eventModel.timestamp);
+  await editSuiPost(eventModel.postId, eventModel.timestamp);
   await createHistory(eventModel, EntityType.Post, OperationType.Edit);
 }
 
