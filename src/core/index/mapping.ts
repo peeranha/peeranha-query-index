@@ -410,7 +410,7 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
     'postId',
     post.id
   );
-  const postTags: number[] = tagsResponse.map((tag: any) => tag.tagId);
+  const postTags = tagsResponse.map((tag) => tag.tagId);
 
   postTags.forEach(async (tag) => {
     const id = `${communityId}-${tag}`;

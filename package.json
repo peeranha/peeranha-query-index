@@ -5,6 +5,7 @@
     "prepare:offline": "mustache config/offline.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
     "prepare:dev1": "mustache config/dev1.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
     "prepare:dev2": "mustache config/dev2.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
+    "prepare:dev3": "mustache config/dev3.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
     "dev": "cross-env sls offline start --stage offline",
     "deploy:test": "cross-env sls deploy --stage test",
     "remove:test": "sls remove --stage test",

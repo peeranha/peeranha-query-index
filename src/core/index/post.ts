@@ -382,8 +382,8 @@ export async function updatePostContent(
     'postId',
     post.id
   );
-  const oldTags: string[] = oldTagsResponse.map(
-    (tag: any) => `${post.communityId}-${tag.tagId}`
+  const oldTags = oldTagsResponse.map(
+    (tag) => `${post.communityId}-${tag.tagId}`
   );
 
   const uniqueNewTags = newTags.filter((newTag) => !oldTags.includes(newTag));

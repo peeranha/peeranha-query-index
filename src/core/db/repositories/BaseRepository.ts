@@ -21,7 +21,7 @@ export abstract class BaseRepository<EntityT, KeyT> {
     properties: string | string[],
     key: string,
     value: any
-  ): Promise<any[]> {
+  ): Promise<EntityT[]> {
     const result = await DatabaseManager.getInstance()
       .column(properties)
       .select()

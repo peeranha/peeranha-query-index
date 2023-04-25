@@ -102,8 +102,8 @@ export async function updateSuiTag(communityId: string, tagId: number) {
         'tagId',
         peeranhaTag.tagId
       );
-    const oldTranslations: string[] = oldTranslationsResponse.map(
-      (translation: any) => translation.id
+    const oldTranslations = oldTranslationsResponse.map(
+      (translation) => translation.id
     );
     await deleteTagTranslations(oldTranslations);
 
@@ -218,8 +218,8 @@ export async function updateSuiCommunity(communityId: string) {
         'communityId',
         communityId
       );
-    const oldTranslations: string[] = oldTranslationsResponse.map(
-      (translation: any) => translation.id
+    const oldTranslations = oldTranslationsResponse.map(
+      (translation) => translation.id
     );
     await deleteCommunityTranslations(oldTranslations);
 
@@ -245,11 +245,10 @@ export async function getCommunityConfigLanguages(communityId: string) {
     communityId
   );
 
-  const result: { language: string; enableAutotranslation: boolean }[] =
-    response.map((item: any) => ({
-      language: item.language,
-      enableAutotranslation: item.enableAutotranslation,
-    }));
+  const result = response.map((item) => ({
+    language: item.language,
+    enableAutotranslation: item.enableAutotranslation,
+  }));
   return result;
 }
 
@@ -260,6 +259,6 @@ export async function getTagTranslations(id: string) {
     id
   );
 
-  const tagNames: string[] = properties.map((item) => item.name);
+  const tagNames = properties.map((item) => item.name);
   return tagNames;
 }

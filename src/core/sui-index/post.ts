@@ -47,6 +47,7 @@ const postTranslationRepository = new PostTranslationRepository();
 const replyTranslationRepository = new ReplyTranslationRepository();
 const commentTranslationRepository = new CommentTranslationRepository();
 
+// TODO: fix translation author & ipfsHash
 async function getPostTranslations(post: PostEntity) {
   let translationsText = '';
 
@@ -62,25 +63,25 @@ async function getPostTranslations(post: PostEntity) {
     'postId',
     post.id
   );
-  const oldTranslations: string[] = properties.map((property) => property.id);
+  const oldTranslations = properties.map((property) => property.id);
 
   const deletionPromises: Promise<any>[] = [];
   oldTranslations.forEach((id) => postTranslationRepository.delete(id));
   await Promise.all(deletionPromises);
 
   const creationPromises: Promise<any>[] = [];
-  Object.entries(translations).forEach((translation) => {
-    const [language, translationData] = translation;
+  Object.keys(translations).forEach((language) => {
+    const translationData = translations[language]!;
 
     translationsText += ` ${translationData.title} ${translationData.content}`;
 
     const postTranslation = new PostTranslationEntity({
       id: `${post.id}-${language}`,
       postId: post.id,
-      author: post.author, // TODO: fix
+      author: post.author,
       title: translationData.title!,
       content: translationData.content,
-      ipfsHash: '', // TODO: fix
+      ipfsHash: '0x',
       language: Number(language),
     });
 
@@ -105,24 +106,24 @@ async function getReplyTranslations(communityId: string, reply: ReplyEntity) {
     'replyId',
     reply.id
   );
-  const oldTranslations: string[] = properties.map((property) => property.id);
+  const oldTranslations = properties.map((property) => property.id);
 
   const deletionPromises: Promise<any>[] = [];
   oldTranslations.forEach((id) => replyTranslationRepository.delete(id));
   await Promise.all(deletionPromises);
 
   const creationPromises: Promise<any>[] = [];
-  Object.entries(translations).forEach((translation) => {
-    const [language, translationData] = translation;
+  Object.keys(translations).forEach((language) => {
+    const translationData = translations[language]!;
 
     translationsText += ` ${translationData.content}`;
 
     const replyTranslation = new ReplyTranslationEntity({
       id: `${reply.id}-${language}`,
       replyId: reply.id,
-      author: reply.author, // TODO: fix
+      author: reply.author,
       content: translationData.content,
-      ipfsHash: '', // TODO: fix
+      ipfsHash: '0x',
       language: Number(language),
     });
 
@@ -150,24 +151,24 @@ async function getCommentTranslations(
     'commentId',
     comment.id
   );
-  const oldTranslations: string[] = properties.map((property) => property.id);
+  const oldTranslations = properties.map((property) => property.id);
 
   const deletionPromises: Promise<any>[] = [];
   oldTranslations.forEach((id) => commentTranslationRepository.delete(id));
   await Promise.all(deletionPromises);
 
   const creationPromises: Promise<any>[] = [];
-  Object.entries(translations).forEach((translation) => {
-    const [language, translationData] = translation;
+  Object.keys(translations).forEach((language) => {
+    const translationData = translations[language]!;
 
     translationsText += ` ${translationData.content}`;
 
     const commentTranslation = new CommentTranslationEntity({
       id: `${comment.id}-${language}`,
       commentId: comment.id,
-      author: comment.author, // TODO: fix
+      author: comment.author,
       content: translationData.content,
-      ipfsHash: '', // TODO: fix
+      ipfsHash: '0x',
       language: Number(language),
     });
 
@@ -298,7 +299,7 @@ export async function updateSuiPostContent(
     'postId',
     post.id
   );
-  const oldTags: string[] = oldTagsResponse.map((tag: any) => tag.tagId);
+  const oldTags = oldTagsResponse.map((tag: any) => tag.tagId);
 
   const uniqueNewTags = newTags.filter((newTag) => !oldTags.includes(newTag));
   const uniqueOldTags = oldTags.filter((oldTag) => !newTags.includes(oldTag));
@@ -445,27 +446,27 @@ export async function createSuiPost(postId: string, timestamp: number) {
     post.title
   );
 
-  const promises: Promise<any>[] = [];
+  const translationPromises: Promise<any>[] = [];
 
-  Object.entries(translations).forEach((translation) => {
-    const [language, translationData] = translation;
+  Object.keys(translations).forEach((language) => {
+    const translationData = translations[language]!;
 
-    const translationText = `${translationData.title || ''} ${
+    post.postContent += ` ${translationData.title || ''} ${
       translationData.content
     }`;
-    post.postContent += ` ${translationText}`;
 
+    // TODO: fix translation author & ipfsHash
     const postTranslation = new PostTranslationEntity({
       id: `${post.id}-${language}`,
       postId: post.id,
-      author: post.author, // TODO: fix
+      author: post.author,
       title: translationData.title!,
       content: translationData.content,
-      ipfsHash: '', // TODO: fix
+      ipfsHash: '0x',
       language: Number(language),
     });
 
-    promises.push(postTranslationRepository.create(postTranslation));
+    translationPromises.push(postTranslationRepository.create(postTranslation));
   });
 
   const tagIds = peeranhaPost.tags.map((tag) => `${post.communityId}-${tag}`);
@@ -478,6 +479,8 @@ export async function createSuiPost(postId: string, timestamp: number) {
     user = await createSuiUser(post.author, timestamp);
   }
 
+  await postRepository.create(post);
+
   await Promise.all([
     communityRepository.update(community.id, {
       postCount: community.postCount + 1,
@@ -487,21 +490,21 @@ export async function createSuiPost(postId: string, timestamp: number) {
       postCount: user.postCount + 1,
     }),
 
-    postRepository.create(post),
-
     updateSuiUserRating(post.author, post.communityId),
   ]);
 
+  const tagPromises: Promise<any>[] = [];
   tagIds.forEach((tag) => {
     const postTag = new PostTagEntity({
       id: `${post.id}-${tag}`,
       postId: post.id,
       tagId: tag,
     });
-    promises.push(postTagRepository.create(postTag));
+    tagPromises.push(postTagRepository.create(postTag));
   });
 
-  await Promise.all(promises);
+  await Promise.all(tagPromises);
+  await Promise.all(translationPromises);
 
   return post;
 }
@@ -564,7 +567,7 @@ export async function deleteSuiPost(postId: string) {
     'postId',
     post.id
   );
-  const postTags: string[] = tagsResponse.map((tag: any) => tag.tagId);
+  const postTags = tagsResponse.map((tag: any) => tag.tagId);
 
   postTags.forEach(async (tag) => {
     const tagEntity = await tagRepository.get(tag);
@@ -585,9 +588,7 @@ export async function deleteSuiPost(postId: string) {
     'postId',
     post.id
   );
-  const translationIds: string[] = response.map(
-    (translation: any) => translation.id
-  );
+  const translationIds = response.map((translation) => translation.id);
   translationIds.forEach((id) =>
     promises.push(postTranslationRepository.delete(id))
   );
@@ -640,20 +641,21 @@ export async function createSuiReply(
 
   let translationsText = '';
 
-  Object.entries(translations).forEach((translation) => {
-    const [language, translationData] = translation;
+  Object.keys(translations).forEach((language) => {
+    const translationData = translations[language]!;
 
     const translationText = `${translationData.title || ''} ${
       translationData.content
     }`;
     translationsText += ` ${translationText}`;
 
+    // TODO: fix translation author & ipfsHash
     const replyTranslation = new ReplyTranslationEntity({
       id: `${reply.id}-${language}`,
       replyId: reply.id,
-      author: reply.author, // TODO: fix
+      author: reply.author,
       content: translationData.content,
-      ipfsHash: '', // TODO: fix
+      ipfsHash: '0x',
       language: Number(language),
     });
 
@@ -798,9 +800,7 @@ export async function deleteSuiReply(
     'replyId',
     reply.id
   );
-  const translationIds: string[] = response.map(
-    (translation: any) => translation.id
-  );
+  const translationIds = response.map((translation) => translation.id);
   translationIds.forEach((id) =>
     promises.push(replyTranslationRepository.delete(id))
   );
@@ -909,20 +909,21 @@ export async function createSuiComment(
 
     let translationsText = '';
 
-    Object.entries(translations).forEach((translation) => {
-      const [language, translationData] = translation;
+    Object.keys(translations).forEach((language) => {
+      const translationData = translations[language]!;
 
       const translationText = `${translationData.title || ''} ${
         translationData.content
       }`;
       translationsText += ` ${translationText}`;
 
+      // TODO: fix translation author & ipfsHash
       const commentTranslation = new CommentTranslationEntity({
         id: `${comment.id}-${language}`,
         commentId: comment.id,
-        author: comment.author, // TODO: fix
+        author: comment.author,
         content: translationData.content,
-        ipfsHash: '', // TODO: fix
+        ipfsHash: '0x',
         language: Number(language),
       });
 
@@ -1017,9 +1018,7 @@ export async function deleteSuiComment(
     'commentId',
     comment.id
   );
-  const translationIds: string[] = response.map(
-    (translation: any) => translation.id
-  );
+  const translationIds = response.map((translation) => translation.id);
   translationIds.forEach((id) =>
     promises.push(commentTranslationRepository.delete(id))
   );
