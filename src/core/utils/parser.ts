@@ -1,5 +1,3 @@
-import { integer } from 'aws-sdk/clients/cloudfront';
-
 export function parseNullableInt(stringVal: string | undefined): number {
   if (stringVal === undefined) {
     return 0;
@@ -11,7 +9,7 @@ export function parseIntArray(stringArray: string[]): number[] {
   return stringArray.map((element) => parseNullableInt(element));
 }
 
-export function byteToHex(byte: integer) {
+export function byteToHex(byte: number) {
   const unsignedByte = byte & 0xff; // eslint-disable-line no-bitwise
 
   if (unsignedByte < 16) {

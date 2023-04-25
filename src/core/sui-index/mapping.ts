@@ -12,13 +12,13 @@ import {
   editSuiReply,
   deleteSuiReply,
   changeStatusBestSuiReply,
-  updateSuiPostContent,
   deleteSuiPost,
   createSuiComment,
   voteSuiItem,
   deleteSuiComment,
   editSuiComment,
   editSuiPost,
+  updateSuiPost,
 } from 'src/core/sui-index/post';
 import {
   createSuiUser,
@@ -67,7 +67,7 @@ export async function handleUpdateSuiUser(
 export async function handleCreateSuiCommunity(
   eventModel: CommunityCreatedSuiEventModel
 ) {
-  await createSuiCommunity(eventModel.communityId);
+  await createSuiCommunity(eventModel.communityId, eventModel.timestamp);
 }
 
 export async function handleUpdateSuiCommunity(
@@ -117,16 +117,16 @@ export async function handleEditSuiReply(eventModel: ReplyEditedSuiEventModel) {
 
   await editSuiReply(postId, replyId, timestamp);
   await createHistory(eventModel, EntityType.Reply, OperationType.Edit);
-  await updateSuiPostContent(postId, timestamp, replyId);
+  await updateSuiPost(postId, timestamp, replyId);
 }
 
 export async function handleDeleteSuiReply(
   eventModel: ReplyDeletedSuiEventModel
 ) {
-  const { postId, timestamp, replyId } = eventModel;
+  const { postId, replyId } = eventModel;
 
   await Promise.all([
-    deleteSuiReply(postId, replyId, timestamp),
+    deleteSuiReply(postId, replyId),
     createHistory(eventModel, EntityType.Reply, OperationType.Delete),
   ]);
 }
@@ -162,10 +162,10 @@ export async function handleEditedSuiComment(
 export async function handleDeletedSuiComment(
   eventModel: CommentDeletedSuiEventModel
 ) {
-  const { postId, replyId, commentId, timestamp } = eventModel;
+  const { postId, replyId, commentId } = eventModel;
 
   await Promise.all([
-    deleteSuiComment(postId, replyId, commentId, timestamp),
+    deleteSuiComment(postId, replyId, commentId),
     createHistory(eventModel, EntityType.Comment, OperationType.Delete),
   ]);
 }
@@ -176,7 +176,7 @@ export async function handleVoteSuiItem(eventModel: ItemVotedSuiEventModel) {
     eventModel.postId,
     eventModel.replyId,
     eventModel.commentId,
-    eventModel.voteDirection
+    eventModel.timestamp
   );
 }
 

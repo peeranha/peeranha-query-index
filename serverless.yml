@@ -172,6 +172,16 @@ functions:
               - firstSuiQueue
               - Arn
 
+  first-sui-content-queue:
+    handler: src/handlers/sui-first-content-queue.handler
+    timeout: 50
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - firstSuiContentQueue
+              - Arn
+
 resources:
   Resources:
     queryIndexConfigTable:
@@ -210,6 +220,16 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: ${self:custom.stage}-firstSuiQueue.fifo
+        VisibilityTimeout: 50
+        FifoQueue: true
+        ContentBasedDeduplication: true
+        DeduplicationScope: messageGroup
+        FifoThroughputLimit: perMessageGroupId
+
+    firstSuiContentQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.stage}-firstSuiContentQueue.fifo
         VisibilityTimeout: 50
         FifoQueue: true
         ContentBasedDeduplication: true

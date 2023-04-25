@@ -40,6 +40,9 @@ export async function createSuiUser(userId: string, timestamp: number) {
   }
 
   const peeranhaUser = await getSuiUserById(userId);
+  if (!peeranhaUser) {
+    return undefined;
+  }
 
   const user = new UserEntity({
     id: userId,
@@ -183,9 +186,14 @@ export async function grantSuiRole(
   timestamp: number,
   role: string
 ) {
-  if (!(await userRepository.get(userId))) {
-    await createSuiUser(userId, timestamp);
+  let user = await userRepository.get(userId);
+  if (!user) {
+    user = await createSuiUser(userId, timestamp);
   }
+  if (!user) {
+    return;
+  }
+
   const userPermission = new UserPermissionEntity({
     id: `${userId}-${role}`,
     userId,

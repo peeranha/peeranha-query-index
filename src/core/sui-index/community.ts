@@ -52,10 +52,11 @@ async function deleteTagTranslations(translations: string[]) {
   await Promise.all(promises);
 }
 
-export async function createSuiTag(
-  communityId: string,
-  tagId: number
-): Promise<TagEntity> {
+export async function createSuiTag(communityId: string, tagId: number) {
+  if (await tagRepository.get(`${communityId}-${tagId}`)) {
+    return;
+  }
+
   const peeranhaTag = await getSuiTagById(communityId, tagId);
   const tagEntity = new TagEntity({
     id: peeranhaTag.tagId,
@@ -71,8 +72,6 @@ export async function createSuiTag(
 
   await tagRepository.create(tagEntity);
   await createTagTranslations(peeranhaTag);
-
-  return tagEntity;
 }
 
 export async function updateSuiTag(communityId: string, tagId: number) {
@@ -147,7 +146,10 @@ async function deleteCommunityTranslations(translations: string[]) {
   await Promise.all(promises);
 }
 
-export async function createSuiCommunity(communityId: string) {
+export async function createSuiCommunity(
+  communityId: string,
+  timestamp?: number
+) {
   const peeranhaCommunity = await getSuiCommunityById(communityId);
 
   const communityEntity = new CommunityEntity({
@@ -159,7 +161,7 @@ export async function createSuiCommunity(communityId: string) {
     language: peeranhaCommunity.language,
     avatar: peeranhaCommunity.avatar,
     isFrozen: peeranhaCommunity.isFrozen,
-    creationTime: peeranhaCommunity.timeCreate,
+    creationTime: timestamp!,
     postCount: 0,
     documentationCount: 0,
     deletedPostCount: 0,
@@ -172,7 +174,7 @@ export async function createSuiCommunity(communityId: string) {
 
   await communityRepository.create(communityEntity);
 
-  const tagsPromises: Promise<TagEntity>[] = [];
+  const tagsPromises: Promise<any>[] = [];
   for (let index = 1; index <= peeranhaCommunity.tags.length; index++) {
     tagsPromises.push(createSuiTag(communityId, index));
   }

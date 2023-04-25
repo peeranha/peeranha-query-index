@@ -1,3 +1,4 @@
+import { SUI_CONTENT_FIRST_QUEUE } from 'src/core/constants';
 import { BaseRepository } from 'src/core/db/repositories/BaseRepository';
 import { ConfigurationError } from 'src/core/errors';
 import {
@@ -50,7 +51,23 @@ import {
   handlerRevokedSuiRole,
 } from 'src/core/sui-index/mapping';
 import { log } from 'src/core/utils/logger';
+import { pushToSQS } from 'src/core/utils/sqs';
 import { BaseSuiEventModel } from 'src/models/sui-event-models';
+
+export const eventsForTranslations = [
+  POST_CREATED_SUI_EVENT_NAME,
+  POST_EDITED_SUI_EVENT_NAME,
+  REPLY_CREATED_SUI_EVENT_NAME,
+  REPLY_EDITED_SUI_EVENT_NAME,
+  COMMENT_CREATED_SUI_EVENT_NAME,
+  COMMENT_EDITED_SUI_EVENT_NAME,
+];
+
+export const eventsForChangePostContent = [
+  ...eventsForTranslations,
+  REPLY_DELETED_SUI_EVENT_NAME,
+  COMMENT_DELETED_SUI_EVENT_NAME,
+];
 
 const eventToHandler: Record<string, Function> = {};
 eventToHandler[USER_CREATED_SUI_EVENT_NAME] = handleCreateSuiUser;
@@ -92,5 +109,13 @@ export async function processSuiIndexing(eventModel: BaseSuiEventModel) {
     );
   }
   await BaseRepository.transaction(handler, eventModel);
+
+  if (
+    eventsForTranslations.includes(eventModel.type) ||
+    eventsForChangePostContent.includes(eventModel.type)
+  ) {
+    await pushToSQS(SUI_CONTENT_FIRST_QUEUE, eventModel);
+  }
+
   return eventModel;
 }

@@ -1,5 +1,6 @@
+/* eslint-disable no-await-in-loop */
 import { SuiTransactionBlockResponse } from '@mysten/sui.js';
-import { SUI_FIRST_QUEUE } from 'src/core/constants';
+import { SUI_INDEXING_FIRST_QUEUE } from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
 import {
@@ -203,8 +204,7 @@ export async function readSuiEvents(
     });
 
     for (let i = 0; i < eventModels.length; i++) {
-      // eslint-disable-next-line no-await-in-loop
-      await pushToSQS(SUI_FIRST_QUEUE, eventModels[i]);
+      await pushToSQS(SUI_INDEXING_FIRST_QUEUE, eventModels[i]);
     }
 
     const newNextCursor = newBlocks[newBlocks.length - 1]?.digest;

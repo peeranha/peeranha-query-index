@@ -9,7 +9,7 @@ import { ConfigurationError, RuntimeError } from 'src/core/errors';
 import { getObject, getDynamicFieldObject } from 'src/core/sui-blockchain/sui';
 import { vectorU8ToString } from 'src/core/sui-blockchain/utils';
 import { AddIpfsData } from 'src/core/utils/ipfs';
-import { log } from 'src/core/utils/logger';
+import { log, LogLevel } from 'src/core/utils/logger';
 import { parseIntArray } from 'src/core/utils/parser';
 
 import { parseIntFromSuiBits } from './utils';
@@ -19,30 +19,42 @@ const REPLY_DYNAMIC_FIELD_TYPE = 'u64';
 const COMMETN_DYNAMIC_FIELD_TYPE = 'u64';
 const USER_RATING_DYNAMIC_FIELD_TYPE = '0x2::object::ID';
 
-export async function getSuiUserById(userId: string): Promise<UserData> {
-  const userObject = await getObject(userId);
+export async function getSuiUserById(
+  userId: string
+): Promise<UserData | undefined> {
+  try {
+    const userObject = await getObject(userId);
 
-  log(`User object: ${JSON.stringify(userObject)}`);
+    log(`User object: ${JSON.stringify(userObject)}`);
 
-  const fields = userObject.data?.content?.fields;
+    const fields = userObject.data?.content?.fields;
 
-  if (!fields) {
-    throw new RuntimeError(`Missing 'fields' in response for user ${userId}.`);
+    if (!fields) {
+      throw new RuntimeError(
+        `Missing 'fields' in response for user ${userId}.`
+      );
+    }
+
+    const ipfsHash1 = vectorU8ToString(fields.ipfsDoc.fields.hash);
+    const ipfsHash2 = vectorU8ToString(fields.ipfsDoc.fields.hash2);
+
+    const user = new UserData([
+      [ipfsHash1, ipfsHash2],
+      fields.energy,
+      fields.lastUpdatePeriod,
+      fields.followedCommunities,
+    ]);
+
+    const userData = await AddIpfsData(user, user.ipfsDoc[0]);
+    log(`User Data with Ipfs info: ${JSON.stringify(userData)}`);
+    return userData;
+  } catch (err: any) {
+    log(
+      `Error during getting user. Params: userId - ${userId}\n${err}`,
+      LogLevel.ERROR
+    );
+    return undefined;
   }
-
-  const ipfsHash1 = vectorU8ToString(fields.ipfsDoc.fields.hash);
-  const ipfsHash2 = vectorU8ToString(fields.ipfsDoc.fields.hash2);
-
-  const user = new UserData([
-    [ipfsHash1, ipfsHash2],
-    fields.energy,
-    fields.lastUpdatePeriod,
-    fields.followedCommunities,
-  ]);
-
-  const userData = await AddIpfsData(user, user.ipfsDoc[0]);
-  log(`User Data with Ipfs info: ${JSON.stringify(userData)}`);
-  return userData;
 }
 
 export async function getSuiCommunityById(
@@ -409,6 +421,10 @@ export async function getSuiUserRating(userId: string, communityId: string) {
     rating = parseIntFromSuiBits(ratingStr);
     active = true;
   }
+
+  log(
+    `User rating for user ${userId} in community with id ${communityId}: value - ${rating}, isActive - ${active}`
+  );
 
   return new UserRating({
     rating,

@@ -1,4 +1,5 @@
 import { DatabaseManager } from 'src/core/db/db-manager';
+import { log, LogLevel } from 'src/core/utils/logger';
 
 export abstract class BaseRepository<EntityT, KeyT> {
   protected tableName: string;
@@ -31,11 +32,21 @@ export abstract class BaseRepository<EntityT, KeyT> {
     return JSON.parse(JSON.stringify(result));
   }
 
-  public async create(data: EntityT): Promise<any> {
-    await DatabaseManager.getInstance()(this.tableName)
-      .insert(data)
-      .onConflict('id')
-      .ignore();
+  public async create(data: EntityT | EntityT[]): Promise<any> {
+    try {
+      await DatabaseManager.getInstance()(this.tableName).insert(data);
+    } catch (err: any) {
+      if (err.code !== 'ER_DUP_ENTRY') {
+        log(
+          `Error when inserting data ${JSON.stringify(data)} into table ${
+            this.tableName
+          }`,
+          LogLevel.ERROR
+        );
+        log(JSON.stringify(err), LogLevel.ERROR);
+        throw err;
+      }
+    }
   }
 
   public async update(id: KeyT, data: any): Promise<any> {
