@@ -322,3 +322,15 @@ export class RoleRevokedSuiEventModel extends BaseSuiEventModel {
     this.userId = event.parsedJson.userId;
   }
 }
+
+export class SetDocumentationTreeSuiEventModel extends BaseSuiEventModel {
+  public userId: string;
+
+  public communityId: string;
+
+  constructor(event: any, timestamp: number) {
+    super(event, timestamp);
+    this.userId = event.parsedJson.userId;
+    this.communityId = event.parsedJson.communityId;
+  }
+}

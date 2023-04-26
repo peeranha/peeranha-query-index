@@ -32,6 +32,7 @@ import {
   ROLE_REVOKED_SUI_EVENT_NAME,
   MODERATOR_POST_EDITED_SUI_EVENT_NAME,
   MODERATOR_REPLY_EDITED_SUI_EVENT_NAME,
+  SET_DOCUMENTATION_TREE_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import {
   createSuiProvider,
@@ -63,6 +64,7 @@ import {
   CommentDeletedSuiEventModel,
   RoleGrantedSuiEventModel,
   RoleRevokedSuiEventModel,
+  SetDocumentationTreeSuiEventModel,
 } from 'src/models/sui-event-models';
 import {
   ReadSuiEventsRequestModel,
@@ -97,7 +99,8 @@ eventToModelType[FOLLOWED_COMMUNITY_SUI_EVENT_NAME] =
   FollowedCommunitySuiEventModel;
 eventToModelType[UNFOLLOWED_COMMUNITY_SUI_EVENT_NAME] =
   UnfollowedCommunitySuiEventModel;
-
+eventToModelType[SET_DOCUMENTATION_TREE_SUI_EVENT_NAME] =
+  SetDocumentationTreeSuiEventModel;
 eventToModelType[COMMENT_CREATED_SUI_EVENT_NAME] = CommentCreatedSuiEventModel;
 eventToModelType[COMMENT_EDITED_SUI_EVENT_NAME] = CommentEditedSuiEventModel;
 eventToModelType[COMMENT_DELETED_SUI_EVENT_NAME] = CommentDeletedSuiEventModel;
