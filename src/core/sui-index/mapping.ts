@@ -18,6 +18,7 @@ import {
   deleteSuiComment,
   editSuiComment,
   editSuiPost,
+  setDocumentationTree,
 } from 'src/core/sui-index/post';
 import {
   createSuiUser,
@@ -49,6 +50,7 @@ import {
   UnfollowedCommunitySuiEventModel,
   RoleGrantedSuiEventModel,
   RoleRevokedSuiEventModel,
+  SetDocumentationTreeSuiEventModel,
 } from 'src/models/sui-event-models';
 
 export async function handleCreateSuiUser(
@@ -210,4 +212,14 @@ export async function handlerRevokedSuiRole(
 ) {
   const { role, userId } = eventModel;
   await revokeSuiRole(userId, role);
+}
+
+export async function handleSetDocumentationTree(
+  eventModel: SetDocumentationTreeSuiEventModel
+) {
+  await setDocumentationTree(
+    eventModel.communityId,
+    eventModel.timestamp,
+    eventModel.userId
+  );
 }

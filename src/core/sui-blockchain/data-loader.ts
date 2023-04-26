@@ -75,10 +75,17 @@ export async function getSuiCommunityById(
   const ipfsHash1 = vectorU8ToString(fields.ipfsDoc.fields.hash);
   const ipfsHash2 = vectorU8ToString(fields.ipfsDoc.fields.hash2);
 
+  const documentation = fields.documentation
+    ? [
+        vectorU8ToString(fields.documentation.fields.hash),
+        vectorU8ToString(fields.documentation.fields.hash2),
+      ]
+    : ['0x', '0x'];
+
   const tagsCount = Number(fields.tags.fields.size);
   const tagTable = fields.tags.fields.id.id;
   const tagsPromises: Promise<any>[] = [];
-  for (let index = 1; index < tagsCount + 1; index++) {
+  for (let index = 1; index <= tagsCount; index++) {
     tagsPromises.push(
       getDynamicFieldObject(tagTable, TAG_DYNAMIC_FIELD_TYPE, index.toString())
     );
@@ -89,7 +96,7 @@ export async function getSuiCommunityById(
   const community = new CommunityData({
     id: communityId,
     ipfsDoc: [ipfsHash1, ipfsHash2],
-    timeCreate: fields.timeCreate,
+    documentation,
     isFrozen: fields.isFrozen,
     tagsCount,
     tags,

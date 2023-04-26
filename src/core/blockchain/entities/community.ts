@@ -43,6 +43,8 @@ export class CommunityData extends Community {
 
   public tags: any[];
 
+  public documentation?: [string, string];
+
   constructor(community: any) {
     super(community);
     this.id = String(community?.id);
@@ -54,5 +56,6 @@ export class CommunityData extends Community {
     this.communitySite = community?.communitySite;
     this.translations = community?.translations;
     this.tags = community?.tags;
+    this.documentation = community?.documentation;
   }
 }

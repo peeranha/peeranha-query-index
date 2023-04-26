@@ -11,6 +11,8 @@ export const COMMUNITY_UPDATED_SUI_EVENT_NAME =
   'communityLib::UpdateCommunityEvent';
 export const TAG_CREATED_SUI_EVENT_NAME = 'communityLib::CreateTagEvent';
 export const TAG_UPDATED_SUI_EVENT_NAME = 'communityLib::UpdateTagEvent';
+export const SET_DOCUMENTATION_TREE_SUI_EVENT_NAME =
+  'communityLib::SetDocumentationTree';
 
 export const POST_CREATED_SUI_EVENT_NAME = 'postLib::CreatePostEvent';
 export const POST_EDITED_SUI_EVENT_NAME = 'postLib::EditPostEvent';

@@ -40,7 +40,7 @@ import {
   createPost,
   updatePostContent,
   createReply,
-  generateDocumentationPosts,
+  setCommunityDocumentation,
 } from 'src/core/index/post';
 import {
   createUser,
@@ -779,7 +779,7 @@ export async function handlerSetDocumentationTree(
     return;
   }
 
-  await generateDocumentationPosts(
+  await setCommunityDocumentation(
     communityId,
     userAddr,
     communityDocumentation.hash,

@@ -30,7 +30,6 @@ import {
 } from 'src/core/index/user';
 import { ItemProperties } from 'src/core/index/utils';
 import { getDataFromIpfs, getIpfsHashFromBytes32 } from 'src/core/utils/ipfs';
-import { log } from 'src/core/utils/logger';
 
 const postRepository = new PostRepository();
 const replyRepository = new ReplyRepository();
@@ -480,33 +479,29 @@ export async function updatePostContent(
   await postRepository.update(String(postId), postForSave);
 }
 
-function indexingJson(children: any[], posts: string[]) {
+function getPostsFromChild(children: any[]) {
+  const posts: string[] = [];
+
   children.forEach((child) => {
     const { id, title } = child;
     if (typeof id === 'string' && typeof title === 'string') {
       if (id !== '' && title !== '') {
         posts.push(id);
-        if (typeof child === 'object') {
-          if (child.children && Array.isArray(child.children)) {
-            if (child.children.length > 0) {
-              indexingJson(child.children, posts);
-            }
-          } else {
-            log("field 'children' in children post is empty or not an array");
+
+        if (child.children && Array.isArray(child.children)) {
+          if (child.children.length > 0) {
+            const childPosts = getPostsFromChild(child.children);
+            posts.push(...childPosts);
           }
-        } else {
-          log('children post is not an object');
         }
-      } else {
-        log('id or/and title of children post is empty');
       }
-    } else {
-      log('id or/and title of children post not found or not a string');
     }
   });
+
+  return posts;
 }
 
-async function indexingDocumentation(ipfsHash: string) {
+export async function getDocumentationData(ipfsHash: string) {
   const posts: string[] = [];
   const result = await getDataFromIpfs(getIpfsHashFromBytes32(ipfsHash));
   const documentationJSON = JSON.stringify(result);
@@ -517,13 +512,7 @@ async function indexingDocumentation(ipfsHash: string) {
     if (pinnedPost && typeof pinnedPost === 'object') {
       const { id, title } = pinnedPost;
       if (typeof id === 'string' && typeof title === 'string') {
-        if (id !== '' && title !== '') {
-          posts.push(id);
-        } else {
-          log('id or/and title of pinned post is empty');
-        }
-      } else {
-        log('id or/and title of pinned post not found or not a string');
+        posts.push(id);
       }
     }
 
@@ -532,30 +521,23 @@ async function indexingDocumentation(ipfsHash: string) {
         const documentationObject = documentations[i];
         const { id, title } = documentationObject;
         if (typeof id === 'string' && typeof title === 'string') {
-          if (id !== '' && title !== '') {
-            const { children } = documentationObject;
-            posts.push(id);
-            if (children && Array.isArray(children) && children.length > 0) {
-              indexingJson(children, posts);
-            }
-          } else {
-            log('id or/and title of post is empty');
+          const { children } = documentationObject;
+          posts.push(id);
+          if (children && Array.isArray(children) && children.length > 0) {
+            const childPosts = getPostsFromChild(children);
+            posts.push(...childPosts);
           }
-        } else {
-          log('id or/and title of post not found or not a string');
         }
       }
-    } else {
-      log('documentations not found or not an array');
     }
   }
 
   return { posts, documentationJSON };
 }
 
-export async function generateDocumentationPosts(
+export async function setCommunityDocumentation(
   communityId: string,
-  userAddr: string,
+  userId: string,
   newDocumentationIpfsHash: string,
   timestamp: number,
   oldDocumentationIpfsHash?: string
@@ -563,13 +545,13 @@ export async function generateDocumentationPosts(
   const newPosts: string[] = [];
   const oldPosts: string[] = [];
 
-  const documentationData = await indexingDocumentation(
+  const documentationData = await getDocumentationData(
     newDocumentationIpfsHash
   );
   newPosts.push(...documentationData.posts);
 
   if (oldDocumentationIpfsHash) {
-    const oldDocumentationData = await indexingDocumentation(
+    const oldDocumentationData = await getDocumentationData(
       oldDocumentationIpfsHash
     );
 
@@ -588,11 +570,6 @@ export async function generateDocumentationPosts(
     await communityDocumentationRepository.create(documentation);
   }
 
-  const user = await userRepository.get(userAddr);
-  if (!user) {
-    await createUser(userAddr, timestamp);
-  }
-
   const postsForCreating = newPosts.filter(
     (post, index) =>
       newPosts.indexOf(post) === index && oldPosts.indexOf(post) === -1
@@ -604,8 +581,7 @@ export async function generateDocumentationPosts(
   const documentationCount =
     oldPosts.length - postsForDeleting.length + postsForCreating.length;
 
-  const community = await getCommunityById(communityId);
-  await communityRepository.update(community.id, {
+  await communityRepository.update(communityId, {
     documentationCount,
   });
 
@@ -622,7 +598,7 @@ export async function generateDocumentationPosts(
       title: postData.title,
       content: postData.content,
       postContent: `${postData.title} ${postData.content}`,
-      author: userAddr,
+      author: userId,
       isDeleted: false,
       rating: 0,
       postTime: timestamp,

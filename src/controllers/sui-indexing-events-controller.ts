@@ -25,6 +25,7 @@ import {
   ROLE_REVOKED_SUI_EVENT_NAME,
   MODERATOR_POST_EDITED_SUI_EVENT_NAME,
   MODERATOR_REPLY_EDITED_SUI_EVENT_NAME,
+  SET_DOCUMENTATION_TREE_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import {
@@ -49,6 +50,7 @@ import {
   handleUnfollowSuiCommunity,
   handlerGrantedSuiRole,
   handlerRevokedSuiRole,
+  handleSetDocumentationTree,
 } from 'src/core/sui-index/mapping';
 import { log } from 'src/core/utils/logger';
 import { pushToSQS } from 'src/core/utils/sqs';
@@ -90,6 +92,8 @@ eventToHandler[ITEM_VOTED_SUI_EVENT_NAME] = handleVoteSuiItem;
 eventToHandler[FOLLOWED_COMMUNITY_SUI_EVENT_NAME] = handleFollowSuiCommunity;
 eventToHandler[UNFOLLOWED_COMMUNITY_SUI_EVENT_NAME] =
   handleUnfollowSuiCommunity;
+eventToHandler[SET_DOCUMENTATION_TREE_SUI_EVENT_NAME] =
+  handleSetDocumentationTree;
 
 eventToHandler[COMMENT_CREATED_SUI_EVENT_NAME] = handleNewSuiComment;
 eventToHandler[COMMENT_EDITED_SUI_EVENT_NAME] = handleEditedSuiComment;

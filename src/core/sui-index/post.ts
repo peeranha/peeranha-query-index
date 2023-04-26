@@ -10,6 +10,7 @@ import {
 } from 'src/core/db/entities';
 import { CommentRepository } from 'src/core/db/repositories/CommentRepository';
 import { CommentTranslationRepository } from 'src/core/db/repositories/CommentTranslationRepository';
+import { CommunityDocumentationRepository } from 'src/core/db/repositories/CommunityDocumentationRepository';
 import { CommunityRepository } from 'src/core/db/repositories/CommunityRepository';
 import { PostRepository } from 'src/core/db/repositories/PostRepository';
 import { PostTagRepository } from 'src/core/db/repositories/PostTagRepository';
@@ -18,10 +19,12 @@ import { ReplyRepository } from 'src/core/db/repositories/ReplyRepository';
 import { ReplyTranslationRepository } from 'src/core/db/repositories/ReplyTranslationRepository';
 import { TagRepository } from 'src/core/db/repositories/TagRepository';
 import { UserRepository } from 'src/core/db/repositories/UserRepository';
+import { setCommunityDocumentation } from 'src/core/index/post';
 import {
   getSuiPostById,
   getSuiReply,
   getSuiComment,
+  getSuiCommunityById,
 } from 'src/core/sui-blockchain/data-loader';
 import {
   getSuiCommunity,
@@ -44,6 +47,7 @@ const postTagRepository = new PostTagRepository();
 const postTranslationRepository = new PostTranslationRepository();
 const replyTranslationRepository = new ReplyTranslationRepository();
 const commentTranslationRepository = new CommentTranslationRepository();
+const communityDocumentationRepository = new CommunityDocumentationRepository();
 
 // TODO: fix translation author & ipfsHash
 async function updatePostTranslations(post: PostEntity) {
@@ -1039,4 +1043,32 @@ export async function voteSuiItem(
 
     await Promise.all(promises);
   }
+}
+
+export async function setDocumentationTree(
+  communityId: string,
+  timestamp: number,
+  userId: string
+) {
+  const [oldDocumentation, community] = await Promise.all([
+    communityDocumentationRepository.get(communityId),
+    getSuiCommunityById(communityId),
+  ]);
+
+  const documentationHash = community.documentation![0];
+
+  if (
+    parseInt(documentationHash, 16) === 0 ||
+    (oldDocumentation && oldDocumentation.ipfsHash === documentationHash)
+  ) {
+    return;
+  }
+
+  await setCommunityDocumentation(
+    communityId,
+    userId,
+    documentationHash,
+    timestamp,
+    oldDocumentation?.ipfsHash
+  );
 }
