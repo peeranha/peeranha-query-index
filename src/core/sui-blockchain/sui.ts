@@ -1,6 +1,8 @@
 import { JsonRpcProvider, Connection } from '@mysten/sui.js';
 import { ConfigurationError } from 'src/core/errors';
 
+import { log } from '../utils/logger';
+
 export function createSuiProvider() {
   if (!process.env.SUI_RPC_ENDPOINT) {
     throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
@@ -45,8 +47,9 @@ export async function queryTransactionBlocks(
     }),
   });
 
-  const responseObject = await response.json();
-
+  const responseText = await response.text();
+  log(`Response from suix_queryTransactionBlocks: ${responseText}`);
+  const responseObject = JSON.parse(responseText);
   return responseObject.result;
 }
 
