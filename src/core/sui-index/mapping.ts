@@ -18,7 +18,6 @@ import {
   deleteSuiComment,
   editSuiComment,
   editSuiPost,
-  updateSuiPost,
 } from 'src/core/sui-index/post';
 import {
   createSuiUser,
@@ -117,7 +116,6 @@ export async function handleEditSuiReply(eventModel: ReplyEditedSuiEventModel) {
 
   await editSuiReply(postId, replyId, timestamp);
   await createHistory(eventModel, EntityType.Reply, OperationType.Edit);
-  await updateSuiPost(postId, timestamp, replyId);
 }
 
 export async function handleDeleteSuiReply(

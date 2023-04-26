@@ -836,16 +836,6 @@ input contractinfo_OrderByInput {
 "Integers that will have a value of 0 or more."
 scalar UnsignedInt
 
-input knex_migrations_lock_WhereInput {
-  index: String
-  is_locked: String
-}
-
-input knex_migrations_lock_OrderByInput {
-  index: OrderBy
-  is_locked: OrderBy
-}
-
 "The javascript `Date` as integer. Type represents date and time as number of milliseconds from start of UNIX epoch."
 scalar Timestamp
 
@@ -861,6 +851,16 @@ input knex_migrations_OrderByInput {
   name: OrderBy
   batch: OrderBy
   migration_time: OrderBy
+}
+
+input knex_migrations_lock_WhereInput {
+  index: String
+  is_locked: String
+}
+
+input knex_migrations_lock_OrderByInput {
+  index: OrderBy
+  is_locked: OrderBy
 }
 
 type Mutation
@@ -1053,16 +1053,6 @@ input history_UpdateInput {
   timeStamp: Int
 }
 
-input knex_migrations_lock_InsertInput {
-  index: UnsignedInt!
-  is_locked: Int
-}
-
-input knex_migrations_lock_UpdateInput {
-  index: UnsignedInt
-  is_locked: Int
-}
-
 input knex_migrations_InsertInput {
   id: UnsignedInt!
   name: String
@@ -1075,6 +1065,16 @@ input knex_migrations_UpdateInput {
   name: String
   batch: Int
   migration_time: Timestamp
+}
+
+input knex_migrations_lock_InsertInput {
+  index: UnsignedInt!
+  is_locked: Int
+}
+
+input knex_migrations_lock_UpdateInput {
+  index: UnsignedInt
+  is_locked: Int
 }
 
 input period_InsertInput {
