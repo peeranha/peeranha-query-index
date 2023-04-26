@@ -24,4 +24,4 @@ environment:
 
   SUI_PACKAGE_ADDRESS: '0x5d964e69316a306cd6ce9f3b8dc230d9149aa9166bd90c2bcabdedbb72634ed5'
   SUI_USERS_RATING_COLLECTION: '0xafb2c2a2c2f6afa72d1b081b8caf78b24474718c16ec4d596937c8af0396d370'
-  SUI_RPC_ENDPOINT: 'https://rpc.testnet.sui.io'
+  SUI_RPC_ENDPOINT: 'https://rpc.ankr.com/sui_testnet'
