@@ -187,6 +187,12 @@ export async function getSuiPostById(
 
   const ipfsDoc = await getItemIpfsDoc(fields.postId);
 
+  const votesArray: { userId: string; direction: number }[] =
+    fields?.historyVotes?.fields?.contents.map((voteItem: any) => ({
+      userId: voteItem.fields.key,
+      direction: voteItem.fields.value,
+    }));
+
   const post = new PostData({
     id: postMetaDataId,
     id2: fields.postId,
@@ -205,6 +211,7 @@ export async function getSuiPostById(
     commentCount: fields.comments.fields.size,
     propertyCount: fields.properties.length,
     language: fields.language,
+    historyVotes: votesArray,
   });
 
   const postData = await AddIpfsData(post, post.ipfsDoc[0]);
@@ -251,6 +258,12 @@ export async function getSuiReply(
     );
   }
 
+  const votesArray: { userId: string; direction: number }[] =
+    replyFields?.historyVotes?.fields?.contents.map((voteItem: any) => ({
+      userId: voteItem.fields.key,
+      direction: voteItem.fields.value,
+    }));
+
   const ipfsDoc = await getItemIpfsDoc(replyFields.replyId);
 
   const reply = new ReplyData({
@@ -266,6 +279,7 @@ export async function getSuiReply(
     isFirstReply: replyFields.isFirstReply,
     isQuickReply: replyFields.isQuickReply,
     language: fields.language,
+    historyVotes: votesArray,
   });
 
   return AddIpfsData(reply, reply.ipfsDoc[0]);

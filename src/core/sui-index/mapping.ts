@@ -176,7 +176,8 @@ export async function handleVoteSuiItem(eventModel: ItemVotedSuiEventModel) {
     eventModel.postId,
     eventModel.replyId,
     eventModel.commentId,
-    eventModel.timestamp
+    eventModel.timestamp,
+    eventModel.voteDirection
   );
 }
 

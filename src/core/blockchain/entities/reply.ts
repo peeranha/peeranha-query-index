@@ -23,6 +23,8 @@ export class Reply {
 
   isDeleted: boolean;
 
+  historyVotes: { userId: string; direction: number }[];
+
   constructor(reply: any) {
     this.id2 = reply.id2;
     this.author = reply.author;
@@ -36,6 +38,7 @@ export class Reply {
     this.isFirstReply = reply.isFirstReply;
     this.isQuickReply = reply.isQuickReply;
     this.language = reply.language;
+    this.historyVotes = reply.historyVotes;
   }
 }
 

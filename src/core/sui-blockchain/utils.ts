@@ -15,3 +15,10 @@ export const vectorU8ToString = (byteArray: any[]) => {
   const uint8Array = new Uint8Array(byteArray);
   return `0x${new TextDecoder('utf-8').decode(uint8Array)}`;
 };
+
+export enum VoteDirection {
+  DIRECTION_DOWNVOTE = 4,
+  DIRECTION_CANCEL_DOWNVOTE = 0,
+  DIRECTION_UPVOTE = 3,
+  DIRECTION_CANCEL_UPVOTE = 1,
+}

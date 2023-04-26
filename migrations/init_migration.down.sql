@@ -1,3 +1,5 @@
+DROP TABLE replyvotehistory;
+DROP TABLE postvotehistory;
 DROP TABLE communitytranslation;
 DROP TABLE tagtranslation;
 DROP TABLE posttranslation;

@@ -283,3 +283,23 @@ CREATE TABLE IF NOT EXISTS commenttranslation (
   FOREIGN KEY (commentId) REFERENCES comment (id),
   FOREIGN KEY (author) REFERENCES user (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS postvotehistory (
+  id VARCHAR(133) PRIMARY KEY,
+  postId VARCHAR(66) NOT NULL,
+  direction INT,
+  userId VARCHAR(66) NOT NULL,
+
+  FOREIGN KEY (postId) REFERENCES post (id),
+  FOREIGN KEY (userId) REFERENCES user (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS replyvotehistory (
+  id VARCHAR(141) PRIMARY KEY,
+  replyId VARCHAR(74) NOT NULL,
+  direction INT,
+  userId VARCHAR(66) NOT NULL,
+
+  FOREIGN KEY (replyId) REFERENCES reply (id),
+  FOREIGN KEY (userId) REFERENCES user (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

@@ -821,3 +821,47 @@ export class CommentTranslationEntity {
     this.author = params.author;
   }
 }
+
+export class PostVoteHistoryEntity {
+  id: string;
+
+  postId: string;
+
+  userId: string;
+
+  direction: number;
+
+  constructor(params: {
+    id: string;
+    postId: string;
+    userId: string;
+    direction: number;
+  }) {
+    this.id = params.id;
+    this.postId = params.postId;
+    this.userId = params.userId;
+    this.direction = params.direction;
+  }
+}
+
+export class ReplyVoteHistoryEntity {
+  id: string;
+
+  replyId: string;
+
+  userId: string;
+
+  direction: number;
+
+  constructor(params: {
+    id: string;
+    replyId: string;
+    userId: string;
+    direction: number;
+  }) {
+    this.id = params.id;
+    this.replyId = params.replyId;
+    this.userId = params.userId;
+    this.direction = params.direction;
+  }
+}

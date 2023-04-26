@@ -33,6 +33,8 @@ export class Post {
 
   ipfsDoc: [string, string];
 
+  historyVotes: { userId: string; direction: number }[];
+
   constructor(post: any) {
     this.id = post.id;
     this.id2 = post.id2;
@@ -51,6 +53,7 @@ export class Post {
     this.tags = post.tags;
     this.ipfsDoc = post.ipfsDoc;
     this.language = post.language;
+    this.historyVotes = post.historyVotes;
   }
 }
 

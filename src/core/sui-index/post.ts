@@ -5,8 +5,10 @@ import {
   PostEntity,
   PostTagEntity,
   PostTranslationEntity,
+  PostVoteHistoryEntity,
   ReplyEntity,
   ReplyTranslationEntity,
+  ReplyVoteHistoryEntity,
 } from 'src/core/db/entities';
 import { CommentRepository } from 'src/core/db/repositories/CommentRepository';
 import { CommentTranslationRepository } from 'src/core/db/repositories/CommentTranslationRepository';
@@ -15,8 +17,10 @@ import { CommunityRepository } from 'src/core/db/repositories/CommunityRepositor
 import { PostRepository } from 'src/core/db/repositories/PostRepository';
 import { PostTagRepository } from 'src/core/db/repositories/PostTagRepository';
 import { PostTranslationRepository } from 'src/core/db/repositories/PostTranslationRepository';
+import { PostVoteHistoryRepository } from 'src/core/db/repositories/PostVoteHistoryRepository';
 import { ReplyRepository } from 'src/core/db/repositories/ReplyRepository';
 import { ReplyTranslationRepository } from 'src/core/db/repositories/ReplyTranslationRepository';
+import { ReplyVoteHistoryRepository } from 'src/core/db/repositories/ReplyVoteHistoryRepository';
 import { TagRepository } from 'src/core/db/repositories/TagRepository';
 import { UserRepository } from 'src/core/db/repositories/UserRepository';
 import { setCommunityDocumentation } from 'src/core/index/post';
@@ -37,6 +41,8 @@ import {
 } from 'src/core/sui-index/user';
 import { translateForumItem } from 'src/core/translations';
 
+import { VoteDirection } from '../sui-blockchain/utils';
+
 const postRepository = new PostRepository();
 const replyRepository = new ReplyRepository();
 const commentRepository = new CommentRepository();
@@ -48,6 +54,8 @@ const postTranslationRepository = new PostTranslationRepository();
 const replyTranslationRepository = new ReplyTranslationRepository();
 const commentTranslationRepository = new CommentTranslationRepository();
 const communityDocumentationRepository = new CommunityDocumentationRepository();
+const postVoteHistoryRepository = new PostVoteHistoryRepository();
+const replyVoteHistoryRepository = new ReplyVoteHistoryRepository();
 
 // TODO: fix translation author & ipfsHash
 async function updatePostTranslations(post: PostEntity) {
@@ -976,7 +984,8 @@ export async function voteSuiItem(
   postId: string,
   replyId: number,
   commentId: number,
-  timestamp: number
+  timestamp: number,
+  voteDirection: number
 ) {
   if (commentId !== 0) {
     let comment = await commentRepository.get(
@@ -1014,6 +1023,40 @@ export async function voteSuiItem(
         })
       );
 
+      const replyVoteHistoryKey = `${postId}-${replyId}-${userId}`;
+      if (
+        [
+          VoteDirection.DIRECTION_UPVOTE,
+          VoteDirection.DIRECTION_DOWNVOTE,
+        ].includes(voteDirection)
+      ) {
+        let historyVoteEntity = await replyVoteHistoryRepository.get(
+          replyVoteHistoryKey
+        );
+        const userVote = peeranhaReply.historyVotes.find(
+          (vote) => vote.userId === userId
+        )!;
+
+        if (!historyVoteEntity) {
+          historyVoteEntity = new ReplyVoteHistoryEntity({
+            id: replyVoteHistoryKey,
+            userId,
+            replyId: `${postId}-${replyId}`,
+            direction: userVote.direction,
+          });
+
+          promises.push(replyVoteHistoryRepository.create(historyVoteEntity));
+        } else {
+          promises.push(
+            replyVoteHistoryRepository.update(replyVoteHistoryKey, {
+              direction: userVote.direction,
+            })
+          );
+        }
+      } else {
+        promises.push(replyVoteHistoryRepository.delete(replyVoteHistoryKey));
+      }
+
       promises.push(updateSuiUserRating(reply.author, post.communityId));
     }
 
@@ -1034,6 +1077,40 @@ export async function voteSuiItem(
           rating: peeranhaPost.rating,
         })
       );
+
+      const postVoteHistoryKey = `${postId}-${userId}`;
+      if (
+        [
+          VoteDirection.DIRECTION_UPVOTE,
+          VoteDirection.DIRECTION_DOWNVOTE,
+        ].includes(voteDirection)
+      ) {
+        let historyVoteEntity = await postVoteHistoryRepository.get(
+          postVoteHistoryKey
+        );
+        const userVote = peeranhaPost.historyVotes.find(
+          (vote) => vote.userId === userId
+        )!;
+
+        if (!historyVoteEntity) {
+          historyVoteEntity = new PostVoteHistoryEntity({
+            id: postVoteHistoryKey,
+            userId,
+            postId,
+            direction: userVote.direction,
+          });
+
+          promises.push(postVoteHistoryRepository.create(historyVoteEntity));
+        } else {
+          promises.push(
+            postVoteHistoryRepository.update(postVoteHistoryKey, {
+              direction: userVote.direction,
+            })
+          );
+        }
+      } else {
+        promises.push(postVoteHistoryRepository.delete(postVoteHistoryKey));
+      }
     }
 
     promises.push(
