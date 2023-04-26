@@ -118,7 +118,7 @@ export async function readSuiEvents(
     throw new ConfigurationError('SUI_PACKAGE_ADDRESS is not configured');
   }
 
-  const provider = createSuiProvider();
+  const provider = await createSuiProvider();
 
   const cursorConfig = await configRepository.get(NEXT_CURSOR);
   const cursor = cursorConfig ? cursorConfig.value : null;
