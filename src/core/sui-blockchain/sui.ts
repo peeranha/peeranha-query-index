@@ -1,34 +1,30 @@
 import { JsonRpcProvider, Connection } from '@mysten/sui.js';
 import { ConfigurationError } from 'src/core/errors';
-import { log } from 'src/core/utils/logger';
 import { getSecretValue } from 'src/core/utils/secrets';
 
 export async function createSuiProvider() {
-  if (!process.env.SUI_RPC_ENDPOINT) {
+  const endpoint = await getSecretValue('SUI_RPC_ENDPOINT');
+  if (!endpoint) {
     throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
 
-  const apiKey = await getSecretValue('RPC_API_KEY');
-  const fullnode = `${process.env.SUI_RPC_ENDPOINT}/${apiKey}`;
-
-  const connection = new Connection({ fullnode });
+  const connection = new Connection({ fullnode: endpoint });
 
   return new JsonRpcProvider(connection);
 }
 
-export async function queryTransactionBlocks(
+export async function queryEvents(
   packageAddress: string,
+  moduleLib: string,
   cursor: string | undefined | null,
   maxTxNumber: number
 ) {
-  if (!process.env.SUI_RPC_ENDPOINT) {
+  const endpoint = await getSecretValue('SUI_RPC_ENDPOINT');
+  if (!endpoint) {
     throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
 
-  const apiKey = await getSecretValue('RPC_API_KEY');
-  const url = `${process.env.SUI_RPC_ENDPOINT}/${apiKey}`;
-
-  const response = await fetch(url, {
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -36,13 +32,12 @@ export async function queryTransactionBlocks(
     body: JSON.stringify({
       jsonrpc: '2.0',
       id: 1,
-      method: 'suix_queryTransactionBlocks',
+      method: 'suix_queryEvents',
       params: [
         {
-          filter: {
-            MoveFunction: {
-              package: packageAddress,
-            },
+          MoveModule: {
+            package: packageAddress,
+            module: moduleLib,
           },
         },
         cursor,
@@ -51,21 +46,17 @@ export async function queryTransactionBlocks(
     }),
   });
 
-  const responseText = await response.text();
-  log(`Response from suix_queryTransactionBlocks: ${responseText}`);
-  const responseObject = JSON.parse(responseText);
+  const responseObject = await response.json();
   return responseObject.result;
 }
 
 export async function getObject(objectId: string) {
-  if (!process.env.SUI_RPC_ENDPOINT) {
-    throw new ConfigurationError('SUI_RPC_ENDPOINT are not configured');
+  const endpoint = await getSecretValue('SUI_RPC_ENDPOINT');
+  if (!endpoint) {
+    throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
 
-  const apiKey = await getSecretValue('RPC_API_KEY');
-  const url = `${process.env.SUI_RPC_ENDPOINT}/${apiKey}`;
-
-  const response = await fetch(url, {
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -99,14 +90,12 @@ export async function getDynamicFieldObject(
   type: string,
   index: string
 ) {
-  if (!process.env.SUI_RPC_ENDPOINT) {
-    throw new ConfigurationError('SUI_RPC_ENDPOINT are not configured');
+  const endpoint = await getSecretValue('SUI_RPC_ENDPOINT');
+  if (!endpoint) {
+    throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
 
-  const apiKey = await getSecretValue('RPC_API_KEY');
-  const url = `${process.env.SUI_RPC_ENDPOINT}/${apiKey}`;
-
-  const response = await fetch(url, {
+  const response = await fetch(endpoint, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

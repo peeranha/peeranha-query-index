@@ -72,12 +72,6 @@ provider:
       - ${self:provider.environment.SUBNET_ID_2}
 
 fargate:
-  vpc:
-    securityGroupIds:
-      - ${self:provider.environment.SECURITY_GROUP_ID}
-    subnetIds:
-      - ${self:provider.environment.SUBNET_ID_1}
-      - ${self:provider.environment.SUBNET_ID_2}
   tasks:
     first-sui-events-listener:
       name: ${self:custom.stage}-first-sui-events-listener
@@ -89,7 +83,6 @@ fargate:
         REGION: ${self:provider.environment.REGION}
         SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
         AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
-        SUI_RPC_ENDPOINT: ${self:provider.environment.SUI_RPC_ENDPOINT}
         DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
         SUI_PACKAGE_ADDRESS: ${self:provider.environment.SUI_PACKAGE_ADDRESS}
         SUI_USERS_RATING_COLLECTION: ${self:provider.environment.SUI_USERS_RATING_COLLECTION}

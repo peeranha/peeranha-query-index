@@ -5,8 +5,6 @@ import { BaseDynamoDbRepository } from 'src/core/dynamodb/repositories/BaseDynam
 
 const BASE_TABLE_NAME_CONFIG = 'query-index-config';
 
-export const NEXT_CURSOR = 'nextCursor';
-
 export class ConfigRepository extends BaseDynamoDbRepository<Config, string> {
   constructor(conn: DynamoDBConnector) {
     super(conn, BASE_TABLE_NAME_CONFIG);

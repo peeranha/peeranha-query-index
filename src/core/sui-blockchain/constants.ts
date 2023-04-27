@@ -1,3 +1,8 @@
+export const SUI_POST_LIB = 'postLib';
+export const SUI_USER_LIB = 'userLib';
+export const SUI_COMMUNITY_LIB = 'communityLib';
+export const SUI_ACCESS_CONTROL_LIB = 'accessControl';
+
 export const USER_CREATED_SUI_EVENT_NAME = 'userLib::CreateUserEvent';
 export const USER_UPDATED_SUI_EVENT_NAME = 'userLib::UpdateUserEvent';
 export const FOLLOWED_COMMUNITY_SUI_EVENT_NAME =
@@ -20,7 +25,6 @@ export const MODERATOR_POST_EDITED_SUI_EVENT_NAME =
   'postLib::ModeratorEditPostEvent';
 export const POST_DELETED_SUI_EVENT_NAME = 'postLib::DeletePostEvent';
 export const ITEM_VOTED_SUI_EVENT_NAME = 'postLib::VoteItem';
-
 export const REPLY_CREATED_SUI_EVENT_NAME = 'postLib::CreateReplyEvent';
 export const REPLY_EDITED_SUI_EVENT_NAME = 'postLib::EditReplyEvent';
 export const MODERATOR_REPLY_EDITED_SUI_EVENT_NAME =

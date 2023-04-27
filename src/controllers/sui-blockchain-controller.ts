@@ -1,13 +1,10 @@
 /* eslint-disable no-await-in-loop */
-import { SuiTransactionBlockResponse } from '@mysten/sui.js';
+import { PaginatedEvents } from '@mysten/sui.js';
 import { SUI_INDEXING_FIRST_QUEUE } from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
-import {
-  ConfigRepository,
-  NEXT_CURSOR,
-} from 'src/core/dynamodb/repositories/ConfigRepository';
-import { ConfigurationError, RuntimeError } from 'src/core/errors';
+import { ConfigRepository } from 'src/core/dynamodb/repositories/ConfigRepository';
+import { ConfigurationError } from 'src/core/errors';
 import {
   USER_CREATED_SUI_EVENT_NAME,
   COMMUNITY_CREATED_SUI_EVENT_NAME,
@@ -33,15 +30,17 @@ import {
   MODERATOR_POST_EDITED_SUI_EVENT_NAME,
   MODERATOR_REPLY_EDITED_SUI_EVENT_NAME,
   SET_DOCUMENTATION_TREE_SUI_EVENT_NAME,
+  SUI_POST_LIB,
+  SUI_USER_LIB,
+  SUI_COMMUNITY_LIB,
+  SUI_ACCESS_CONTROL_LIB,
 } from 'src/core/sui-blockchain/constants';
-import {
-  createSuiProvider,
-  queryTransactionBlocks,
-} from 'src/core/sui-blockchain/sui';
+import { queryEvents } from 'src/core/sui-blockchain/sui';
 import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import { log } from 'src/core/utils/logger';
 import { pushToSQS } from 'src/core/utils/sqs';
 import {
+  Event,
   BaseSuiEventModel,
   CommunityCreatedSuiEventModel,
   CommunityUpdatedSuiEventModel,
@@ -72,6 +71,13 @@ import {
 } from 'src/models/sui-models';
 
 const TRANSACTIONS_MAX_NUMBER = 100;
+
+const modules = [
+  SUI_POST_LIB,
+  SUI_USER_LIB,
+  SUI_COMMUNITY_LIB,
+  SUI_ACCESS_CONTROL_LIB,
+];
 
 const eventToModelType: Record<string, typeof BaseSuiEventModel> = {};
 eventToModelType[USER_CREATED_SUI_EVENT_NAME] = UserCreatedSuiEventModel;
@@ -117,112 +123,90 @@ export async function readSuiEvents(
   if (!process.env.SUI_PACKAGE_ADDRESS) {
     throw new ConfigurationError('SUI_PACKAGE_ADDRESS is not configured');
   }
+  const { SUI_PACKAGE_ADDRESS } = process.env;
 
-  const provider = await createSuiProvider();
-
-  const cursorConfig = await configRepository.get(NEXT_CURSOR);
-  const cursor = cursorConfig ? cursorConfig.value : null;
-
-  log(
-    `Requesting ${TRANSACTIONS_MAX_NUMBER} transactions with cursor ${cursor}`
+  const moduleConfigPromises: Promise<Config | null>[] = [];
+  modules.forEach((module) =>
+    moduleConfigPromises.push(configRepository.get(module))
   );
-  const result = await queryTransactionBlocks(
-    process.env.SUI_PACKAGE_ADDRESS,
-    cursor,
-    TRANSACTIONS_MAX_NUMBER
-  );
+  const moduleConfigs = await Promise.all(moduleConfigPromises);
 
-  log(`Response: ${JSON.stringify(result)}`);
+  const eventsPromises: Promise<PaginatedEvents>[] = [];
 
-  const { data, nextCursor } = result;
+  modules.forEach((module, index) => {
+    const cursorConfig = moduleConfigs[index];
+    const cursor = cursorConfig ? JSON.parse(cursorConfig.value!) : undefined;
 
-  if (nextCursor == null) {
-    throw new RuntimeError('Next cursor on the response is missing');
-  }
+    log(
+      `Requesting ${TRANSACTIONS_MAX_NUMBER} events for module ${module} with cursor ${cursorConfig?.value}`
+    );
 
-  const digests: string[] = data.map((block: any) => block.digest);
+    eventsPromises.push(
+      queryEvents(SUI_PACKAGE_ADDRESS, module, cursor, TRANSACTIONS_MAX_NUMBER)
+    );
+  });
 
-  log(`Received digests: ${digests}`);
+  const events = await Promise.all(eventsPromises);
 
-  const transactionBlockPromises: Promise<SuiTransactionBlockResponse>[] = [];
+  const eventObjects: Event[] = [];
 
-  digests.forEach((digest) =>
-    transactionBlockPromises.push(
-      provider.getTransactionBlock({
-        digest,
-        options: {
-          showInput: false,
-          showEffects: false,
-          showEvents: true,
-          showObjectChanges: false,
-          showBalanceChanges: false,
-        },
-      })
-    )
-  );
+  events
+    .map((item) => item.data)
+    .forEach((evs) => {
+      evs.forEach((ev) => {
+        eventObjects.push(ev);
+      });
+    });
 
-  const transactionBlocks = await Promise.all(transactionBlockPromises);
+  log(`Number of recieved events: ${eventObjects.length}`);
 
-  const blockByStoredDigest = transactionBlocks.find(
-    (block) => block.digest === cursor
-  );
-  const storedBlockTimestamp = blockByStoredDigest
-    ? Number(blockByStoredDigest.timestampMs)
-    : 0;
+  const eventModels: BaseSuiEventModel[] = [];
 
-  const newBlocks = transactionBlocks
-    .filter(
-      (block) =>
-        block.digest !== cursor &&
-        Number(block.timestampMs) > storedBlockTimestamp
-    )
-    .sort((a: any, b: any) => {
-      if (a.timestampMs < b.timestampMs) return -1;
-      if (a.timestampMs > b.timestampMs) return 1;
+  eventObjects
+    .filter((event) => eventToModelType[cleanEventType(event.type)])
+    .sort((a, b) => {
+      if (a.timestampMs! < b.timestampMs!) return -1;
+      if (a.timestampMs! > b.timestampMs!) return 1;
       return 0;
+    })
+    .forEach((event) => {
+      const eventName = cleanEventType(event.type);
+      const EventModeType = eventToModelType[eventName];
+      if (!EventModeType) {
+        throw new ConfigurationError(
+          `Model type is not configured for event by name ${eventName}`
+        );
+      }
+      const eventModel = new EventModeType(event);
+      eventModels.push(eventModel);
     });
 
-  log(`New transaction blocks: ${JSON.stringify(newBlocks)}`);
-
-  if (newBlocks.length > 0) {
-    const eventModels: BaseSuiEventModel[] = [];
-
-    newBlocks.forEach((block) => {
-      block.events
-        ?.filter((event) => eventToModelType[cleanEventType(event.type)])
-        .forEach((event) => {
-          const eventName = cleanEventType(event.type);
-          const EventModeType = eventToModelType[eventName];
-          if (!EventModeType) {
-            throw new ConfigurationError(
-              `Model type is not configured for event by name ${eventName}`
-            );
-          }
-          const eventModel = new EventModeType(
-            event,
-            block.timestampMs ? Math.floor(Number(block.timestampMs) / 1000) : 0
-          );
-          eventModels.push(eventModel);
-        });
-    });
-
-    for (let i = 0; i < eventModels.length; i++) {
-      await pushToSQS(SUI_INDEXING_FIRST_QUEUE, eventModels[i]);
-    }
-
-    const newNextCursor = newBlocks[newBlocks.length - 1]?.digest;
-    const configBlockNumber = new Config({
-      key: NEXT_CURSOR,
-      value: newNextCursor,
-    });
-
-    log(`Updating next cursor in db - ${newNextCursor}`);
-    if (!cursorConfig) {
-      await configRepository.put(configBlockNumber);
-    } else {
-      await configRepository.update(NEXT_CURSOR, configBlockNumber);
-    }
+  for (let i = 0; i < eventModels.length; i++) {
+    await pushToSQS(SUI_INDEXING_FIRST_QUEUE, eventModels[i]);
   }
+
+  const configPromises: Promise<any>[] = [];
+  const nextCursors = events.map((item) => item.nextCursor);
+
+  nextCursors.forEach((newNextCursor, index) => {
+    const cursorKey = modules[index]!;
+    const cursorValue = newNextCursor
+      ? JSON.stringify(newNextCursor)
+      : undefined;
+
+    const cursorConfig = new Config({
+      key: cursorKey,
+      value: cursorValue,
+    });
+
+    log(`Updating next cursor for module ${cursorKey} in db - ${cursorValue}`);
+    if (!moduleConfigs[index]) {
+      configPromises.push(configRepository.put(cursorConfig));
+    } else {
+      configPromises.push(configRepository.update(cursorKey, cursorConfig));
+    }
+  });
+  await Promise.all(configPromises);
 
   return new ReadSuiEventsResponseModel();
 }

@@ -1,5 +1,19 @@
 import { toHexString } from 'src/core/utils/parser';
 
+export type Event = {
+  id: {
+    txDigest: string;
+    eventSeq: string;
+  };
+  packageId: string;
+  transactionModule: string;
+  sender: string;
+  type: string;
+  parsedJson?: Record<string, any> | undefined;
+  bcs?: string | undefined;
+  timestampMs?: string | undefined;
+};
+
 export class BaseSuiEventModel {
   public transaction: string;
 
@@ -15,32 +29,32 @@ export class BaseSuiEventModel {
 
   public timestamp: number;
 
-  constructor(event: any, timestamp: number) {
+  constructor(event: Event) {
     this.transaction = event.id.txDigest;
     this.eventSeq = event.id.eventSeq;
     this.packageId = event.packageId;
     this.transactionModule = event.transactionModule;
     this.sender = event.sender;
     this.type = event.type;
-    this.timestamp = Number(timestamp);
+    this.timestamp = Math.floor(Number(event.timestampMs) / 1000);
   }
 }
 
 export class UserCreatedSuiEventModel extends BaseSuiEventModel {
   public userId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
   }
 }
 
 export class UserUpdatedSuiEventModel extends BaseSuiEventModel {
   public userId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
   }
 }
 
@@ -49,10 +63,10 @@ export class CommunityCreatedSuiEventModel extends BaseSuiEventModel {
 
   public communityId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.communityId = event.parsedJson.communityId;
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.communityId = event.parsedJson?.communityId;
   }
 }
 
@@ -61,10 +75,10 @@ export class CommunityUpdatedSuiEventModel extends BaseSuiEventModel {
 
   public communityId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.communityId = event.parsedJson.communityId;
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.communityId = event.parsedJson?.communityId;
   }
 }
 
@@ -75,11 +89,11 @@ export class TagCreatedSuiEventModel extends BaseSuiEventModel {
 
   public tagId: number;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.communityId = event.parsedJson.communityId;
-    this.tagId = Number(event.parsedJson.tagKey);
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.communityId = event.parsedJson?.communityId;
+    this.tagId = Number(event.parsedJson?.tagKey);
   }
 }
 
@@ -90,11 +104,11 @@ export class TagUpdatedSuiEventModel extends BaseSuiEventModel {
 
   public tagId: number;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.communityId = event.parsedJson.communityId;
-    this.tagId = Number(event.parsedJson.tagKey);
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.communityId = event.parsedJson?.communityId;
+    this.tagId = Number(event.parsedJson?.tagKey);
   }
 }
 
@@ -105,11 +119,11 @@ export class PostCreatedSuiEventModel extends BaseSuiEventModel {
 
   public postId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.communityId = event.parsedJson.communityId;
-    this.postId = event.parsedJson.postMetaDataId;
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.communityId = event.parsedJson?.communityId;
+    this.postId = event.parsedJson?.postMetaDataId;
   }
 }
 
@@ -118,10 +132,10 @@ export class PostEditedSuiEventModel extends BaseSuiEventModel {
 
   public postId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.postId = event.parsedJson.postMetaDataId;
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.postId = event.parsedJson?.postMetaDataId;
   }
 }
 
@@ -130,10 +144,10 @@ export class PostDeletedSuiEventModel extends BaseSuiEventModel {
 
   public postId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.postId = event.parsedJson.postMetaDataId;
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.postId = event.parsedJson?.postMetaDataId;
   }
 }
 
@@ -146,12 +160,12 @@ export class ReplyCreatedSuiEventModel extends BaseSuiEventModel {
 
   public replyId: number;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.postId = event.parsedJson.postMetaDataId;
-    this.parentReplyKey = Number(event.parsedJson.parentReplyKey);
-    this.replyId = Number(event.parsedJson.replyMetaDataKey);
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.postId = event.parsedJson?.postMetaDataId;
+    this.parentReplyKey = Number(event.parsedJson?.parentReplyKey);
+    this.replyId = Number(event.parsedJson?.replyMetaDataKey);
   }
 }
 
@@ -162,11 +176,11 @@ export class ReplyEditedSuiEventModel extends BaseSuiEventModel {
 
   public replyId: number;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.postId = event.parsedJson.postMetaDataId;
-    this.replyId = Number(event.parsedJson.replyMetaDataKey);
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.postId = event.parsedJson?.postMetaDataId;
+    this.replyId = Number(event.parsedJson?.replyMetaDataKey);
   }
 }
 
@@ -177,11 +191,11 @@ export class ReplyDeletedSuiEventModel extends BaseSuiEventModel {
 
   public replyId: number;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.postId = event.parsedJson.postMetaDataId;
-    this.replyId = Number(event.parsedJson.replyMetaDataKey);
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.postId = event.parsedJson?.postMetaDataId;
+    this.replyId = Number(event.parsedJson?.replyMetaDataKey);
   }
 }
 
@@ -192,11 +206,11 @@ export class ReplyMarkedTheBestSuiEventModel extends BaseSuiEventModel {
 
   public replyId: number;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.postId = event.parsedJson.postMetaDataId;
-    this.replyId = Number(event.parsedJson.replyMetaDataKey);
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.postId = event.parsedJson?.postMetaDataId;
+    this.replyId = Number(event.parsedJson?.replyMetaDataKey);
   }
 }
 
@@ -211,13 +225,13 @@ export class ItemVotedSuiEventModel extends BaseSuiEventModel {
 
   public voteDirection: number;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.postId = event.parsedJson.postMetaDataId;
-    this.replyId = Number(event.parsedJson.replyMetaDataKey);
-    this.commentId = Number(event.parsedJson.commentMetaDataKey);
-    this.voteDirection = Number(event.parsedJson.voteDirection);
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.postId = event.parsedJson?.postMetaDataId;
+    this.replyId = Number(event.parsedJson?.replyMetaDataKey);
+    this.commentId = Number(event.parsedJson?.commentMetaDataKey);
+    this.voteDirection = Number(event.parsedJson?.voteDirection);
   }
 }
 
@@ -226,10 +240,10 @@ export class FollowedCommunitySuiEventModel extends BaseSuiEventModel {
 
   public communityId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.communityId = event.parsedJson.communityId;
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.communityId = event.parsedJson?.communityId;
   }
 }
 
@@ -238,10 +252,10 @@ export class UnfollowedCommunitySuiEventModel extends BaseSuiEventModel {
 
   public communityId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.communityId = event.parsedJson.communityId;
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.communityId = event.parsedJson?.communityId;
   }
 }
 
@@ -254,12 +268,12 @@ export class CommentCreatedSuiEventModel extends BaseSuiEventModel {
 
   public commentId: number;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.postId = event.parsedJson.postMetaDataId;
-    this.replyId = Number(event.parsedJson.parentReplyKey);
-    this.commentId = Number(event.parsedJson.commentMetaDataKey);
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.postId = event.parsedJson?.postMetaDataId;
+    this.replyId = Number(event.parsedJson?.parentReplyKey);
+    this.commentId = Number(event.parsedJson?.commentMetaDataKey);
   }
 }
 
@@ -272,12 +286,12 @@ export class CommentEditedSuiEventModel extends BaseSuiEventModel {
 
   public commentId: number;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.postId = event.parsedJson.postMetaDataId;
-    this.replyId = Number(event.parsedJson.parentReplyKey);
-    this.commentId = Number(event.parsedJson.commentMetaDataKey);
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.postId = event.parsedJson?.postMetaDataId;
+    this.replyId = Number(event.parsedJson?.parentReplyKey);
+    this.commentId = Number(event.parsedJson?.commentMetaDataKey);
   }
 }
 
@@ -290,12 +304,12 @@ export class CommentDeletedSuiEventModel extends BaseSuiEventModel {
 
   public commentId: number;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.postId = event.parsedJson.postMetaDataId;
-    this.replyId = Number(event.parsedJson.parentReplyKey);
-    this.commentId = Number(event.parsedJson.commentMetaDataKey);
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.postId = event.parsedJson?.postMetaDataId;
+    this.replyId = Number(event.parsedJson?.parentReplyKey);
+    this.commentId = Number(event.parsedJson?.commentMetaDataKey);
   }
 }
 
@@ -304,10 +318,10 @@ export class RoleGrantedSuiEventModel extends BaseSuiEventModel {
 
   public userId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.role = toHexString(event.parsedJson.role);
-    this.userId = event.parsedJson.userId;
+  constructor(event: Event) {
+    super(event);
+    this.role = toHexString(event.parsedJson?.role);
+    this.userId = event.parsedJson?.userId;
   }
 }
 
@@ -316,10 +330,10 @@ export class RoleRevokedSuiEventModel extends BaseSuiEventModel {
 
   public userId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.role = toHexString(event.parsedJson.role);
-    this.userId = event.parsedJson.userId;
+  constructor(event: Event) {
+    super(event);
+    this.role = toHexString(event.parsedJson?.role);
+    this.userId = event.parsedJson?.userId;
   }
 }
 
@@ -328,9 +342,9 @@ export class SetDocumentationTreeSuiEventModel extends BaseSuiEventModel {
 
   public communityId: string;
 
-  constructor(event: any, timestamp: number) {
-    super(event, timestamp);
-    this.userId = event.parsedJson.userId;
-    this.communityId = event.parsedJson.communityId;
+  constructor(event: Event) {
+    super(event);
+    this.userId = event.parsedJson?.userId;
+    this.communityId = event.parsedJson?.communityId;
   }
 }
