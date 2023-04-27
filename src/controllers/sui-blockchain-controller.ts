@@ -30,10 +30,7 @@ import {
   MODERATOR_POST_EDITED_SUI_EVENT_NAME,
   MODERATOR_REPLY_EDITED_SUI_EVENT_NAME,
   SET_DOCUMENTATION_TREE_SUI_EVENT_NAME,
-  SUI_POST_LIB,
-  SUI_USER_LIB,
-  SUI_COMMUNITY_LIB,
-  SUI_ACCESS_CONTROL_LIB,
+  suiModules,
 } from 'src/core/sui-blockchain/constants';
 import { queryEvents } from 'src/core/sui-blockchain/sui';
 import { cleanEventType } from 'src/core/sui-blockchain/utils';
@@ -71,13 +68,6 @@ import {
 } from 'src/models/sui-models';
 
 const TRANSACTIONS_MAX_NUMBER = 100;
-
-const modules = [
-  SUI_POST_LIB,
-  SUI_USER_LIB,
-  SUI_COMMUNITY_LIB,
-  SUI_ACCESS_CONTROL_LIB,
-];
 
 const eventToModelType: Record<string, typeof BaseSuiEventModel> = {};
 eventToModelType[USER_CREATED_SUI_EVENT_NAME] = UserCreatedSuiEventModel;
@@ -126,14 +116,14 @@ export async function readSuiEvents(
   const { SUI_PACKAGE_ADDRESS } = process.env;
 
   const moduleConfigPromises: Promise<Config | null>[] = [];
-  modules.forEach((module) =>
+  suiModules.forEach((module) =>
     moduleConfigPromises.push(configRepository.get(module))
   );
   const moduleConfigs = await Promise.all(moduleConfigPromises);
 
   const eventsPromises: Promise<PaginatedEvents>[] = [];
 
-  modules.forEach((module, index) => {
+  suiModules.forEach((module, index) => {
     const cursorConfig = moduleConfigs[index];
     const cursor = cursorConfig ? JSON.parse(cursorConfig.value!) : undefined;
 
@@ -189,7 +179,7 @@ export async function readSuiEvents(
   const nextCursors = events.map((item) => item.nextCursor);
 
   nextCursors.forEach((newNextCursor, index) => {
-    const cursorKey = modules[index]!;
+    const cursorKey = suiModules[index]!;
     const cursorValue = newNextCursor
       ? JSON.stringify(newNextCursor)
       : undefined;
