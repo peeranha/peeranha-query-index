@@ -115,8 +115,8 @@ export async function processSuiIndexing(eventModel: BaseSuiEventModel) {
   await BaseRepository.transaction(handler, eventModel);
 
   if (
-    eventsForTranslations.includes(eventModel.type) ||
-    eventsForChangePostContent.includes(eventModel.type)
+    eventsForTranslations.includes(eventName) ||
+    eventsForChangePostContent.includes(eventName)
   ) {
     await pushToSQS(SUI_CONTENT_FIRST_QUEUE, eventModel);
   }

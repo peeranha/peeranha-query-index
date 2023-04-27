@@ -66,15 +66,16 @@ async function updatePostTranslations(post: PostEntity) {
     post.title
   );
 
-  const properties = await postTranslationRepository.getListOfProperties(
+  const oldTranslations = await postTranslationRepository.getListOfProperties(
     'id',
     'postId',
     post.id
   );
-  const oldTranslations = properties.map((property) => property.id);
 
   const deletionPromises: Promise<any>[] = [];
-  oldTranslations.forEach((id) => postTranslationRepository.delete(id));
+  oldTranslations.forEach((translation) =>
+    postTranslationRepository.delete(translation.id)
+  );
   await Promise.all(deletionPromises);
 
   const postTranslations: PostTranslationEntity[] = [];
@@ -109,15 +110,16 @@ async function updateReplyTranslations(
     reply.content
   );
 
-  const properties = await replyTranslationRepository.getListOfProperties(
+  const oldTranslations = await replyTranslationRepository.getListOfProperties(
     'id',
     'replyId',
     reply.id
   );
-  const oldTranslations = properties.map((property) => property.id);
 
   const deletionPromises: Promise<any>[] = [];
-  oldTranslations.forEach((id) => replyTranslationRepository.delete(id));
+  oldTranslations.forEach((translation) =>
+    replyTranslationRepository.delete(translation.id)
+  );
   await Promise.all(deletionPromises);
 
   const replyTranslations: ReplyTranslationEntity[] = [];
@@ -151,15 +153,17 @@ async function updateCommentTranslations(
     comment.content
   );
 
-  const properties = await commentTranslationRepository.getListOfProperties(
-    'id',
-    'commentId',
-    comment.id
-  );
-  const oldTranslations = properties.map((property) => property.id);
+  const oldTranslations =
+    await commentTranslationRepository.getListOfProperties(
+      'id',
+      'commentId',
+      comment.id
+    );
 
   const deletionPromises: Promise<any>[] = [];
-  oldTranslations.forEach((id) => commentTranslationRepository.delete(id));
+  oldTranslations.forEach((translation) =>
+    commentTranslationRepository.delete(translation.id)
+  );
   await Promise.all(deletionPromises);
 
   const commentTranslations: CommentTranslationEntity[] = [];
@@ -197,13 +201,13 @@ export async function updateTranslations(eventModel: any) {
     if (!comment) {
       return;
     }
-    await updateCommentTranslations(post!.communityId, comment);
+    await updateCommentTranslations(post.communityId, comment);
   } else if (replyId && replyId !== 0) {
     const reply = await replyRepository.get(`${postId}-${replyId}`);
     if (!reply) {
       return;
     }
-    await updateReplyTranslations(post!.communityId, reply);
+    await updateReplyTranslations(post.communityId, reply);
   } else {
     await updatePostTranslations(post);
   }
@@ -611,6 +615,15 @@ export async function deleteSuiPost(postId: string) {
     promises.push(postTranslationRepository.delete(id))
   );
 
+  const voteHistoryIds = await postVoteHistoryRepository.getListOfProperties(
+    'id',
+    'postId',
+    postId
+  );
+  voteHistoryIds.forEach((voteHistory) => {
+    promises.push(postVoteHistoryRepository.delete(voteHistory.id));
+  });
+
   await Promise.all(promises);
 
   await communityRepository.update(communityId, {
@@ -792,6 +805,15 @@ export async function deleteSuiReply(postId: string, replyId: number) {
   translationIds.forEach((id) =>
     promises.push(replyTranslationRepository.delete(id))
   );
+
+  const voteHistoryIds = await replyVoteHistoryRepository.getListOfProperties(
+    'id',
+    'replyId',
+    reply.id
+  );
+  voteHistoryIds.forEach((voteHistory) => {
+    promises.push(replyVoteHistoryRepository.delete(voteHistory.id));
+  });
 
   await Promise.all(promises);
 }
@@ -1046,7 +1068,7 @@ export async function voteSuiItem(
           });
 
           promises.push(replyVoteHistoryRepository.create(historyVoteEntity));
-        } else {
+        } else if (historyVoteEntity.direction !== userVote.direction) {
           promises.push(
             replyVoteHistoryRepository.update(replyVoteHistoryKey, {
               direction: userVote.direction,
@@ -1101,7 +1123,7 @@ export async function voteSuiItem(
           });
 
           promises.push(postVoteHistoryRepository.create(historyVoteEntity));
-        } else {
+        } else if (historyVoteEntity.direction !== userVote.direction) {
           promises.push(
             postVoteHistoryRepository.update(postVoteHistoryKey, {
               direction: userVote.direction,
