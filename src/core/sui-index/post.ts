@@ -399,7 +399,7 @@ export async function createSuiPost(postId: string, timestamp: number) {
     bestReply: peeranhaPost.bestReply,
     ipfsHash: peeranhaPost.ipfsDoc[0],
     ipfsHash2: peeranhaPost.ipfsDoc[1],
-    language: 0,
+    language: peeranhaPost.language,
   });
 
   const tagIds = peeranhaPost.tags.map((tag) => `${post.communityId}-${tag}`);
@@ -659,7 +659,7 @@ export async function createSuiReply(
     isOfficialReply: false,
     ipfsHash: peeranhaReply.ipfsDoc[0],
     ipfsHash2: peeranhaReply.ipfsDoc[1],
-    language: 0,
+    language: peeranhaReply.language,
   });
 
   // if (messengerUserData) {
@@ -901,7 +901,7 @@ export async function createSuiComment(
     rating: 0,
     ipfsHash: peeranhaComment.ipfsDoc[0],
     ipfsHash2: peeranhaComment.ipfsDoc[1],
-    language: 0,
+    language: peeranhaComment.language,
   });
 
   await commentRepository.create(comment);

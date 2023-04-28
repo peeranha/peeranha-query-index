@@ -360,20 +360,16 @@ export async function getSuiComment(
 
   const ipfsDoc = await getItemIpfsDoc(commentFields.commentId);
 
-  const comment = new CommentData(
-    [
-      ipfsDoc,
-      commentFields.author,
-      parseIntFromSuiBits(commentFields.rating?.fields?.bits),
-      timestamp,
-      0,
-      commentFields.isDeleted,
-      commentFields.language,
-    ],
-    {
-      id2: commentFields.commentId,
-    }
-  );
+  const comment = new CommentData({
+    id2: commentFields.commentId,
+    ipfsDoc,
+    author: commentFields.author,
+    rating: parseIntFromSuiBits(commentFields.rating?.fields?.bits),
+    postTime: timestamp,
+    propertyCount: 0,
+    isDeleted: commentFields.isDeleted,
+    language: commentFields.language,
+  });
 
   return AddIpfsData(comment, comment.ipfsDoc[0]);
 }
