@@ -18,6 +18,9 @@ const QUEUE_URL = `${process.env.SQS_ENDPOINT}/${
 
 export async function pushToSQS(queueName: string, content: any) {
   try {
+    log(
+      `Pushing event to queue ${queueName}. Model: ${JSON.stringify(content)}`
+    );
     const result = await client
       .sendMessage({
         QueueUrl: QUEUE_URL + queueName,
@@ -26,9 +29,7 @@ export async function pushToSQS(queueName: string, content: any) {
       })
       .promise();
     log(
-      `Successfully published event to SQS. Message ID: ${
-        result.MessageId
-      } Model: ${JSON.stringify(content)}`,
+      `Successfully published event to SQS. Message ID: ${result.MessageId}`,
       LogLevel.DEBUG
     );
     return result;

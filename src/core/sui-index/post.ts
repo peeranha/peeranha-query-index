@@ -450,7 +450,6 @@ export async function editSuiPost(postId: string, timestamp: number) {
     await createSuiPost(postId, timestamp);
   } else {
     const peeranhaPost = await getSuiPostById(postId, timestamp);
-    if (!peeranhaPost) return;
 
     const postForSave = {
       ...post,
@@ -467,12 +466,9 @@ export async function editSuiPost(postId: string, timestamp: number) {
     const newTags = peeranhaPost.tags.map(
       (tag) => `${peeranhaPost.communityId}-${tag}`
     );
-    const oldTagsResponse = await postTagRepository.getListOfProperties(
-      'tagId',
-      'postId',
-      post.id
-    );
-    const oldTags = oldTagsResponse.map((tag) => tag.tagId);
+    const oldTags = (
+      await postTagRepository.getListOfProperties('tagId', 'postId', post.id)
+    ).map((tag) => tag.tagId);
 
     const uniqueNewTags = newTags.filter((newTag) => !oldTags.includes(newTag));
     const uniqueOldTags = oldTags.filter((oldTag) => !newTags.includes(oldTag));
@@ -528,7 +524,7 @@ export async function editSuiPost(postId: string, timestamp: number) {
       }
 
       if (post.postType === peeranhaPost.postType) {
-        promises.push(updateSuiPostUsersRatings(post));
+        promises.push(updateSuiPostUsersRatings(post)); // for old community
       }
 
       postForSave.communityId = peeranhaPost.communityId;
@@ -536,6 +532,7 @@ export async function editSuiPost(postId: string, timestamp: number) {
     }
 
     await Promise.all(promises);
+    await postRepository.update(postId, postForSave);
   }
 }
 
@@ -546,6 +543,8 @@ export async function deleteSuiPost(postId: string) {
   const promises: Promise<any>[] = [];
   const { author, communityId, replyCount } = post;
 
+  await postRepository.update(postId, { isDeleted: true });
+
   const postAuthor = await userRepository.get(author);
   if (postAuthor) {
     promises.push(
@@ -555,13 +554,7 @@ export async function deleteSuiPost(postId: string) {
     );
   }
 
-  promises.push(
-    postRepository.update(postId, {
-      isDeleted: true,
-    }),
-
-    updateSuiUserRating(author, communityId)
-  );
+  promises.push(updateSuiUserRating(author, communityId));
 
   const community = await getSuiCommunity(communityId);
   let communityReplyCount = community.replyCount;
