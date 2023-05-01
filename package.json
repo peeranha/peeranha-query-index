@@ -30,9 +30,9 @@
     "dynamodb:install": "sls dynamodb install"
   },
   "dependencies": {
-    "@graphql-mesh/cli": "^0.82.6",
-    "@graphql-mesh/mysql": "^0.19.2",
-    "@graphql-mesh/transform-filter-schema": "^0.15.5",
+    "@graphql-mesh/cli": "^0.82.35",
+    "@graphql-mesh/mysql": "^0.93.1",
+    "@graphql-mesh/transform-filter-schema": "^0.93.1",
     "@mysten/sui.js": "^0.32.2",
     "@slack/web-api": "^6.8.1",
     "aws-sdk": "^2.1360.0",

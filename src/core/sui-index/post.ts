@@ -264,21 +264,11 @@ async function updateTagsPostCount(newTags: string[], oldTags: string[]) {
 async function changeStatusOfficialReply(
   postId: string,
   oldOfficialReply: string,
-  newOfficialReply: string,
-  replyId: string
+  newOfficialReply: string
 ) {
-  let officialReply = oldOfficialReply;
-  let previousOfficialReplyId = '0';
-  if (newOfficialReply === replyId && oldOfficialReply !== replyId) {
-    previousOfficialReplyId = oldOfficialReply;
-    officialReply = replyId;
-  } else if (newOfficialReply === '0' && oldOfficialReply === replyId) {
-    officialReply = '0';
-  }
-
-  if (previousOfficialReplyId !== '0') {
+  if (oldOfficialReply !== newOfficialReply && oldOfficialReply !== '0') {
     const previousOfficialReply = await replyRepository.get(
-      `${postId}-${previousOfficialReplyId}`
+      `${postId}-${oldOfficialReply}`
     );
 
     if (previousOfficialReply) {
@@ -287,8 +277,6 @@ async function changeStatusOfficialReply(
       });
     }
   }
-
-  return officialReply;
 }
 
 export async function updateSuiPostContent(eventModel: any) {
@@ -598,14 +586,13 @@ export async function deleteSuiPost(postId: string) {
     promises.push(postTagRepository.delete(`${post.id}-${tag}`));
   });
 
-  const response = await postTranslationRepository.getListOfProperties(
+  const translationIds = await postTranslationRepository.getListOfProperties(
     'id',
     'postId',
     post.id
   );
-  const translationIds = response.map((translation) => translation.id);
-  translationIds.forEach((id) =>
-    promises.push(postTranslationRepository.delete(id))
+  translationIds.forEach((translation) =>
+    promises.push(postTranslationRepository.delete(translation.id))
   );
 
   const voteHistoryIds = await postVoteHistoryRepository.getListOfProperties(
@@ -635,6 +622,8 @@ export async function createSuiReply(
   const peeranhaReply = await getSuiReply(postId, replyId, timestamp);
   // const messengerUserData = getItemProperty(ItemProperties.MessengerSender, Number(postId), replyId)
 
+  const { officialReply } = peeranhaPost;
+
   const reply = new ReplyEntity({
     id: `${postId}-${replyId}`,
     id2: peeranhaReply.id2,
@@ -649,7 +638,7 @@ export async function createSuiReply(
     rating: 0,
     isBestReply: false,
     commentCount: 0,
-    isOfficialReply: false,
+    isOfficialReply: String(replyId) === officialReply,
     ipfsHash: peeranhaReply.ipfsDoc[0],
     ipfsHash2: peeranhaReply.ipfsDoc[1],
     language: peeranhaReply.language,
@@ -684,13 +673,9 @@ export async function createSuiReply(
       })
     );
 
-    const officialReply = await changeStatusOfficialReply(
-      postId,
-      post.officialReply,
-      peeranhaPost.officialReply,
-      String(replyId)
+    promises.push(
+      changeStatusOfficialReply(postId, post.officialReply, officialReply)
     );
-    reply.isOfficialReply = String(replyId) === officialReply;
 
     promises.push(
       postRepository.update(postId, {
@@ -734,25 +719,31 @@ export async function editSuiReply(
     return;
   }
 
-  await replyRepository.update(`${postId}-${replyId}`, {
-    content: peeranhaReply.content,
-    language: peeranhaReply.language,
-    ipfsHash: peeranhaReply.ipfsDoc[0],
-    ipfsHash2: peeranhaReply.ipfsDoc[1],
-    isOfficialReply: String(replyId) === peeranhaPost.officialReply,
-  });
+  const { officialReply } = peeranhaPost;
 
-  const officialReply = await changeStatusOfficialReply(
-    postId,
-    post.officialReply,
-    peeranhaPost.officialReply,
-    String(replyId)
+  const promises: Promise<any>[] = [];
+
+  promises.push(
+    replyRepository.update(`${postId}-${replyId}`, {
+      content: peeranhaReply.content,
+      language: peeranhaReply.language,
+      ipfsHash: peeranhaReply.ipfsDoc[0],
+      ipfsHash2: peeranhaReply.ipfsDoc[1],
+      isOfficialReply: String(replyId) === officialReply,
+    }),
+
+    changeStatusOfficialReply(postId, post.officialReply, officialReply)
   );
+
   if (post.officialReply !== officialReply) {
-    await postRepository.update(postId, {
-      officialReply,
-    });
+    promises.push(
+      postRepository.update(postId, {
+        officialReply,
+      })
+    );
   }
+
+  await Promise.all(promises);
 }
 
 export async function deleteSuiReply(postId: string, replyId: number) {

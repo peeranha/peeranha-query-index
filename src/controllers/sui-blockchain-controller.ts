@@ -185,9 +185,7 @@ export async function readSuiEvents(
   nextCursors.forEach((newNextCursor, index) => {
     if (newNextCursor) {
       const cursorKey = suiModules[index]!;
-      const cursorValue = newNextCursor
-        ? JSON.stringify(newNextCursor)
-        : undefined;
+      const cursorValue = JSON.stringify(newNextCursor);
 
       const cursorConfig = new Config({
         key: cursorKey,
