@@ -1,4 +1,6 @@
 export class Comment {
+  id2: string;
+
   ipfsDoc: [string, string];
 
   author: string;
@@ -14,6 +16,7 @@ export class Comment {
   isDeleted: boolean;
 
   constructor(comment: any) {
+    this.id2 = comment.id2;
     this.ipfsDoc = comment.ipfsDoc;
     this.author = comment.author;
     this.rating = comment.rating;
@@ -25,13 +28,10 @@ export class Comment {
 }
 
 export class CommentData extends Comment {
-  id2: string;
-
   content: string;
 
-  constructor(comment: any, extra: any = {}) {
+  constructor(comment: any) {
     super(comment);
     this.content = comment?.content;
-    this.id2 = extra?.id2;
   }
 }
