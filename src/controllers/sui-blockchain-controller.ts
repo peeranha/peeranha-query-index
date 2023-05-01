@@ -115,6 +115,7 @@ export async function readSuiEvents(
   }
   const { SUI_PACKAGE_ADDRESS } = process.env;
 
+  log('Reading cursors from db.');
   const moduleConfigPromises: Promise<Config | null>[] = [];
   suiModules.forEach((module) =>
     moduleConfigPromises.push(configRepository.get(module))
@@ -123,6 +124,7 @@ export async function readSuiEvents(
 
   const eventsPromises: Promise<PaginatedEvents>[] = [];
 
+  log('Reading new events.');
   suiModules.forEach((module, index) => {
     const cursorConfig = moduleConfigs[index];
     const cursor = cursorConfig ? JSON.parse(cursorConfig.value!) : undefined;
@@ -152,6 +154,7 @@ export async function readSuiEvents(
 
   const eventModels: BaseSuiEventModel[] = [];
 
+  log('Pushing new events to SQS.');
   eventObjects
     .filter((event) => eventToModelType[cleanEventType(event.type)])
     .sort((a, b) => {
@@ -178,22 +181,27 @@ export async function readSuiEvents(
   const configPromises: Promise<any>[] = [];
   const nextCursors = events.map((item) => item.nextCursor);
 
+  log('Updating cursors.');
   nextCursors.forEach((newNextCursor, index) => {
-    const cursorKey = suiModules[index]!;
-    const cursorValue = newNextCursor
-      ? JSON.stringify(newNextCursor)
-      : undefined;
+    if (newNextCursor) {
+      const cursorKey = suiModules[index]!;
+      const cursorValue = newNextCursor
+        ? JSON.stringify(newNextCursor)
+        : undefined;
 
-    const cursorConfig = new Config({
-      key: cursorKey,
-      value: cursorValue,
-    });
+      const cursorConfig = new Config({
+        key: cursorKey,
+        value: cursorValue,
+      });
 
-    log(`Updating next cursor for module ${cursorKey} in db - ${cursorValue}`);
-    if (!moduleConfigs[index]) {
-      configPromises.push(configRepository.put(cursorConfig));
-    } else {
-      configPromises.push(configRepository.update(cursorKey, cursorConfig));
+      log(
+        `Updating next cursor for module ${cursorKey} in db - ${cursorValue}`
+      );
+      if (!moduleConfigs[index]) {
+        configPromises.push(configRepository.put(cursorConfig));
+      } else {
+        configPromises.push(configRepository.update(cursorKey, cursorConfig));
+      }
     }
   });
   await Promise.all(configPromises);
