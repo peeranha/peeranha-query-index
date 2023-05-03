@@ -22,6 +22,6 @@ environment:
   IPFS_CDN_URL: 'https://ipfs-cdn.testpeeranha.io/'
   RPC_ENDPOINT: 'https://rpc.ankr.com/polygon_mumbai'
 
-  SUI_PACKAGE_ADDRESS: '0x5d964e69316a306cd6ce9f3b8dc230d9149aa9166bd90c2bcabdedbb72634ed5'
-  SUI_USERS_RATING_COLLECTION: '0xafb2c2a2c2f6afa72d1b081b8caf78b24474718c16ec4d596937c8af0396d370'
+  SUI_PACKAGE_ADDRESS: '0x537ae9bb80ec56b152271a7a183a7f5e6cb3db0fff7c6221f2f7f25c8cf0e0ca'
+  SUI_USERS_RATING_COLLECTION: '0x656bb8096918da648a306c4a285888e8207aee61f818a4758f86d987f3c8d198'
   SUI_RPC_ENDPOINT: 'https://rpc.ankr.com/sui_testnet'
