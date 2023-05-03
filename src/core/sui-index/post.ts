@@ -850,8 +850,8 @@ export async function changeStatusBestSuiReply(
     reply = await createSuiReply(postId, replyId, timestamp);
   }
 
-  if (reply && replyId !== previousBestReply) {
-    if (replyId !== 0) {
+  if (reply) {
+    if (replyId !== 0 && replyId !== previousBestReply) {
       if (reply.author !== post.author) {
         await updateSuiUserRating(reply.author, post.communityId);
       }

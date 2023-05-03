@@ -183,8 +183,8 @@ export async function readSuiEvents(
 
   log('Updating cursors.');
   nextCursors.forEach((newNextCursor, index) => {
+    const cursorKey = suiModules[index]!;
     if (newNextCursor) {
-      const cursorKey = suiModules[index]!;
       const cursorValue = JSON.stringify(newNextCursor);
 
       const cursorConfig = new Config({
@@ -200,6 +200,8 @@ export async function readSuiEvents(
       } else {
         configPromises.push(configRepository.update(cursorKey, cursorConfig));
       }
+    } else {
+      log(`No next cursor for module ${cursorKey}.`);
     }
   });
   await Promise.all(configPromises);
