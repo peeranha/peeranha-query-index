@@ -813,10 +813,15 @@ export async function changeStatusBestSuiReply(
     post = await createSuiPost(postId, timestamp);
   } else {
     previousBestReply = Number(post.bestReply);
-
-    await postRepository.update(postId, {
-      bestReply: replyId,
-    });
+    if (replyId !== previousBestReply) {
+      await postRepository.update(postId, {
+        bestReply: replyId,
+      });
+    } else {
+      await postRepository.update(postId, {
+        bestReply: 0,
+      });
+    }
   }
 
   if (previousBestReply) {
@@ -845,7 +850,7 @@ export async function changeStatusBestSuiReply(
     reply = await createSuiReply(postId, replyId, timestamp);
   }
 
-  if (reply) {
+  if (reply && replyId !== previousBestReply) {
     if (replyId !== 0) {
       if (reply.author !== post.author) {
         await updateSuiUserRating(reply.author, post.communityId);
