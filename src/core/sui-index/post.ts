@@ -815,11 +815,11 @@ export async function changeStatusBestSuiReply(
     previousBestReply = Number(post.bestReply);
     if (replyId !== previousBestReply) {
       await postRepository.update(postId, {
-        bestReply: replyId,
+        bestReply: replyId.toString(),
       });
     } else {
       await postRepository.update(postId, {
-        bestReply: 0,
+        bestReply: '0',
       });
     }
   }
