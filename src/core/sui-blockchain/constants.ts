@@ -1,7 +1,7 @@
 const SUI_POST_LIB = 'postLib';
 const SUI_USER_LIB = 'userLib';
 const SUI_COMMUNITY_LIB = 'communityLib';
-const SUI_ACCESS_CONTROL_LIB = 'accessControl';
+const SUI_ACCESS_CONTROL_LIB = 'accessControlLib';
 const SUI_FOLLOW_COMMUNITY_LIB = 'followCommunityLib';
 
 export const suiModules = [
@@ -46,5 +46,5 @@ export const COMMENT_CREATED_SUI_EVENT_NAME = 'postLib::CreateCommentEvent';
 export const COMMENT_EDITED_SUI_EVENT_NAME = 'postLib::EditCommentEvent';
 export const COMMENT_DELETED_SUI_EVENT_NAME = 'postLib::DeleteCommentEvent';
 
-export const ROLE_GRANTED_SUI_EVENT_NAME = 'accessControl::RoleGranted';
-export const ROLE_REVOKED_SUI_EVENT_NAME = 'accessControl::RoleRevoked';
+export const ROLE_GRANTED_SUI_EVENT_NAME = 'accessControlLib::RoleGranted';
+export const ROLE_REVOKED_SUI_EVENT_NAME = 'accessControlLib::RoleRevoked';
