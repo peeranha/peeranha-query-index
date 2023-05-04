@@ -64,14 +64,15 @@ provider:
             - translate:TranslateText
             - comprehend:DetectDominantLanguage
           Resource: "*"
+
+fargate:
   vpc:
     securityGroupIds:
       - ${self:provider.environment.SECURITY_GROUP_ID}
     subnetIds:
       - ${self:provider.environment.SUBNET_ID_1}
       - ${self:provider.environment.SUBNET_ID_2}
-
-fargate:
+    assignPublicIp: true
   tasks:
     first-sui-events-listener:
       name: ${self:custom.stage}-first-sui-events-listener
