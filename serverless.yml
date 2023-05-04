@@ -64,7 +64,12 @@ provider:
             - translate:TranslateText
             - comprehend:DetectDominantLanguage
           Resource: "*"
-
+  vpc:
+    securityGroupIds:
+      - ${self:provider.environment.SECURITY_GROUP_ID}
+    subnetIds:
+      - ${self:provider.environment.SUBNET_ID_1}
+      - ${self:provider.environment.SUBNET_ID_2}
 fargate:
   vpc:
     securityGroupIds:
