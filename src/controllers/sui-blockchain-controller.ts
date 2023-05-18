@@ -1,6 +1,9 @@
 /* eslint-disable no-await-in-loop */
 import { PaginatedEvents } from '@mysten/sui.js';
-import { SUI_INDEXING_FIRST_QUEUE } from 'src/core/constants';
+import {
+  SUI_INDEXING_FIRST_QUEUE,
+  SUI_EVENTS_MAPPING_SNS_TOPIC_NAME,
+} from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
 import { ConfigRepository } from 'src/core/dynamodb/repositories/ConfigRepository';
@@ -35,6 +38,7 @@ import {
 import { queryEvents } from 'src/core/sui-blockchain/sui';
 import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import { log } from 'src/core/utils/logger';
+import { pushToSNS } from 'src/core/utils/sns';
 import { pushToSQS } from 'src/core/utils/sqs';
 import {
   Event,
@@ -61,6 +65,7 @@ import {
   RoleGrantedSuiEventModel,
   RoleRevokedSuiEventModel,
   SetDocumentationTreeSuiEventModel,
+  SuiExportEventModel,
 } from 'src/models/sui-event-models';
 import {
   ReadSuiEventsRequestModel,
@@ -153,6 +158,7 @@ export async function readSuiEvents(
   log(`Number of recieved events: ${eventObjects.length}`);
 
   const eventModels: BaseSuiEventModel[] = [];
+  const exportEventModels: SuiExportEventModel[] = [];
 
   log('Pushing new events to SQS.');
   eventObjects
@@ -171,11 +177,15 @@ export async function readSuiEvents(
         );
       }
       const eventModel = new EventModeType(event);
+      const exportEventModel = new SuiExportEventModel(event);
+      exportEventModel.name = eventName;
       eventModels.push(eventModel);
+      exportEventModels.push(exportEventModel);
     });
 
   for (let i = 0; i < eventModels.length; i++) {
     await pushToSQS(SUI_INDEXING_FIRST_QUEUE, eventModels[i]);
+    await pushToSNS(SUI_EVENTS_MAPPING_SNS_TOPIC_NAME, exportEventModels[i]);
   }
 
   const configPromises: Promise<any>[] = [];
