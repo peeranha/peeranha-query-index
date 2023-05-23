@@ -49,11 +49,11 @@ export class PeeranhaContentWrapper extends BaseContractWrapper {
   }
 
   public getAddress(): string {
-    if (!process.env.MAIN_CONTRACT_ADDRESS) {
-      throw new ConfigurationError('MAIN_CONTRACT_ADDRESS is not configured');
+    if (!process.env.CONTENT_ADDRESS) {
+      throw new ConfigurationError('CONTENT_ADDRESS is not configured');
     }
 
-    return process.env.MAIN_CONTRACT_ADDRESS;
+    return process.env.CONTENT_ADDRESS;
   }
 
   public getAbi() {

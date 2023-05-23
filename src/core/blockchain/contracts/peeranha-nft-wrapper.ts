@@ -8,11 +8,11 @@ export class PeeranhaNFTWrapper extends BaseContractWrapper {
   }
 
   public getAddress(): string {
-    if (!process.env.NFT_CONTRACT_ADDRESS) {
-      throw new ConfigurationError('NFT_CONTRACT_ADDRESS is not configured');
+    if (!process.env.NFT_ADDRESS) {
+      throw new ConfigurationError('NFT_ADDRESS is not configured');
     }
 
-    return process.env.NFT_CONTRACT_ADDRESS;
+    return process.env.NFT_ADDRESS;
   }
 
   public getAbi() {

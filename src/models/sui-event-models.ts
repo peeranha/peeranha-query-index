@@ -1,4 +1,5 @@
 import { toHexString } from 'src/core/utils/parser';
+import { Network } from 'src/models/event-models';
 
 export type Event = {
   id: {
@@ -9,6 +10,7 @@ export type Event = {
   transactionModule: string;
   sender: string;
   type: string;
+  network: Network;
   parsedJson?: Record<string, any> | undefined;
   bcs?: string | undefined;
   timestampMs?: string | undefined;
@@ -29,6 +31,8 @@ export class BaseSuiEventModel {
 
   public timestamp: number;
 
+  public network: Network;
+
   constructor(event: Event) {
     this.transaction = event.id.txDigest;
     this.eventSeq = event.id.eventSeq;
@@ -37,6 +41,7 @@ export class BaseSuiEventModel {
     this.sender = event.sender;
     this.type = event.type;
     this.timestamp = Math.floor(Number(event.timestampMs) / 1000);
+    this.network = event.network;
   }
 }
 

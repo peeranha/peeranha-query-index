@@ -8,11 +8,11 @@ export class PeeranhaTokenWrapper extends BaseContractWrapper {
   }
 
   public getAddress(): string {
-    if (!process.env.TOKEN_CONTRACT_ADDRESS) {
-      throw new ConfigurationError('TOKEN_CONTRACT_ADDRESS is not configured');
+    if (!process.env.TOKEN_ADDRESS) {
+      throw new ConfigurationError('TOKEN_ADDRESS is not configured');
     }
 
-    return process.env.TOKEN_CONTRACT_ADDRESS;
+    return process.env.TOKEN_ADDRESS;
   }
 
   public getAbi() {

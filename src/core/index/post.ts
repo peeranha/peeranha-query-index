@@ -30,6 +30,7 @@ import {
 } from 'src/core/index/user';
 import { ItemProperties } from 'src/core/index/utils';
 import { getDataFromIpfs, getIpfsHashFromBytes32 } from 'src/core/utils/ipfs';
+import { Network } from 'src/models/event-models';
 
 const postRepository = new PostRepository();
 const replyRepository = new ReplyRepository();
@@ -113,11 +114,12 @@ async function changedStatusOfficialReply(
 
 export async function createPost(
   postId: string,
-  timestamp: number
+  timestamp: number,
+  network: Network
 ): Promise<PostEntity> {
   const [peeranhaPost, messengerUserData] = await Promise.all([
-    getPost(Number(postId)),
-    getItemProperty(ItemProperties.MessengerSender, Number(postId)),
+    getPost(Number(postId), network),
+    getItemProperty(ItemProperties.MessengerSender, Number(postId), network),
   ]);
 
   const post = new PostEntity({
@@ -152,11 +154,11 @@ export async function createPost(
   const tagIds = peeranhaPost.tags.map((tag) => `${post.communityId}-${tag}`);
   post.postContent += await updateTagsPostCount(tagIds, []);
 
-  const community = await getCommunityById(post.communityId);
+  const community = await getCommunityById(post.communityId, network);
 
   let user = await userRepository.get(post.author);
   if (!user) {
-    user = await createUser(post.author, timestamp);
+    user = await createUser(post.author, timestamp, network);
   }
 
   await Promise.all([
@@ -170,7 +172,7 @@ export async function createPost(
 
     postRepository.create(post),
 
-    updateUserRating(post.author, post.communityId),
+    updateUserRating(post.author, post.communityId, network),
   ]);
 
   const promises: Promise<any>[] = [];
@@ -190,12 +192,18 @@ export async function createPost(
 export async function createReply(
   postId: string,
   replyId: number,
-  timestamp: number
+  timestamp: number,
+  network: Network
 ): Promise<ReplyEntity | undefined> {
   const [peeranhaReply, peeranhaPost, messengerUserData] = await Promise.all([
-    getReply(Number(postId), replyId),
-    getPost(Number(postId)),
-    getItemProperty(ItemProperties.MessengerSender, Number(postId), replyId),
+    getReply(Number(postId), replyId, network),
+    getPost(Number(postId), network),
+    getItemProperty(
+      ItemProperties.MessengerSender,
+      Number(postId),
+      network,
+      replyId
+    ),
   ]);
 
   if (!peeranhaReply) {
@@ -231,7 +239,7 @@ export async function createReply(
 
   let user = await userRepository.get(reply.author);
   if (!user) {
-    user = await createUser(reply.author, timestamp);
+    user = await createUser(reply.author, timestamp, network);
   }
 
   const promises: Promise<any>[] = [];
@@ -244,7 +252,7 @@ export async function createReply(
 
   const post = await postRepository.get(postId);
   if (post) {
-    const community = await getCommunityById(post.communityId);
+    const community = await getCommunityById(post.communityId, network);
     promises.push(
       communityRepository.update(post.communityId, {
         replyCount: community.replyCount + 1,
@@ -266,11 +274,11 @@ export async function createReply(
         lastMod: reply.postTime,
       }),
 
-      updateUserRating(reply.author, post.communityId)
+      updateUserRating(reply.author, post.communityId, network)
     );
 
     if (peeranhaReply.isFirstReply || peeranhaReply.isQuickReply) {
-      promises.push(updateUserRating(reply.author, post.communityId));
+      promises.push(updateUserRating(reply.author, post.communityId, network));
     }
   }
 
@@ -283,12 +291,14 @@ export async function createReply(
 export async function createComment(
   postId: string,
   parentReplyId: number,
-  commentId: number
+  commentId: number,
+  network: Network
 ): Promise<CommentEntity | undefined> {
   const peeranhaComment = await getComment(
     Number(postId),
     parentReplyId,
-    commentId
+    commentId,
+    network
   );
 
   if (!peeranhaComment) {
@@ -331,7 +341,7 @@ export async function createComment(
         lastMod: comment.postTime,
       }),
 
-      updateUserRating(post.author, post.communityId),
+      updateUserRating(post.author, post.communityId, network),
     ]);
   }
 
@@ -341,11 +351,12 @@ export async function createComment(
 export async function updatePostContent(
   postId: string,
   timestamp: number,
+  network: Network,
   editedReplyId?: number
 ) {
   const [post, peeranhaPost] = await Promise.all([
     postRepository.get(postId),
-    getPost(Number(postId)),
+    getPost(Number(postId), network),
   ]);
   if (!(post && peeranhaPost)) return;
 
@@ -406,7 +417,7 @@ export async function updatePostContent(
   );
 
   if (post.postType !== peeranhaPost.postType) {
-    promises.push(updatePostUsersRatings(post));
+    promises.push(updatePostUsersRatings(post, network));
     postForSave.postType = peeranhaPost.postType;
   }
 
@@ -444,11 +455,11 @@ export async function updatePostContent(
     }
 
     if (post.postType === peeranhaPost.postType) {
-      promises.push(updatePostUsersRatings(post));
+      promises.push(updatePostUsersRatings(post, network));
     }
 
     postForSave.communityId = peeranhaPost.communityId;
-    promises.push(updatePostUsersRatings(postForSave));
+    promises.push(updatePostUsersRatings(postForSave, network));
   }
 
   for (let replyId = 1; replyId <= postForSave.replyCount; replyId++) {

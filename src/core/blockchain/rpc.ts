@@ -1,8 +1,12 @@
 import { providers } from 'ethers';
-import { getSecretValue } from 'src/core/utils/secrets';
+import { Network } from 'src/models/event-models';
 
-export async function createRpcProvider() {
-  const apiKey = await getSecretValue('RPC_API_KEY');
-  const url = `${process.env.RPC_ENDPOINT}/${apiKey}`;
+export const DELEGATE_USERS_COUNT = 'DELEGATE_USERS_COUNT';
+export const DELEGATE_USER_PRIVATE_KEY = 'DELEGATE_USER_PRIVATE_KEY_';
+
+const NetworkEndpointName = ['POLYGON', 'EDGEWARE'];
+
+export async function createRpcProvider(network: Network = 0) {
+  const url = `${process.env[`RPC_${NetworkEndpointName[network]}_ENDPOINT`]}`;
   return new providers.JsonRpcProvider(url);
 }

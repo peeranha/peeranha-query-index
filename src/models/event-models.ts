@@ -1,3 +1,19 @@
+export enum Network {
+  Polygon = 0,
+  Edgeware = 1,
+  Sui = 2,
+}
+
+export class ReadNotificationsRequestModel {
+  public network: Network;
+
+  constructor(network: Network) {
+    this.network = network;
+  }
+}
+
+export class ReadNotificationsResponseModel {}
+
 export class BaseEventModel {
   public contractEventName: string;
 
@@ -9,17 +25,22 @@ export class BaseEventModel {
 
   public timestamp: number;
 
+  public network: Network;
+
   constructor(event: any) {
     this.contractEventName = event.event_name;
     this.contractAddress = event.contract_address;
     this.transaction = event.transaction_hash;
     this.blockNumber = event.block_number;
     this.timestamp = 0;
+    this.network = event.network;
   }
 }
 
 export class EventListenerRequest {
   public transactions: any[];
+
+  public network: Network;
 
   constructor(req: any) {
     const transactions: any[] = [];
@@ -27,6 +48,7 @@ export class EventListenerRequest {
       transactions.push(...item.transactions)
     );
     this.transactions = transactions;
+    this.network = req.network;
   }
 }
 
@@ -41,7 +63,7 @@ export class PostCreatedEventModel extends BaseEventModel {
     super(event);
     this.user = event.user;
     this.communityId = String(event.communityId);
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
   }
 }
 
@@ -53,7 +75,7 @@ export class PostEditedEventModel extends BaseEventModel {
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
   }
 }
 
@@ -67,7 +89,7 @@ export class ReplyEditedEventModel extends BaseEventModel {
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
     this.replyId = event.replyId;
   }
 }
@@ -84,7 +106,7 @@ export class CommentEditedEventModel extends BaseEventModel {
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
     this.replyId = event.parentReplyId;
     this.commentId = event.commentId;
   }
@@ -242,7 +264,7 @@ export class PostDeletedEventModel extends BaseEventModel {
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
   }
 }
 
@@ -257,7 +279,7 @@ export class ChangePostTypeEventModel extends BaseEventModel {
     super(event);
     this.user = event.user;
     this.newPostType = event.newPostType;
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
   }
 }
 
@@ -271,7 +293,7 @@ export class ReplyDeletedEventModel extends BaseEventModel {
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
     this.replyId = event.replyId;
   }
 }
@@ -288,7 +310,7 @@ export class CommentDeletedEventModel extends BaseEventModel {
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
     this.replyId = event.parentReplyId;
     this.commentId = event.commentId;
   }
@@ -342,7 +364,7 @@ export class ItemVotedEventModel extends BaseEventModel {
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
     this.replyId = event.replyId;
     this.commentId = event.commentId;
   }
@@ -358,7 +380,7 @@ export class ReplyMarkedTheBestEventModel extends BaseEventModel {
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
     this.replyId = event.replyId;
   }
 }
@@ -376,7 +398,7 @@ export class ReplyCreatedEventModel extends BaseEventModel {
     super(event);
     this.user = event.user;
     this.parentReplyId = event.parentReplyId;
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
     this.replyId = event.replyId;
   }
 }
@@ -393,7 +415,7 @@ export class CommentCreatedEventModel extends BaseEventModel {
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.postId = event.postId;
+    this.postId = event.postId?.toNumber();
     this.replyId = event.parentReplyId; // ~parentReplyId
     this.commentId = event.commentId;
   }

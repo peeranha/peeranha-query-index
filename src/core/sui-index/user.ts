@@ -18,6 +18,7 @@ import {
 } from 'src/core/sui-blockchain/data-loader';
 import { getSuiCommunity } from 'src/core/sui-index/community';
 import { log } from 'src/core/utils/logger';
+import { Network } from 'src/models/event-models';
 
 const START_USER_RATING = 10;
 
@@ -147,7 +148,8 @@ export async function updateSuiPostUsersRatings(post: PostEntity) {
 export async function followSuiCommunity(
   userId: string,
   communityId: string,
-  timestamp: number
+  timestamp: number,
+  network: Network
 ) {
   let user = await userRepository.get(userId);
   if (!user) user = await createSuiUser(userId, timestamp);
@@ -159,7 +161,7 @@ export async function followSuiCommunity(
   });
   await userCommunityRepository.create(userCommunity);
 
-  const community = await getSuiCommunity(communityId);
+  const community = await getSuiCommunity(communityId, network);
   await communityRepository.update(communityId, {
     followingUsers: community.followingUsers + 1,
   });
@@ -168,14 +170,15 @@ export async function followSuiCommunity(
 export async function unfollowSuiCommunity(
   userId: string,
   communityId: string,
-  timestamp: number
+  timestamp: number,
+  network: Network
 ) {
   let user = await userRepository.get(userId);
   if (!user) user = await createSuiUser(userId, timestamp);
 
   await userCommunityRepository.delete(`${userId}-${communityId}`);
 
-  const community = await getSuiCommunity(communityId);
+  const community = await getSuiCommunity(communityId, network);
   await communityRepository.update(communityId, {
     followingUsers: community.followingUsers - 1,
   });

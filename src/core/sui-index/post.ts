@@ -40,6 +40,7 @@ import {
   updateSuiUserRating,
 } from 'src/core/sui-index/user';
 import { translateForumItem } from 'src/core/translations';
+import { Network } from 'src/models/event-models';
 
 import { VoteDirection } from '../sui-blockchain/utils';
 
@@ -365,7 +366,11 @@ export async function updateSuiPostContent(eventModel: any) {
   await postRepository.update(postId, postForSave);
 }
 
-export async function createSuiPost(postId: string, timestamp: number) {
+export async function createSuiPost(
+  postId: string,
+  timestamp: number,
+  network: Network
+) {
   const peeranhaPost = await getSuiPostById(postId, timestamp);
 
   const post = new PostEntity({
@@ -392,7 +397,7 @@ export async function createSuiPost(postId: string, timestamp: number) {
 
   const tagIds = peeranhaPost.tags.map((tag) => `${post.communityId}-${tag}`);
 
-  const community = await getSuiCommunity(post.communityId);
+  const community = await getSuiCommunity(post.communityId, network);
 
   let user = await userRepository.get(post.author);
   if (!user) {
@@ -432,10 +437,14 @@ export async function createSuiPost(postId: string, timestamp: number) {
   return post;
 }
 
-export async function editSuiPost(postId: string, timestamp: number) {
+export async function editSuiPost(
+  postId: string,
+  timestamp: number,
+  network: Network
+) {
   const post = await postRepository.get(postId);
   if (!post) {
-    await createSuiPost(postId, timestamp);
+    await createSuiPost(postId, timestamp, network);
   } else {
     const peeranhaPost = await getSuiPostById(postId, timestamp);
 
@@ -524,7 +533,7 @@ export async function editSuiPost(postId: string, timestamp: number) {
   }
 }
 
-export async function deleteSuiPost(postId: string) {
+export async function deleteSuiPost(postId: string, network: Network) {
   const post = await postRepository.get(postId);
   if (!post) return;
 
@@ -544,7 +553,7 @@ export async function deleteSuiPost(postId: string) {
 
   promises.push(updateSuiUserRating(author, communityId));
 
-  const community = await getSuiCommunity(communityId);
+  const community = await getSuiCommunity(communityId, network);
   let communityReplyCount = community.replyCount;
 
   for (let i = 1; i <= replyCount; i++) {
@@ -616,7 +625,8 @@ export async function deleteSuiPost(postId: string) {
 export async function createSuiReply(
   postId: string,
   replyId: number,
-  timestamp: number
+  timestamp: number,
+  network: Network
 ): Promise<ReplyEntity> {
   const peeranhaPost = await getSuiPostById(postId, 0);
   const peeranhaReply = await getSuiReply(postId, replyId, timestamp);
@@ -666,7 +676,7 @@ export async function createSuiReply(
 
   const post = await postRepository.get(postId);
   if (post) {
-    const community = await getSuiCommunity(post.communityId);
+    const community = await getSuiCommunity(post.communityId, network);
     promises.push(
       communityRepository.update(post.communityId, {
         replyCount: community.replyCount + 1,
@@ -702,11 +712,12 @@ export async function createSuiReply(
 export async function editSuiReply(
   postId: string,
   replyId: number,
-  timestamp: number
+  timestamp: number,
+  network: Network
 ) {
   const reply = await replyRepository.get(`${postId}-${replyId}`);
   if (!reply) {
-    await createSuiReply(postId, replyId, timestamp);
+    await createSuiReply(postId, replyId, timestamp, network);
   }
 
   const [peeranhaPost, peeranhaReply, post] = await Promise.all([
@@ -746,7 +757,11 @@ export async function editSuiReply(
   await Promise.all(promises);
 }
 
-export async function deleteSuiReply(postId: string, replyId: number) {
+export async function deleteSuiReply(
+  postId: string,
+  replyId: number,
+  network: Network
+) {
   const reply = await replyRepository.get(`${postId}-${replyId}`);
   if (!reply) return;
 
@@ -756,7 +771,7 @@ export async function deleteSuiReply(postId: string, replyId: number) {
 
   const post = await postRepository.get(postId);
   if (post) {
-    const community = await getSuiCommunity(post.communityId);
+    const community = await getSuiCommunity(post.communityId, network);
     promises.push(
       updateSuiUserRating(reply.author, post.communityId),
 
@@ -805,12 +820,13 @@ export async function deleteSuiReply(postId: string, replyId: number) {
 export async function changeStatusBestSuiReply(
   postId: string,
   replyId: number,
-  timestamp: number
+  timestamp: number,
+  network: Network
 ) {
   let post = await postRepository.get(postId);
   let previousBestReply = 0;
   if (!post) {
-    post = await createSuiPost(postId, timestamp);
+    post = await createSuiPost(postId, timestamp, network);
   } else {
     previousBestReply = Number(post.bestReply);
     if (replyId !== previousBestReply) {
@@ -833,7 +849,8 @@ export async function changeStatusBestSuiReply(
       previousReply = await createSuiReply(
         postId,
         previousBestReply,
-        timestamp
+        timestamp,
+        network
       );
 
     if (previousReply) {
@@ -847,7 +864,7 @@ export async function changeStatusBestSuiReply(
 
   let reply = await replyRepository.get(`${postId}-${replyId}`);
   if (!reply) {
-    reply = await createSuiReply(postId, replyId, timestamp);
+    reply = await createSuiReply(postId, replyId, timestamp, network);
   }
 
   if (reply) {
@@ -996,7 +1013,8 @@ export async function voteSuiItem(
   replyId: number,
   commentId: number,
   timestamp: number,
-  voteDirection: number
+  voteDirection: number,
+  network: Network
 ) {
   if (commentId !== 0) {
     let comment = await commentRepository.get(
@@ -1016,12 +1034,12 @@ export async function voteSuiItem(
   } else if (replyId !== 0) {
     let post = await postRepository.get(postId);
     if (!post) {
-      post = await createSuiPost(postId, timestamp);
+      post = await createSuiPost(postId, timestamp, network);
     }
 
     let reply = await replyRepository.get(`${postId}-${replyId}`);
     if (!reply) {
-      reply = await createSuiReply(postId, replyId, timestamp);
+      reply = await createSuiReply(postId, replyId, timestamp, network);
     }
 
     const promises: Promise<any>[] = [];
@@ -1076,7 +1094,7 @@ export async function voteSuiItem(
   } else {
     let post = await postRepository.get(postId);
     if (!post) {
-      post = await createSuiPost(postId, timestamp);
+      post = await createSuiPost(postId, timestamp, network);
     }
 
     const promises: Promise<any>[] = [];

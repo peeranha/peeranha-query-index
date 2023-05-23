@@ -6,6 +6,7 @@ import { PeriodRepository } from 'src/core/db/repositories/PeriodRepository';
 import { ConfigurationError } from 'src/core/errors';
 import { indexingUserReward } from 'src/core/index/user';
 import { log } from 'src/core/utils/logger';
+import { Network } from 'src/models/event-models';
 
 const getPeriod = (startPeriodTime: number, periodLength: number) =>
   Math.floor((Date.now() / 1000 - startPeriodTime) / periodLength);
@@ -13,16 +14,16 @@ const getPeriod = (startPeriodTime: number, periodLength: number) =>
 const contractInfoRepository = new ContractInfoRepository();
 const periodRepository = new PeriodRepository();
 
-export async function indexingPeriods() {
-  if (!process.env.USER_CONTRACT_ADDRESS) {
-    throw new ConfigurationError('USER_CONTRACT_ADDRESS is not set');
+export async function indexingPeriods(network: Network) {
+  if (!process.env.USER_ADDRESS) {
+    throw new ConfigurationError('USER_ADDRESS is not set');
   }
-  const { USER_CONTRACT_ADDRESS } = process.env;
-  let contractInfo = await contractInfoRepository.get(USER_CONTRACT_ADDRESS);
+  const { USER_ADDRESS } = process.env;
+  let contractInfo = await contractInfoRepository.get(USER_ADDRESS);
   if (!contractInfo) {
-    const periodInfo = await getContractInfo();
+    const periodInfo = await getContractInfo(network);
     contractInfo = new ContractInfoEntity({
-      id: USER_CONTRACT_ADDRESS,
+      id: USER_ADDRESS,
       periodLength: periodInfo.periodLength,
       deployTime: periodInfo.startPeriodTime,
       lastUpdatePeriod: 0,
@@ -60,7 +61,7 @@ export async function indexingPeriods() {
     const previousPeriod = lastUpdatePeriod - 2;
     if (previousPeriod >= 0) {
       const timestamp = startPeriodTime - contractInfo.periodLength * 2;
-      promises.push(indexingUserReward(previousPeriod, timestamp));
+      promises.push(indexingUserReward(previousPeriod, timestamp, network));
 
       const previousPeriodEntity = await periodRepository.get(previousPeriod);
       if (previousPeriodEntity) {
@@ -73,7 +74,7 @@ export async function indexingPeriods() {
 
   await Promise.all(promises);
 
-  await contractInfoRepository.update(USER_CONTRACT_ADDRESS, {
+  await contractInfoRepository.update(USER_ADDRESS, {
     lastUpdatePeriod: period,
   });
 

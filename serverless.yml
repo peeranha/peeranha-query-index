@@ -92,6 +92,24 @@ fargate:
         DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
         SUI_PACKAGE_ADDRESS: ${self:provider.environment.SUI_PACKAGE_ADDRESS}
         SUI_USERS_RATING_COLLECTION: ${self:provider.environment.SUI_USERS_RATING_COLLECTION}
+    first-edgeware-events-listener:
+      name: ${self:custom.stage}-first-edgeware-events-listener
+      image: peeranha-ecs-nodejs
+      command:
+        - "./dist/edgeware-events-listener.mjs"
+      environment:
+        ENV: ${self:provider.environment.ENV}
+        REGION: ${self:provider.environment.REGION}
+        SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
+        AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
+        DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
+        COMMUNITY_ADDRESS: ${self:provider.environment.COMMUNITY_ADDRESS}
+        CONTENT_ADDRESS: ${self:provider.environment.CONTENT_ADDRESS}
+        USER_ADDRESS: ${self:provider.environment.USER_ADDRESS}
+        TOKEN_ADDRESS: ${self:provider.environment.TOKEN_ADDRESS}
+        NFT_ADDRESS: ${self:provider.environment.NFT_ADDRESS}
+        EDGEWARE_START_BLOCK_NUMBER: ${self:provider.environment.EDGEWARE_START_BLOCK_NUMBER}
+        RPC_EDGEWARE_ENDPOINT: ${self:provider.environment.RPC_EDGEWARE_ENDPOINT}
 
 functions:
   graphql:
@@ -101,37 +119,37 @@ functions:
           path: '/graphql'
           method: 'POST'
 
-  first-period-trigger:
-    handler: src/handlers/first-period-trigger.handler
-    timeout: 300
-    events:
-      - schedule:
-          name: first-period-trigger-${self:custom.stage}
-          rate: rate(10 minutes)
+  # first-period-trigger:
+  #   handler: src/handlers/first-period-trigger.handler
+  #   timeout: 300
+  #   events:
+  #     - schedule:
+  #         name: first-period-trigger-${self:custom.stage}
+  #         rate: rate(10 minutes)
 
-  second-period-trigger:
-    handler: src/handlers/second-period-trigger.handler
-    timeout: 300
-    events:
-      - schedule:
-          name: second-period-trigger-${self:custom.stage}
-          rate: rate(10 minutes)
+  # second-period-trigger:
+  #   handler: src/handlers/second-period-trigger.handler
+  #   timeout: 300
+  #   events:
+  #     - schedule:
+  #         name: second-period-trigger-${self:custom.stage}
+  #         rate: rate(10 minutes)
   
-  first-polygon-event-listener-webhook:
-    handler: src/handlers/first-polygon-event-listener-webhook.handler
-    timeout: 28
-    events:
-      - httpApi:
-          path: '/polygon-event-listener/first-webhook'
-          method: 'POST'
+  # first-polygon-event-listener-webhook:
+  #   handler: src/handlers/first-polygon-event-listener-webhook.handler
+  #   timeout: 28
+  #   events:
+  #     - httpApi:
+  #         path: '/polygon-event-listener/first-webhook'
+  #         method: 'POST'
   
-  second-polygon-event-listener-webhook:
-    handler: src/handlers/second-polygon-event-listener-webhook.handler
-    timeout: 28
-    events:
-      - httpApi:
-          path: '/polygon-event-listener/second-webhook'
-          method: 'POST'
+  # second-polygon-event-listener-webhook:
+  #   handler: src/handlers/second-polygon-event-listener-webhook.handler
+  #   timeout: 28
+  #   events:
+  #     - httpApi:
+  #         path: '/polygon-event-listener/second-webhook'
+  #         method: 'POST'
 
   # first-sui-onchain-events-read:
   #   handler: src/handlers/first-sui-onchain-events-read.handler
@@ -141,24 +159,42 @@ functions:
   #         name: first-sui-read-onchain-events-${self:custom.stage}
   #         rate: rate(1 minute)
 
-  first-indexing-queue:
-    handler: src/handlers/first-indexing-queue.handler
-    timeout: 50
+  first-edgeware-onchain-events-read:
+    handler: src/handlers/first-edgeware-onchain-events-read.handler
+    timeout: 300
     events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - firstQueue
-              - Arn
+      - schedule:
+          name: first-edgeware-read-onchain-events-${self:custom.stage}
+          rate: rate(1 minute)
 
-  second-indexing-queue:
-    handler: src/handlers/second-indexing-queue.handler
+  # first-indexing-queue:
+  #   handler: src/handlers/first-indexing-queue.handler
+  #   timeout: 50
+  #   events:
+  #     - sqs:
+  #         arn:
+  #           Fn::GetAtt:
+  #             - firstQueue
+  #             - Arn
+
+  # second-indexing-queue:
+  #   handler: src/handlers/second-indexing-queue.handler
+  #   timeout: 50
+  #   events:
+  #     - sqs:
+  #         arn:
+  #           Fn::GetAtt:
+  #             - secondQueue
+  #             - Arn
+  
+  first-edgeware-indexing-queue:
+    handler: src/handlers/edgeware-first-indexing-queue.handler
     timeout: 50
     events:
       - sqs:
           arn:
             Fn::GetAtt:
-              - secondQueue
+              - firstEdgewareQueue
               - Arn
       
   first-sui-indexing-queue:
@@ -205,10 +241,20 @@ resources:
         DeduplicationScope: messageGroup
         FifoThroughputLimit: perMessageGroupId
 
-    secondQueue:
+    # secondQueue:
+    #   Type: AWS::SQS::Queue
+    #   Properties:
+    #     QueueName: ${self:custom.stage}-secondQueue.fifo
+    #     VisibilityTimeout: 50
+    #     FifoQueue: true
+    #     ContentBasedDeduplication: true
+    #     DeduplicationScope: messageGroup
+    #     FifoThroughputLimit: perMessageGroupId
+
+    firstEdgewareQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: ${self:custom.stage}-secondQueue.fifo
+        QueueName: ${self:custom.stage}-firstEdgewareQueue.fifo
         VisibilityTimeout: 50
         FifoQueue: true
         ContentBasedDeduplication: true

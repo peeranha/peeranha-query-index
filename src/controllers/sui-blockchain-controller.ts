@@ -36,6 +36,7 @@ import { queryEvents } from 'src/core/sui-blockchain/sui';
 import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import { log } from 'src/core/utils/logger';
 import { pushToSQS } from 'src/core/utils/sqs';
+import { Network } from 'src/models/event-models';
 import {
   Event,
   BaseSuiEventModel,
@@ -146,7 +147,7 @@ export async function readSuiEvents(
     .map((item) => item.data)
     .forEach((evs) => {
       evs.forEach((ev) => {
-        eventObjects.push(ev);
+        eventObjects.push({ ...ev, network: Network.Sui });
       });
     });
 

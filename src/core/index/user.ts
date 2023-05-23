@@ -16,6 +16,7 @@ import { UserCommunityRatingRepository } from 'src/core/db/repositories/UserComm
 import { UserRepository } from 'src/core/db/repositories/UserRepository';
 import { UserRewardRepository } from 'src/core/db/repositories/UserRewardRepository';
 import { log, LogLevel } from 'src/core/utils/logger';
+import { Network } from 'src/models/event-models';
 
 const replyRepository = new ReplyRepository();
 const userRepository = new UserRepository();
@@ -24,7 +25,11 @@ const userRewardRepository = new UserRewardRepository();
 
 const START_USER_RATING = 10;
 
-export async function createUser(address: string, timestamp: number) {
+export async function createUser(
+  address: string,
+  timestamp: number,
+  network: Network
+) {
   const storedUser = await userRepository.get(address);
   if (storedUser) {
     if (timestamp < storedUser.creationTime)
@@ -34,7 +39,7 @@ export async function createUser(address: string, timestamp: number) {
     return storedUser;
   }
 
-  const peeranhaUser = await getUserByAddress(address);
+  const peeranhaUser = await getUserByAddress(address, network);
   if (!peeranhaUser) {
     return undefined;
   }
@@ -62,7 +67,8 @@ export async function createUser(address: string, timestamp: number) {
 
 export async function updateUserRating(
   userAddress: string,
-  communityId: string
+  communityId: string,
+  network: Network
 ) {
   const user = await userRepository.get(userAddress);
   if (!user) return;
@@ -71,7 +77,8 @@ export async function updateUserRating(
 
   const userRatingCollection = await getUserRatingCollection(
     userAddress,
-    communityId
+    communityId,
+    network
   );
 
   if (userRatingCollection.isActive) {
@@ -97,9 +104,12 @@ export async function updateUserRating(
   }
 }
 
-export async function updatePostUsersRatings(post: PostEntity) {
+export async function updatePostUsersRatings(
+  post: PostEntity,
+  network: Network
+) {
   const promises: Promise<any>[] = [];
-  promises.push(updateUserRating(post.author, post.communityId));
+  promises.push(updateUserRating(post.author, post.communityId, network));
 
   for (let i = 1; i <= post.replyCount; i++) {
     const reply = await replyRepository.get(`${post.id}-${i}`);
@@ -112,7 +122,7 @@ export async function updatePostUsersRatings(post: PostEntity) {
         reply.rating !== 0 ||
         reply.isBestReply)
     ) {
-      promises.push(updateUserRating(reply.author, post.communityId));
+      promises.push(updateUserRating(reply.author, post.communityId, network));
     }
   }
   await Promise.all(promises);
@@ -120,9 +130,10 @@ export async function updatePostUsersRatings(post: PostEntity) {
 
 export async function indexingUserReward(
   period: number,
-  timestamp: number
+  timestamp: number,
+  network: Network
 ): Promise<void> {
-  const activeUsersInPeriod = await getActiveUsersInPeriod(period);
+  const activeUsersInPeriod = await getActiveUsersInPeriod(period, network);
   if (activeUsersInPeriod.length > 0) {
     log(
       `Number of active users in period ${period}: ${activeUsersInPeriod.length}`
@@ -134,10 +145,10 @@ export async function indexingUserReward(
     const userEntity = await userRepository.get(user);
     if (!userEntity) {
       log(`Creating non-existent user by address ${user}`, LogLevel.DEBUG);
-      await createUser(user, timestamp);
+      await createUser(user, timestamp, network);
     }
 
-    const tokenReward = await getUserRewardGraph(user, period);
+    const tokenReward = await getUserRewardGraph(user, period, network);
     const userReward = new UserRewardEntity({
       id: `${period}-${user}`,
       periodId: period,

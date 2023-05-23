@@ -20,13 +20,11 @@ export class PeeranhaCommunityWrapper extends BaseContractWrapper {
   }
 
   public getAddress(): string {
-    if (!process.env.COMMUNITY_CONTRACT_ADDRESS) {
-      throw new ConfigurationError(
-        'COMMUNITY_CONTRACT_ADDRESS is not configured'
-      );
+    if (!process.env.COMMUNITY_ADDRESS) {
+      throw new ConfigurationError('COMMUNITY_ADDRESS is not configured');
     }
 
-    return process.env.COMMUNITY_CONTRACT_ADDRESS;
+    return process.env.COMMUNITY_ADDRESS;
   }
 
   public getAbi() {

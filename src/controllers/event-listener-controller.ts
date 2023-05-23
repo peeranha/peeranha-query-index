@@ -34,6 +34,7 @@ import { FIRST_QUEUE, SECOND_QUEUE } from 'src/core/constants';
 import { ConfigurationError } from 'src/core/errors';
 import { pushToSQS } from 'src/core/utils/sqs';
 import {
+  Network,
   BaseEventModel,
   ChangePostTypeEventModel,
   CommentCreatedEventModel,
@@ -66,8 +67,8 @@ import {
   UserUpdatedEventModel,
 } from 'src/models/event-models';
 
-const contractEvents = {
-  [process.env.USER_CONTRACT_ADDRESS!.toLowerCase()]: [
+export const contractEvents = {
+  [process.env.USER_ADDRESS!.toLowerCase()]: [
     USER_CREATED_EVENT_NAME,
     USER_UPDATED_EVENT_NAME,
     FOLLOWED_COMMUNITY_EVENT_NAME,
@@ -75,7 +76,7 @@ const contractEvents = {
     ROLE_GRANTED_EVENT_NAME,
     ROLE_REVOKED_EVENT_NAME,
   ],
-  [process.env.COMMUNITY_CONTRACT_ADDRESS!.toLowerCase()]: [
+  [process.env.COMMUNITY_ADDRESS!.toLowerCase()]: [
     COMMUNITY_CREATED_EVENT_NAME,
     TAG_CREATED_EVENT_NAME,
     COMMUNITY_UPDATED_EVENT_NAME,
@@ -83,7 +84,7 @@ const contractEvents = {
     COMMUNITY_FROZEN_EVENT_NAME,
     COMMUNITY_UNFROZEN_EVENT_NAME,
   ],
-  [process.env.MAIN_CONTRACT_ADDRESS!.toLowerCase()]: [
+  [process.env.CONTENT_ADDRESS!.toLowerCase()]: [
     POST_CREATED_EVENT_NAME,
     REPLY_CREATED_EVENT_NAME,
     COMMENT_CREATED_EVENT_NAME,
@@ -98,8 +99,8 @@ const contractEvents = {
     CHANGE_POST_TYPE_EVENT_NAME,
     SET_DOCUMENTATION_TREE_EVENT_NAME,
   ],
-  [process.env.TOKEN_CONTRACT_ADDRESS!.toLowerCase()]: [GET_REWARD_EVENT_NAME],
-  [process.env.NFT_CONTRACT_ADDRESS!.toLowerCase()]: [
+  [process.env.TOKEN_ADDRESS!.toLowerCase()]: [GET_REWARD_EVENT_NAME],
+  [process.env.NFT_ADDRESS!.toLowerCase()]: [
     CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME,
     TRANSFER_EVENT_NAME,
   ],
@@ -139,7 +140,7 @@ eventToModelType[GET_REWARD_EVENT_NAME] = GetRewardEventModel;
 eventToModelType[SET_DOCUMENTATION_TREE_EVENT_NAME] =
   SetDocumentationTreeEventModel;
 
-const getEventModels = (transactions: any[]) =>
+const getEventModels = (transactions: any[], network: Network) =>
   transactions
     .filter((transaction) =>
       contractEvents[transaction.contract_address]?.includes(
@@ -153,13 +154,13 @@ const getEventModels = (transactions: any[]) =>
           `Model type is not configured for event by name ${transaction.event_name}`
         );
       }
-      return new EventModeType(transaction);
+      return new EventModeType({ ...transaction, network });
     });
 
-async function getEvents(transactions: any[]) {
-  const provider = await createRpcProvider();
+async function getEvents(transactions: any[], network: Network) {
+  const provider = await createRpcProvider(network);
 
-  const eventModels = getEventModels(transactions);
+  const eventModels = getEventModels(transactions, network);
 
   const blockPromises: Promise<providers.Block>[] = [];
   eventModels.forEach((eventModel) =>
@@ -178,7 +179,7 @@ async function handleListenWebhook(
   request: EventListenerRequest,
   queueName: string
 ): Promise<void> {
-  const events = await getEvents(request.transactions);
+  const events = await getEvents(request.transactions, request.network);
 
   // TODO: think about possible failed operations
   for (let i = 0; i < events.length; i++) {

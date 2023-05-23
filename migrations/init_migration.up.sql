@@ -30,7 +30,8 @@ CREATE TABLE IF NOT EXISTS community (
   tagsCount SMALLINT DEFAULT 0,
   followingUsers INT DEFAULT 0,
   ipfsHash VARCHAR(66),
-  ipfsHash2 VARCHAR(66)
+  ipfsHash2 VARCHAR(66),
+  network VARCHAR(20)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS usercommunity (

@@ -3,6 +3,7 @@ import { TagData } from 'src/core/blockchain/entities/tag';
 import { CommunityEntity, TagEntity } from 'src/core/db/entities';
 import { CommunityRepository } from 'src/core/db/repositories/CommunityRepository';
 import { TagRepository } from 'src/core/db/repositories/TagRepository';
+import { Network } from 'src/models/event-models';
 
 const communityRepository = new CommunityRepository();
 const tagRepository = new TagRepository();
@@ -26,11 +27,12 @@ export async function createTag(tag: TagData): Promise<TagEntity> {
 }
 
 export async function createCommunity(
-  communityId: string
+  communityId: string,
+  network: Network
 ): Promise<CommunityEntity> {
   const [peeranhaCommunity, peeranhaTags] = await Promise.all([
-    getCommunity(communityId),
-    getTags(communityId),
+    getCommunity(communityId, network),
+    getTags(communityId, network),
   ]);
 
   const community = new CommunityEntity({
@@ -51,6 +53,7 @@ export async function createCommunity(
     followingUsers: 0,
     ipfsHash: peeranhaCommunity.ipfsDoc[0],
     ipfsHash2: peeranhaCommunity.ipfsDoc[1],
+    network,
   });
 
   await communityRepository.create(community);
@@ -63,11 +66,12 @@ export async function createCommunity(
 }
 
 export async function getCommunityById(
-  communityId: string
+  communityId: string,
+  network: Network
 ): Promise<CommunityEntity> {
   let community = await communityRepository.get(communityId);
   if (!community) {
-    community = await createCommunity(communityId);
+    community = await createCommunity(communityId, network);
   }
   return community;
 }

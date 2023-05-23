@@ -1,3 +1,5 @@
+import { Network } from 'src/models/event-models';
+
 export class UserEntity {
   public id: string;
 
@@ -87,6 +89,8 @@ export class CommunityEntity {
 
   public ipfsHash2: string;
 
+  public network: Network;
+
   constructor(community: {
     id: string;
     name: string;
@@ -105,6 +109,7 @@ export class CommunityEntity {
     followingUsers: number;
     ipfsHash: string;
     ipfsHash2: string;
+    network: Network;
   }) {
     this.id = community.id;
     this.name = community.name;
@@ -123,6 +128,7 @@ export class CommunityEntity {
     this.followingUsers = community.followingUsers;
     this.ipfsHash = community.ipfsHash;
     this.ipfsHash2 = community.ipfsHash2;
+    this.network = community.network;
   }
 }
 
@@ -613,6 +619,8 @@ export class HistoryEntity {
 
   public timestamp: number;
 
+  public network: Network;
+
   constructor(history: {
     id: string;
     transactionHash: string;
@@ -623,6 +631,7 @@ export class HistoryEntity {
     eventName: string;
     actionUser: string;
     timestamp: number;
+    network: Network;
   }) {
     this.id = history.id;
     this.transactionHash = history.transactionHash;
@@ -633,6 +642,7 @@ export class HistoryEntity {
     this.eventName = history.eventName;
     this.actionUser = history.actionUser;
     this.timestamp = history.timestamp;
+    this.network = history.network;
   }
 }
 
