@@ -441,6 +441,22 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
         );
       }
 
+      for (let j = 1; j <= reply.commentCount; j++) {
+        const comment = await commentRepository.get(
+          `${postId.toString()}-${i.toString()}-${j.toString()}`
+        );
+        if (comment) {
+          promises.push(
+            commentRepository.update(
+              `${postId.toString()}-${i.toString()}-${j.toString()}`,
+              {
+                isDeleted: true,
+              }
+            )
+          );
+        }
+      }
+
       communityReplyCount -= 1;
     }
   }

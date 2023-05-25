@@ -1,5 +1,5 @@
 /* eslint-disable no-await-in-loop */
-import { Event } from 'ethers';
+import { Event, providers } from 'ethers';
 import { contractEvents } from 'src/controllers/event-listener-controller';
 import {
   CHANGE_POST_TYPE_EVENT_NAME,
@@ -129,18 +129,16 @@ export async function readEvents(
 
     const configEndBlock = await configRepository.get(lastBlockNumber);
 
-    // const listenBlocksNumber = 2000 - 1;
+    const listenBlocksNumber = 2000 - 1;
 
-    // const startBlock = !configEndBlock
-    //   ? parseInt(process.env.EDGEWARE_START_BLOCK_NUMBER!, 10)
-    //   : parseInt(configEndBlock?.value!.toString(), 10) + 1;
+    const startBlock = !configEndBlock
+      ? parseInt(process.env.EDGEWARE_START_BLOCK_NUMBER!, 10)
+      : parseInt(configEndBlock?.value!.toString(), 10) + 1;
 
-    // const endBlock = Math.min(
-    //   startBlock + listenBlocksNumber,
-    //   (await provider.getBlockNumber()) - 2
-    // ); // go 2 blocks back to account for forks
-    const endBlock = 15967580;
-    const startBlock = 15967550;
+    const endBlock = Math.min(
+      startBlock + listenBlocksNumber,
+      (await provider.getBlockNumber()) - 2
+    ); // go 2 blocks back to account for forks
 
     const allEventsPromises: Record<string, Array<Promise<Event[]>>> = {};
     allEventsPromises[ITEM_VOTED_EVENT_NAME] = new Array<Promise<Event[]>>();
@@ -237,21 +235,6 @@ export async function readEvents(
       });
     });
 
-    // const peeranhaContract = new PeeranhaContentWrapper(provider);
-
-    // const contractEventsPromises = peeranhaContract.getEventsPromisesByNames(
-    //   Object.keys(allEventsPromises),
-    //   startBlock,
-    //   endBlock
-    // );
-
-    // Object.keys(contractEventsPromises).forEach((contractEventName) => {
-    //   const eventPromises = contractEventsPromises[contractEventName];
-    //   if (eventPromises) {
-    //     allEventsPromises[contractEventName]?.push(eventPromises);
-    //   }
-    // });
-
     const eventsResults: Record<string, any[]> = {};
     /* eslint-disable no-await-in-loop */
     /* eslint-disable no-restricted-syntax */
@@ -284,49 +267,60 @@ export async function readEvents(
       await configRepository.update(lastBlockNumber, configBlockNumber);
     }
 
-    const pushToSnsPromises = new Array<Promise<any>>();
+    const configuratedEvents: any[] = [];
+    const pushToSqsPromises = new Array<Promise<any>>();
 
     Object.keys(eventsResults).forEach((eventName) => {
       const results = eventsResults[eventName];
       if (results) {
         results.forEach((events: Event[]) => {
-          events.forEach((ev: Event) => {
+          events.forEach(async (ev: Event) => {
             const EventModeType = eventToModelType[eventName];
             if (!EventModeType) {
               throw new ConfigurationError(
                 `Model type is not configured for event by name ${eventName}`
               );
             }
-            const getTime = async () => {
-              return (await ev.getBlock()).timestamp;
-            };
             const model = new EventModeType({
-              ...ev?.args,
-              event_name: ev.event,
-              contract_address: ev.address,
-              transaction_hash: ev.transactionHash,
-              block_number: ev.blockNumber,
+              ...ev,
               network: readEventsRequest.network,
             });
-            getTime().then((timestamp) => {
-              model.timestamp = timestamp;
-              log(
-                `Prepared '${eventName}' event to be pushed to SNS - ${JSON.stringify(
-                  model
-                )}`,
-                LogLevel.INFO
-              );
-              pushToSnsPromises.push(
-                pushToSQS(EDGEWARE_INDEXING_FIRST_QUEUE, model)
-              );
-            });
+            configuratedEvents.push(model);
           });
         });
       }
     });
 
-    log('Pushing events to SNS.', LogLevel.INFO);
-    await Promise.allSettled(pushToSnsPromises);
+    const blockPromises: Promise<providers.Block>[] = [];
+    configuratedEvents.forEach((configuratedEvent) =>
+      blockPromises.push(provider.getBlock(configuratedEvent.blockNumber))
+    );
+
+    const blocks = await Promise.all(blockPromises);
+    for (let i = 0; i < blocks.length; i++) {
+      configuratedEvents[i]!.timestamp = blocks[i]!.timestamp;
+    }
+
+    configuratedEvents.sort((firstEventModel, secondEventModel) =>
+      firstEventModel.timestamp > secondEventModel.timestamp ? 1 : -1
+    );
+
+    for (let i = 0; i < configuratedEvents.length; i++) {
+      log(
+        `Prepared '${
+          configuratedEvents[i].contractEventName
+        }' event to be pushed to SQS - ${JSON.stringify(
+          configuratedEvents[i]
+        )}`,
+        LogLevel.INFO
+      );
+      pushToSqsPromises.push(
+        pushToSQS(EDGEWARE_INDEXING_FIRST_QUEUE, configuratedEvents[i])
+      );
+    }
+
+    log('Pushing events to SQS.', LogLevel.INFO);
+    await Promise.allSettled(pushToSqsPromises);
 
     log('DONE!', LogLevel.INFO);
     return new ReadNotificationsResponseModel();
