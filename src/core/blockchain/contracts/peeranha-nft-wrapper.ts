@@ -1,18 +1,22 @@
 import peeranhaNFTInterface from 'src/core/blockchain/contracts/abi/PeeranhaNFT.json';
 import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
 import { ConfigurationError } from 'src/core/errors';
+import { Network } from 'src/models/event-models';
 
 export class PeeranhaNFTWrapper extends BaseContractWrapper {
   public getAchievementsNFTConfig(achievementId: number): Promise<any> {
     return this.contract.getAchievementsNFTConfig(achievementId);
   }
 
-  public getAddress(): string {
-    if (!process.env.NFT_ADDRESS) {
+  public getAddress(network: Network): string {
+    const nftAddress = !network
+      ? process.env.POLYGON_NFT_ADDRESS
+      : process.env.EDGEWARE_NFT_ADDRESS;
+    if (!nftAddress) {
       throw new ConfigurationError('NFT_ADDRESS is not configured');
     }
 
-    return process.env.NFT_ADDRESS;
+    return nftAddress;
   }
 
   public getAbi() {

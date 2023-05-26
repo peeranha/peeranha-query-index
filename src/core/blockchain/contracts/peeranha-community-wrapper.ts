@@ -1,6 +1,7 @@
 import peeranhaCommunityInterface from 'src/core/blockchain/contracts/abi/PeeranhaCommunity.json';
 import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
 import { ConfigurationError } from 'src/core/errors';
+import { Network } from 'src/models/event-models';
 
 export class PeeranhaCommunityWrapper extends BaseContractWrapper {
   public async getCommunitiesCount(): Promise<number> {
@@ -19,12 +20,15 @@ export class PeeranhaCommunityWrapper extends BaseContractWrapper {
     return this.contract.getTags(communityId);
   }
 
-  public getAddress(): string {
-    if (!process.env.COMMUNITY_ADDRESS) {
+  public getAddress(network: Network): string {
+    const communityAddress = !network
+      ? process.env.POLYGON_COMMUNITY_ADDRESS
+      : process.env.EDGEWARE_COMMUNITY_ADDRESS;
+    if (!communityAddress) {
       throw new ConfigurationError('COMMUNITY_ADDRESS is not configured');
     }
 
-    return process.env.COMMUNITY_ADDRESS;
+    return communityAddress;
   }
 
   public getAbi() {

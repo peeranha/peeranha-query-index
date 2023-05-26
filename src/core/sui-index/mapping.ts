@@ -56,13 +56,21 @@ import {
 export async function handleCreateSuiUser(
   eventModel: UserCreatedSuiEventModel
 ) {
-  await createSuiUser(eventModel.userId, eventModel.timestamp);
+  await createSuiUser(
+    eventModel.userId,
+    eventModel.timestamp,
+    eventModel.network
+  );
 }
 
 export async function handleUpdateSuiUser(
   eventModel: UserUpdatedSuiEventModel
 ) {
-  await updateSuiUser(eventModel.userId, eventModel.timestamp);
+  await updateSuiUser(
+    eventModel.userId,
+    eventModel.timestamp,
+    eventModel.network
+  );
 }
 
 export async function handleCreateSuiCommunity(
@@ -266,7 +274,7 @@ export async function handlerGrantedSuiRole(
   eventModel: RoleGrantedSuiEventModel
 ) {
   const { role, timestamp, userId } = eventModel;
-  await grantSuiRole(userId, timestamp, role);
+  await grantSuiRole(userId, timestamp, role, eventModel.network);
 }
 
 export async function handlerRevokedSuiRole(

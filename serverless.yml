@@ -90,13 +90,13 @@ fargate:
         SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
         AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
         DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
-        COMMUNITY_ADDRESS: ${self:provider.environment.COMMUNITY_ADDRESS}
-        CONTENT_ADDRESS: ${self:provider.environment.CONTENT_ADDRESS}
-        USER_ADDRESS: ${self:provider.environment.USER_ADDRESS}
-        TOKEN_ADDRESS: ${self:provider.environment.TOKEN_ADDRESS}
-        NFT_ADDRESS: ${self:provider.environment.NFT_ADDRESS}
-        EDGEWARE_START_BLOCK_NUMBER: ${self:provider.environment.POLYGON_START_BLOCK_NUMBER}
-        RPC_EDGEWARE_ENDPOINT: ${self:provider.environment.RPC_POLYGON_ENDPOINT}
+        POLYGON_COMMUNITY_ADDRESS: ${self:provider.environment.POLYGON_COMMUNITY_ADDRESS}
+        POLYGON_CONTENT_ADDRESS: ${self:provider.environment.POLYGON_CONTENT_ADDRESS}
+        POLYGON_USER_ADDRESS: ${self:provider.environment.POLYGON_USER_ADDRESS}
+        POLYGON_TOKEN_ADDRESS: ${self:provider.environment.POLYGON_TOKEN_ADDRESS}
+        POLYGON_NFT_ADDRESS: ${self:provider.environment.POLYGON_NFT_ADDRESS}
+        START_BLOCK_NUMBER: ${self:provider.environment.POLYGON_START_BLOCK_NUMBER}
+        RPC_POLYGON_ENDPOINT: ${self:provider.environment.RPC_POLYGON_ENDPOINT}
 
     edgeware-events-listener:
       name: ${self:custom.stage}-edgeware-events-listener
@@ -109,12 +109,12 @@ fargate:
         SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
         AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
         DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
-        COMMUNITY_ADDRESS: ${self:provider.environment.COMMUNITY_ADDRESS}
-        CONTENT_ADDRESS: ${self:provider.environment.CONTENT_ADDRESS}
-        USER_ADDRESS: ${self:provider.environment.USER_ADDRESS}
-        TOKEN_ADDRESS: ${self:provider.environment.TOKEN_ADDRESS}
-        NFT_ADDRESS: ${self:provider.environment.NFT_ADDRESS}
-        EDGEWARE_START_BLOCK_NUMBER: ${self:provider.environment.EDGEWARE_START_BLOCK_NUMBER}
+        EDGEWARE_COMMUNITY_ADDRESS: ${self:provider.environment.EDGEWARE_COMMUNITY_ADDRESS}
+        EDGEWARE_CONTENT_ADDRESS: ${self:provider.environment.EDGEWARE_CONTENT_ADDRESS}
+        EDGEWARE_USER_ADDRESS: ${self:provider.environment.EDGEWARE_USER_ADDRESS}
+        EDGEWARE_TOKEN_ADDRESS: ${self:provider.environment.EDGEWARE_TOKEN_ADDRESS}
+        EDGEWARE_NFT_ADDRESS: ${self:provider.environment.EDGEWARE_NFT_ADDRESS}
+        START_BLOCK_NUMBER: ${self:provider.environment.EDGEWARE_START_BLOCK_NUMBER}
         RPC_EDGEWARE_ENDPOINT: ${self:provider.environment.RPC_EDGEWARE_ENDPOINT}
 
     sui-events-listener:

@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS user (
   avatar TEXT,
   creationTime INT NOT NULL,
   ipfsHash VARCHAR(66),
-  ipfsHash2 VARCHAR(66)
+  ipfsHash2 VARCHAR(66),
+  network VARCHAR(20)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS community (

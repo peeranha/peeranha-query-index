@@ -59,6 +59,7 @@ export async function createUser(
     creationTime: timestamp,
     ipfsHash: peeranhaUser.ipfsDoc[0],
     ipfsHash2: peeranhaUser.ipfsDoc[1],
+    network,
   });
   await userRepository.create(user);
 

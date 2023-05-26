@@ -1,6 +1,5 @@
 /* eslint-disable no-await-in-loop */
 import { Event, providers } from 'ethers';
-import { contractEvents } from 'src/controllers/event-listener-controller';
 import {
   CHANGE_POST_TYPE_EVENT_NAME,
   COMMENT_DELETED_EVENT_NAME,
@@ -37,7 +36,10 @@ import { PeeranhaNFTWrapper } from 'src/core/blockchain/contracts/peeranha-nft-w
 import { PeeranhaTokenWrapper } from 'src/core/blockchain/contracts/peeranha-token-wrapper';
 import { PeeranhaUserWrapper } from 'src/core/blockchain/contracts/peeranha-user-wrapper';
 import { createRpcProvider } from 'src/core/blockchain/rpc';
-import { EDGEWARE_INDEXING_QUEUE } from 'src/core/constants';
+import {
+  EDGEWARE_INDEXING_QUEUE,
+  POLYGON_INDEXING_QUEUE,
+} from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
 import {
@@ -81,6 +83,8 @@ import {
   ReadNotificationsResponseModel,
 } from 'src/models/event-models';
 
+import { contractEvents } from './event-listener-controller';
+
 const eventToModelType: Record<string, typeof BaseEventModel> = {};
 eventToModelType[ITEM_VOTED_EVENT_NAME] = ItemVotedEventModel;
 eventToModelType[REPLY_MARKED_THE_BEST_EVENT_NAME] =
@@ -122,6 +126,11 @@ export async function readEvents(
   readEventsRequest: ReadNotificationsRequestModel
 ): Promise<ReadNotificationsResponseModel> {
   try {
+    const Queues = [POLYGON_INDEXING_QUEUE, EDGEWARE_INDEXING_QUEUE];
+    const startsBlocks = [
+      process.env.POLYGON_START_BLOCK_NUMBER,
+      process.env.EDGEWARE_START_BLOCK_NUMBER,
+    ];
     const provider = await createRpcProvider(readEventsRequest.network);
     const lastBlockNumber = await getKeyForLastBlockByNetwork(
       readEventsRequest.network
@@ -132,7 +141,7 @@ export async function readEvents(
     const listenBlocksNumber = 2000 - 1;
 
     const startBlock = !configEndBlock
-      ? parseInt(process.env.EDGEWARE_START_BLOCK_NUMBER!, 10)
+      ? parseInt(startsBlocks[readEventsRequest.network]!, 10)
       : parseInt(configEndBlock?.value!.toString(), 10) + 1;
 
     const endBlock = Math.min(
@@ -198,25 +207,31 @@ export async function readEvents(
 
     log(`Creating promise to read events from chain.`, LogLevel.INFO);
     const peeranhaContracts = {
-      [process.env.USER_ADDRESS!.toLowerCase()]: new PeeranhaUserWrapper(
-        provider
-      ),
-      [process.env.COMMUNITY_ADDRESS!.toLowerCase()]:
-        new PeeranhaCommunityWrapper(provider),
-      [process.env.CONTENT_ADDRESS!.toLowerCase()]: new PeeranhaContentWrapper(
-        provider
-      ),
-      [process.env.TOKEN_ADDRESS!.toLowerCase()]: new PeeranhaTokenWrapper(
-        provider
-      ),
-      [process.env.NFT_ADDRESS!.toLowerCase()]: new PeeranhaNFTWrapper(
-        provider
-      ),
+      [!readEventsRequest.network
+        ? process.env.POLYGON_USER_ADDRESS!.toLowerCase()
+        : process.env.EDGEWARE_USER_ADDRESS!.toLowerCase()]:
+        new PeeranhaUserWrapper(provider, readEventsRequest.network),
+      [!readEventsRequest.network
+        ? process.env.POLYGON_COMMUNITY_ADDRESS!.toLowerCase()
+        : process.env.EDGEWARE_COMMUNITY_ADDRESS!.toLowerCase()]:
+        new PeeranhaCommunityWrapper(provider, readEventsRequest.network),
+      [!readEventsRequest.network
+        ? process.env.POLYGON_CONTENT_ADDRESS!.toLowerCase()
+        : process.env.EDGEWARE_CONTENT_ADDRESS!.toLowerCase()]:
+        new PeeranhaContentWrapper(provider, readEventsRequest.network),
+      [!readEventsRequest.network
+        ? process.env.POLYGON_TOKEN_ADDRESS!.toLowerCase()
+        : process.env.EDGEWARE_TOKEN_ADDRESS!.toLowerCase()]:
+        new PeeranhaTokenWrapper(provider, readEventsRequest.network),
+      [!readEventsRequest.network
+        ? process.env.POLYGON_NFT_ADDRESS!.toLowerCase()
+        : process.env.EDGEWARE_NFT_ADDRESS!.toLowerCase()]:
+        new PeeranhaNFTWrapper(provider, readEventsRequest.network),
     };
     const contractEventsPromises = Object.keys(peeranhaContracts).map(
       (peeranhaContract: string) => {
         return peeranhaContracts[peeranhaContract]?.getEventsPromisesByNames(
-          contractEvents[peeranhaContract] || [],
+          contractEvents(readEventsRequest.network)[peeranhaContract] || [],
           startBlock, // todo startBlock
           endBlock // todo endBlock
         );
@@ -315,7 +330,10 @@ export async function readEvents(
         LogLevel.INFO
       );
       pushToSqsPromises.push(
-        pushToSQS(EDGEWARE_INDEXING_QUEUE, configuratedEvents[i])
+        pushToSQS(
+          Queues[readEventsRequest.network] || POLYGON_INDEXING_QUEUE,
+          configuratedEvents[i]
+        )
       );
     }
 

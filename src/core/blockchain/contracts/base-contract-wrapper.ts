@@ -1,19 +1,26 @@
 import { Contract, providers, Event } from 'ethers';
 import { ConfigurationError } from 'src/core/errors';
+import { Network } from 'src/models/event-models';
 
 export class BaseContractWrapper {
   contract: Contract;
 
-  constructor(provider: providers.Provider, address?: string) {
+  constructor(
+    provider: providers.Provider,
+    network: Network,
+    address?: string
+  ) {
     this.contract = new Contract(
-      address ?? this.getAddress(),
+      address ?? this.getAddress(network),
       this.getAbi(),
       provider
     );
   }
 
-  public getAddress(): string {
-    throw new ConfigurationError('getAddress method is not implemented');
+  public getAddress(network: Network): string {
+    throw new ConfigurationError(
+      `getAddress method for ${Network[network]} network is not implemented`
+    );
   }
 
   public getAbi(): any {

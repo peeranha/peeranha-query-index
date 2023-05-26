@@ -1,6 +1,7 @@
 import peeranhaUserInterface from 'src/core/blockchain/contracts/abi/PeeranhaUser.json';
 import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
 import { ConfigurationError } from 'src/core/errors';
+import { Network } from 'src/models/event-models';
 
 export class PeeranhaUserWrapper extends BaseContractWrapper {
   public async getUserByAddress(address: string): Promise<any> {
@@ -31,12 +32,15 @@ export class PeeranhaUserWrapper extends BaseContractWrapper {
     return this.contract.getUserRatingCollection(address, communityId);
   }
 
-  public getAddress(): string {
-    if (!process.env.USER_ADDRESS) {
+  public getAddress(network: Network): string {
+    const userAddress = !network
+      ? process.env.POLYGON_USER_ADDRESS
+      : process.env.EDGEWARE_USER_ADDRESS;
+    if (!userAddress) {
       throw new ConfigurationError('USER_ADDRESS is not configured');
     }
 
-    return process.env.USER_ADDRESS;
+    return userAddress;
   }
 
   public getAbi() {

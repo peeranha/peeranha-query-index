@@ -2,6 +2,7 @@ import peeranhaContentInterface from 'src/core/blockchain/contracts/abi/Peeranha
 import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
 import { Documentation } from 'src/core/blockchain/entities/documentation';
 import { ConfigurationError } from 'src/core/errors';
+import { Network } from 'src/models/event-models';
 
 export class PeeranhaContentWrapper extends BaseContractWrapper {
   public async getPost(postId: number): Promise<any> {
@@ -48,12 +49,15 @@ export class PeeranhaContentWrapper extends BaseContractWrapper {
     return this.contract.getItemLanguage(postId, replyId ?? 0, commentId ?? 0);
   }
 
-  public getAddress(): string {
-    if (!process.env.CONTENT_ADDRESS) {
+  public getAddress(network: Network): string {
+    const contentAddress = !network
+      ? process.env.POLYGON_CONTENT_ADDRESS
+      : process.env.EDGEWARE_CONTENT_ADDRESS;
+    if (!contentAddress) {
       throw new ConfigurationError('CONTENT_ADDRESS is not configured');
     }
 
-    return process.env.CONTENT_ADDRESS;
+    return contentAddress;
   }
 
   public getAbi() {

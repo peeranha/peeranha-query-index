@@ -29,7 +29,11 @@ const userCommunityRatingRepository = new UserCommunityRatingRepository();
 const communityRepository = new CommunityRepository();
 const userPermissionRepository = new UserPermissionRepository();
 
-export async function createSuiUser(userId: string, timestamp: number) {
+export async function createSuiUser(
+  userId: string,
+  timestamp: number,
+  network: Network
+) {
   log(`Indexing user by id ${userId}`);
   const storedUser = await userRepository.get(userId);
   if (storedUser) {
@@ -58,17 +62,22 @@ export async function createSuiUser(userId: string, timestamp: number) {
     creationTime: timestamp,
     ipfsHash: peeranhaUser.ipfsDoc[0],
     ipfsHash2: peeranhaUser.ipfsDoc[1],
+    network,
   });
   await userRepository.create(user);
 
   return user;
 }
 
-export async function updateSuiUser(userId: string, timestamp: number) {
+export async function updateSuiUser(
+  userId: string,
+  timestamp: number,
+  network: Network
+) {
   log(`Updating sui user by id ${userId}`);
   const storedUser = await userRepository.get(userId);
   if (!storedUser) {
-    await createSuiUser(userId, timestamp);
+    await createSuiUser(userId, timestamp, network);
   } else {
     const peeranhaUser = await getSuiUserById(userId);
     if (!peeranhaUser) {
@@ -86,6 +95,7 @@ export async function updateSuiUser(userId: string, timestamp: number) {
       avatar: peeranhaUser.avatar,
       ipfsHash: peeranhaUser.ipfsDoc[0],
       ipfsHash2: peeranhaUser.ipfsDoc[1],
+      network,
     };
     await userRepository.update(userId, userForSave);
   }
@@ -152,7 +162,7 @@ export async function followSuiCommunity(
   network: Network
 ) {
   let user = await userRepository.get(userId);
-  if (!user) user = await createSuiUser(userId, timestamp);
+  if (!user) user = await createSuiUser(userId, timestamp, network);
 
   const userCommunity = new UserCommunityEntity({
     id: `${userId}-${communityId}`,
@@ -174,7 +184,7 @@ export async function unfollowSuiCommunity(
   network: Network
 ) {
   let user = await userRepository.get(userId);
-  if (!user) user = await createSuiUser(userId, timestamp);
+  if (!user) user = await createSuiUser(userId, timestamp, network);
 
   await userCommunityRepository.delete(`${userId}-${communityId}`);
 
@@ -187,11 +197,12 @@ export async function unfollowSuiCommunity(
 export async function grantSuiRole(
   userId: string,
   timestamp: number,
-  role: string
+  role: string,
+  network: Network
 ) {
   let user = await userRepository.get(userId);
   if (!user) {
-    user = await createSuiUser(userId, timestamp);
+    user = await createSuiUser(userId, timestamp, network);
   }
   if (!user) {
     return;

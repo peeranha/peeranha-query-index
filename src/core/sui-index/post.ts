@@ -401,7 +401,7 @@ export async function createSuiPost(
 
   let user = await userRepository.get(post.author);
   if (!user) {
-    user = await createSuiUser(post.author, timestamp);
+    user = await createSuiUser(post.author, timestamp, network);
   }
 
   await Promise.all([
@@ -663,7 +663,7 @@ export async function createSuiReply(
 
   let user = await userRepository.get(reply.author);
   if (!user) {
-    user = await createSuiUser(reply.author, timestamp);
+    user = await createSuiUser(reply.author, timestamp, network);
   }
 
   const promises: Promise<any>[] = [];

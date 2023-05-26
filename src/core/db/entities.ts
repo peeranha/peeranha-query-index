@@ -25,6 +25,8 @@ export class UserEntity {
 
   public ipfsHash2: string;
 
+  public network: Network;
+
   constructor(user: {
     id: string;
     displayName: string;
@@ -38,6 +40,7 @@ export class UserEntity {
     creationTime: number;
     ipfsHash: string;
     ipfsHash2: string;
+    network: Network;
   }) {
     this.id = user.id;
     this.displayName = user.displayName;
@@ -51,6 +54,7 @@ export class UserEntity {
     this.creationTime = user.creationTime;
     this.ipfsHash = user.ipfsHash;
     this.ipfsHash2 = user.ipfsHash2;
+    this.network = user.network;
   }
 }
 

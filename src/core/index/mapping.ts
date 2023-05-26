@@ -199,6 +199,7 @@ export async function handleUpdatedUser(eventModel: UserUpdatedEventModel) {
       avatar: user.avatar,
       ipfsHash: user.ipfsDoc[0],
       ipfsHash2: user.ipfsDoc[1],
+      network: eventModel.network,
     };
     await userRepository.update(userAddress, userForSave);
   }
