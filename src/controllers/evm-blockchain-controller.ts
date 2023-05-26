@@ -37,7 +37,7 @@ import { PeeranhaNFTWrapper } from 'src/core/blockchain/contracts/peeranha-nft-w
 import { PeeranhaTokenWrapper } from 'src/core/blockchain/contracts/peeranha-token-wrapper';
 import { PeeranhaUserWrapper } from 'src/core/blockchain/contracts/peeranha-user-wrapper';
 import { createRpcProvider } from 'src/core/blockchain/rpc';
-import { EDGEWARE_INDEXING_FIRST_QUEUE } from 'src/core/constants';
+import { EDGEWARE_INDEXING_QUEUE } from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
 import {
@@ -315,7 +315,7 @@ export async function readEvents(
         LogLevel.INFO
       );
       pushToSqsPromises.push(
-        pushToSQS(EDGEWARE_INDEXING_FIRST_QUEUE, configuratedEvents[i])
+        pushToSQS(EDGEWARE_INDEXING_QUEUE, configuratedEvents[i])
       );
     }
 

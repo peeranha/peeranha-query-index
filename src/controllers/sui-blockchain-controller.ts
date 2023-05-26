@@ -1,6 +1,6 @@
 /* eslint-disable no-await-in-loop */
 import { PaginatedEvents } from '@mysten/sui.js';
-import { SUI_INDEXING_FIRST_QUEUE } from 'src/core/constants';
+import { SUI_INDEXING_QUEUE } from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
 import { ConfigRepository } from 'src/core/dynamodb/repositories/ConfigRepository';
@@ -176,7 +176,7 @@ export async function readSuiEvents(
     });
 
   for (let i = 0; i < eventModels.length; i++) {
-    await pushToSQS(SUI_INDEXING_FIRST_QUEUE, eventModels[i]);
+    await pushToSQS(SUI_INDEXING_QUEUE, eventModels[i]);
   }
 
   const configPromises: Promise<any>[] = [];

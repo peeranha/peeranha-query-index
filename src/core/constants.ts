@@ -1,18 +1,13 @@
-export const FIRST_QUEUE = `${process.env.ENV}-firstQueue.fifo`;
-export const SECOND_QUEUE = `${process.env.ENV}-secondQueue.fifo`;
+export const POLYGON_INDEXING_QUEUE = `${process.env.ENV}-polygonQueue.fifo`;
+export const EDGEWARE_INDEXING_QUEUE = `${process.env.ENV}-edgewareQueue.fifo`;
+export const SUI_INDEXING_QUEUE = `${process.env.ENV}-suiQueue.fifo`;
+export const SUI_CONTENT_QUEUE = `${process.env.ENV}-suiContentQueue.fifo`;
 
-export const EDGEWARE_INDEXING_FIRST_QUEUE = `${process.env.ENV}-firstEdgewareQueue.fifo`;
-
-export const SUI_INDEXING_FIRST_QUEUE = `${process.env.ENV}-firstSuiQueue.fifo`;
-export const SUI_CONTENT_FIRST_QUEUE = `${process.env.ENV}-firstSuiContentQueue.fifo`;
-
-const FIRST_CLUSTER_CREDENTIALS = 'FIRST_CLUSTER_CREDENTIALS';
-const SECOND_CLUSTER_CREDENTIALS = 'SECOND_CLUSTER_CREDENTIALS';
+const DB_CLUSTER_CREDENTIALS = 'DB_CLUSTER_CREDENTIALS';
 
 export const credentialsSecret = {
-  [FIRST_QUEUE]: FIRST_CLUSTER_CREDENTIALS,
-  [EDGEWARE_INDEXING_FIRST_QUEUE]: FIRST_CLUSTER_CREDENTIALS,
-  [SUI_INDEXING_FIRST_QUEUE]: FIRST_CLUSTER_CREDENTIALS,
-  [SUI_CONTENT_FIRST_QUEUE]: FIRST_CLUSTER_CREDENTIALS,
-  [SECOND_QUEUE]: SECOND_CLUSTER_CREDENTIALS,
+  [POLYGON_INDEXING_QUEUE]: DB_CLUSTER_CREDENTIALS,
+  [EDGEWARE_INDEXING_QUEUE]: DB_CLUSTER_CREDENTIALS,
+  [SUI_INDEXING_QUEUE]: DB_CLUSTER_CREDENTIALS,
+  [SUI_CONTENT_QUEUE]: DB_CLUSTER_CREDENTIALS,
 };

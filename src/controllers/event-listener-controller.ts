@@ -30,7 +30,7 @@ import {
   USER_UPDATED_EVENT_NAME,
 } from 'src/core/blockchain/constants';
 import { createRpcProvider } from 'src/core/blockchain/rpc';
-import { FIRST_QUEUE, SECOND_QUEUE } from 'src/core/constants';
+import { POLYGON_INDEXING_QUEUE } from 'src/core/constants';
 import { ConfigurationError } from 'src/core/errors';
 import { pushToSQS } from 'src/core/utils/sqs';
 import {
@@ -188,14 +188,8 @@ async function handleListenWebhook(
   }
 }
 
-export async function handleListenFirstWebhook(
+export async function handleListenPolygonWebhook(
   request: EventListenerRequest
 ): Promise<void> {
-  await handleListenWebhook(request, FIRST_QUEUE);
-}
-
-export async function handleListenSecondWebhook(
-  request: EventListenerRequest
-): Promise<void> {
-  await handleListenWebhook(request, SECOND_QUEUE);
+  await handleListenWebhook(request, POLYGON_INDEXING_QUEUE);
 }
