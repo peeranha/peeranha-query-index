@@ -1,7 +1,7 @@
 export enum Network {
-  Polygon = 0,
-  Edgeware = 1,
-  Sui = 2,
+  Polygon = 1,
+  Edgeware = 2,
+  Sui = 3,
 }
 
 export class ReadNotificationsRequestModel {

@@ -215,6 +215,7 @@ CREATE TABLE IF NOT EXISTS history (
   eventName VARCHAR(15),
   actionUser VARCHAR(66) NOT NULL,
   timeStamp INT NOT NULL,
+  network VARCHAR(20),
 
   FOREIGN KEY (postId) REFERENCES post (id),
   FOREIGN KEY (actionUser) REFERENCES user (id)

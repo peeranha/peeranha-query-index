@@ -69,9 +69,9 @@ import {
 
 export const contractEvents = (network: Network) => {
   return {
-    [!network
-      ? process.env.POLYGON_USER_ADDRESS!.toLowerCase()
-      : process.env.EDGEWARE_USER_ADDRESS!.toLowerCase()]: [
+    [network === Network.Edgeware
+      ? process.env.EDGEWARE_USER_ADDRESS!.toLowerCase()
+      : process.env.POLYGON_USER_ADDRESS!.toLowerCase()]: [
       USER_CREATED_EVENT_NAME,
       USER_UPDATED_EVENT_NAME,
       FOLLOWED_COMMUNITY_EVENT_NAME,
@@ -79,9 +79,9 @@ export const contractEvents = (network: Network) => {
       ROLE_GRANTED_EVENT_NAME,
       ROLE_REVOKED_EVENT_NAME,
     ],
-    [!network
-      ? process.env.POLYGON_COMMUNITY_ADDRESS!.toLowerCase()
-      : process.env.EDGEWARE_COMMUNITY_ADDRESS!.toLowerCase()]: [
+    [network === Network.Edgeware
+      ? process.env.EDGEWARE_COMMUNITY_ADDRESS!.toLowerCase()
+      : process.env.POLYGON_COMMUNITY_ADDRESS!.toLowerCase()]: [
       COMMUNITY_CREATED_EVENT_NAME,
       TAG_CREATED_EVENT_NAME,
       COMMUNITY_UPDATED_EVENT_NAME,
@@ -89,9 +89,9 @@ export const contractEvents = (network: Network) => {
       COMMUNITY_FROZEN_EVENT_NAME,
       COMMUNITY_UNFROZEN_EVENT_NAME,
     ],
-    [!network
-      ? process.env.POLYGON_CONTENT_ADDRESS!.toLowerCase()
-      : process.env.EDGEWARE_CONTENT_ADDRESS!.toLowerCase()]: [
+    [network === Network.Edgeware
+      ? process.env.EDGEWARE_CONTENT_ADDRESS!.toLowerCase()
+      : process.env.POLYGON_CONTENT_ADDRESS!.toLowerCase()]: [
       POST_CREATED_EVENT_NAME,
       REPLY_CREATED_EVENT_NAME,
       COMMENT_CREATED_EVENT_NAME,
@@ -106,14 +106,14 @@ export const contractEvents = (network: Network) => {
       CHANGE_POST_TYPE_EVENT_NAME,
       SET_DOCUMENTATION_TREE_EVENT_NAME,
     ],
-    [!network
-      ? process.env.POLYGON_TOKEN_ADDRESS!.toLowerCase()
-      : process.env.EDGEWARE_TOKEN_ADDRESS!.toLowerCase()]: [
+    [network === Network.Edgeware
+      ? process.env.EDGEWARE_TOKEN_ADDRESS!.toLowerCase()
+      : process.env.POLYGON_TOKEN_ADDRESS!.toLowerCase()]: [
       GET_REWARD_EVENT_NAME,
     ],
-    [!network
-      ? process.env.POLYGON_NFT_ADDRESS!.toLowerCase()
-      : process.env.EDGEWARE_NFT_ADDRESS!.toLowerCase()]: [
+    [network === Network.Edgeware
+      ? process.env.EDGEWARE_NFT_ADDRESS!.toLowerCase()
+      : process.env.POLYGON_NFT_ADDRESS!.toLowerCase()]: [
       CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME,
       TRANSFER_EVENT_NAME,
     ],

@@ -39,6 +39,7 @@ import { createRpcProvider } from 'src/core/blockchain/rpc';
 import {
   EDGEWARE_INDEXING_QUEUE,
   POLYGON_INDEXING_QUEUE,
+  SUI_INDEXING_QUEUE,
 } from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
@@ -81,6 +82,7 @@ import {
   UserUpdatedEventModel,
   ReadNotificationsRequestModel,
   ReadNotificationsResponseModel,
+  Network,
 } from 'src/models/event-models';
 
 import { contractEvents } from './event-listener-controller';
@@ -126,11 +128,16 @@ export async function readEvents(
   readEventsRequest: ReadNotificationsRequestModel
 ): Promise<ReadNotificationsResponseModel> {
   try {
-    const Queues = [POLYGON_INDEXING_QUEUE, EDGEWARE_INDEXING_QUEUE];
-    const startsBlocks = [
-      process.env.POLYGON_START_BLOCK_NUMBER,
-      process.env.EDGEWARE_START_BLOCK_NUMBER,
-    ];
+    const Queues = {
+      [Network.Polygon]: POLYGON_INDEXING_QUEUE,
+      [Network.Edgeware]: EDGEWARE_INDEXING_QUEUE,
+      [Network.Sui]: SUI_INDEXING_QUEUE,
+    };
+    const startsBlocks = {
+      [Network.Polygon]: process.env.POLYGON_START_BLOCK_NUMBER,
+      [Network.Edgeware]: process.env.EDGEWARE_START_BLOCK_NUMBER,
+      [Network.Sui]: '0',
+    };
     const provider = await createRpcProvider(readEventsRequest.network);
     const lastBlockNumber = await getKeyForLastBlockByNetwork(
       readEventsRequest.network
@@ -207,25 +214,25 @@ export async function readEvents(
 
     log(`Creating promise to read events from chain.`, LogLevel.INFO);
     const peeranhaContracts = {
-      [!readEventsRequest.network
-        ? process.env.POLYGON_USER_ADDRESS!.toLowerCase()
-        : process.env.EDGEWARE_USER_ADDRESS!.toLowerCase()]:
+      [readEventsRequest.network === Network.Edgeware
+        ? process.env.EDGEWARE_USER_ADDRESS!.toLowerCase()
+        : process.env.POLYGON_USER_ADDRESS!.toLowerCase()]:
         new PeeranhaUserWrapper(provider, readEventsRequest.network),
-      [!readEventsRequest.network
-        ? process.env.POLYGON_COMMUNITY_ADDRESS!.toLowerCase()
-        : process.env.EDGEWARE_COMMUNITY_ADDRESS!.toLowerCase()]:
+      [readEventsRequest.network === Network.Edgeware
+        ? process.env.EDGEWARE_COMMUNITY_ADDRESS!.toLowerCase()
+        : process.env.POLYGON_COMMUNITY_ADDRESS!.toLowerCase()]:
         new PeeranhaCommunityWrapper(provider, readEventsRequest.network),
-      [!readEventsRequest.network
-        ? process.env.POLYGON_CONTENT_ADDRESS!.toLowerCase()
-        : process.env.EDGEWARE_CONTENT_ADDRESS!.toLowerCase()]:
+      [readEventsRequest.network === Network.Edgeware
+        ? process.env.EDGEWARE_CONTENT_ADDRESS!.toLowerCase()
+        : process.env.POLYGON_CONTENT_ADDRESS!.toLowerCase()]:
         new PeeranhaContentWrapper(provider, readEventsRequest.network),
-      [!readEventsRequest.network
-        ? process.env.POLYGON_TOKEN_ADDRESS!.toLowerCase()
-        : process.env.EDGEWARE_TOKEN_ADDRESS!.toLowerCase()]:
+      [readEventsRequest.network === Network.Edgeware
+        ? process.env.EDGEWARE_TOKEN_ADDRESS!.toLowerCase()
+        : process.env.POLYGON_TOKEN_ADDRESS!.toLowerCase()]:
         new PeeranhaTokenWrapper(provider, readEventsRequest.network),
-      [!readEventsRequest.network
-        ? process.env.POLYGON_NFT_ADDRESS!.toLowerCase()
-        : process.env.EDGEWARE_NFT_ADDRESS!.toLowerCase()]:
+      [readEventsRequest.network === Network.Edgeware
+        ? process.env.EDGEWARE_NFT_ADDRESS!.toLowerCase()
+        : process.env.POLYGON_NFT_ADDRESS!.toLowerCase()]:
         new PeeranhaNFTWrapper(provider, readEventsRequest.network),
     };
     const contractEventsPromises = Object.keys(peeranhaContracts).map(
@@ -330,10 +337,7 @@ export async function readEvents(
         LogLevel.INFO
       );
       pushToSqsPromises.push(
-        pushToSQS(
-          Queues[readEventsRequest.network] || POLYGON_INDEXING_QUEUE,
-          configuratedEvents[i]
-        )
+        pushToSQS(Queues[readEventsRequest.network], configuratedEvents[i])
       );
     }
 

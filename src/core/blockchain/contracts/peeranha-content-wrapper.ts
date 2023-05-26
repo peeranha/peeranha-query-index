@@ -50,9 +50,13 @@ export class PeeranhaContentWrapper extends BaseContractWrapper {
   }
 
   public getAddress(network: Network): string {
-    const contentAddress = !network
-      ? process.env.POLYGON_CONTENT_ADDRESS
-      : process.env.EDGEWARE_CONTENT_ADDRESS;
+    let contentAddress;
+    if (network === Network.Polygon) {
+      contentAddress = process.env.POLYGON_CONTENT_ADDRESS;
+    }
+    if (network === Network.Edgeware) {
+      contentAddress = process.env.EDGEWARE_CONTENT_ADDRESS;
+    }
     if (!contentAddress) {
       throw new ConfigurationError('CONTENT_ADDRESS is not configured');
     }

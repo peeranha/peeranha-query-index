@@ -9,9 +9,13 @@ export class PeeranhaTokenWrapper extends BaseContractWrapper {
   }
 
   public getAddress(network: Network): string {
-    const tokenAddress = !network
-      ? process.env.POLYGON_TOKEN_ADDRESS
-      : process.env.EDGEWARE_TOKEN_ADDRESS;
+    let tokenAddress;
+    if (network === Network.Polygon) {
+      tokenAddress = process.env.POLYGON_TOKEN_ADDRESS;
+    }
+    if (network === Network.Edgeware) {
+      tokenAddress = process.env.EDGEWARE_TOKEN_ADDRESS;
+    }
     if (!tokenAddress) {
       throw new ConfigurationError('TOKEN_ADDRESS is not configured');
     }

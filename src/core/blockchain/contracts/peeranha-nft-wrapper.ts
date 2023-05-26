@@ -9,9 +9,13 @@ export class PeeranhaNFTWrapper extends BaseContractWrapper {
   }
 
   public getAddress(network: Network): string {
-    const nftAddress = !network
-      ? process.env.POLYGON_NFT_ADDRESS
-      : process.env.EDGEWARE_NFT_ADDRESS;
+    let nftAddress;
+    if (network === Network.Polygon) {
+      nftAddress = process.env.POLYGON_NFT_ADDRESS;
+    }
+    if (network === Network.Edgeware) {
+      nftAddress = process.env.EDGEWARE_NFT_ADDRESS;
+    }
     if (!nftAddress) {
       throw new ConfigurationError('NFT_ADDRESS is not configured');
     }

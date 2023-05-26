@@ -33,9 +33,13 @@ export class PeeranhaUserWrapper extends BaseContractWrapper {
   }
 
   public getAddress(network: Network): string {
-    const userAddress = !network
-      ? process.env.POLYGON_USER_ADDRESS
-      : process.env.EDGEWARE_USER_ADDRESS;
+    let userAddress;
+    if (network === Network.Polygon) {
+      userAddress = process.env.POLYGON_USER_ADDRESS;
+    }
+    if (network === Network.Edgeware) {
+      userAddress = process.env.EDGEWARE_USER_ADDRESS;
+    }
     if (!userAddress) {
       throw new ConfigurationError('USER_ADDRESS is not configured');
     }

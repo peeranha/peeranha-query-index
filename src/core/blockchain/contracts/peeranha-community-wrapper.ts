@@ -21,14 +21,19 @@ export class PeeranhaCommunityWrapper extends BaseContractWrapper {
   }
 
   public getAddress(network: Network): string {
-    const communityAddress = !network
-      ? process.env.POLYGON_COMMUNITY_ADDRESS
-      : process.env.EDGEWARE_COMMUNITY_ADDRESS;
-    if (!communityAddress) {
+    let communnityAddress;
+    if (network === Network.Polygon) {
+      communnityAddress = process.env.POLYGON_COMMUNITY_ADDRESS;
+    }
+    if (network === Network.Edgeware) {
+      communnityAddress = process.env.EDGEWARE_COMMUNITY_ADDRESS;
+    }
+
+    if (!communnityAddress) {
       throw new ConfigurationError('COMMUNITY_ADDRESS is not configured');
     }
 
-    return communityAddress;
+    return communnityAddress;
   }
 
   public getAbi() {
