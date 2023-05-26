@@ -94,6 +94,7 @@ fargate:
         DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
         SUI_PACKAGE_ADDRESS: ${self:provider.environment.SUI_PACKAGE_ADDRESS}
         SUI_USERS_RATING_COLLECTION: ${self:provider.environment.SUI_USERS_RATING_COLLECTION}
+        SUI_RPC_ENDPOINT: ${self:provider.environment.SUI_RPC_ENDPOINT}
 
 functions:
   graphql:

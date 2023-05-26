@@ -114,7 +114,7 @@ export interface IPostTypeChangedEvent extends IBaseEvent {
 export interface IPostCommunityChangedEvent extends IBaseEvent {
   user: string;
   postId: any;
-  oldCommunityId: number;
+  oldCommunityId: string;
 }
 
 export interface IFollowedCommunityEvent extends IBaseEvent {

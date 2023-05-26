@@ -51,7 +51,7 @@ export async function queryEvents(
 }
 
 export async function getObject(objectId: string) {
-  const endpoint = await getSecretValue('SUI_RPC_ENDPOINT');
+  const endpoint = process.env.SUI_RPC_ENDPOINT;
   if (!endpoint) {
     throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }

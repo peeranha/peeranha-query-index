@@ -1,8 +1,8 @@
 /* eslint-disable no-await-in-loop */
 import { PaginatedEvents } from '@mysten/sui.js';
 import {
-  SUI_INDEXING_FIRST_QUEUE,
   SUI_EVENTS_MAPPING_SNS_TOPIC_NAME,
+  SUI_INDEXING_FIRST_QUEUE,
 } from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
@@ -177,10 +177,11 @@ export async function readSuiEvents(
         );
       }
       const eventModel = new EventModeType(event);
-      const exportEventModel = new SuiExportEventModel(event);
-      exportEventModel.name = eventName;
       eventModels.push(eventModel);
-      exportEventModels.push(exportEventModel);
+      exportEventModels.push({
+        ...event,
+        name: eventName,
+      });
     });
 
   for (let i = 0; i < eventModels.length; i++) {

@@ -56,13 +56,13 @@ import {
 export async function handleCreateSuiUser(
   eventModel: UserCreatedSuiEventModel
 ) {
-  await createSuiUser(eventModel.userId, eventModel.timestamp);
+  await createSuiUser(eventModel.user, eventModel.timestamp);
 }
 
 export async function handleUpdateSuiUser(
   eventModel: UserUpdatedSuiEventModel
 ) {
-  await updateSuiUser(eventModel.userId, eventModel.timestamp);
+  await updateSuiUser(eventModel.user, eventModel.timestamp);
 }
 
 export async function handleCreateSuiCommunity(
@@ -172,7 +172,7 @@ export async function handleDeletedSuiComment(
 
 export async function handleVoteSuiItem(eventModel: ItemVotedSuiEventModel) {
   await voteSuiItem(
-    eventModel.userId,
+    eventModel.user,
     eventModel.postId,
     eventModel.replyId,
     eventModel.commentId,
@@ -185,7 +185,7 @@ export async function handleFollowSuiCommunity(
   eventModel: FollowedCommunitySuiEventModel
 ) {
   await followSuiCommunity(
-    eventModel.userId,
+    eventModel.user,
     eventModel.communityId,
     eventModel.timestamp
   );
@@ -195,7 +195,7 @@ export async function handleUnfollowSuiCommunity(
   eventModel: UnfollowedCommunitySuiEventModel
 ) {
   await unfollowSuiCommunity(
-    eventModel.userId,
+    eventModel.user,
     eventModel.communityId,
     eventModel.timestamp
   );
@@ -204,15 +204,15 @@ export async function handleUnfollowSuiCommunity(
 export async function handlerGrantedSuiRole(
   eventModel: RoleGrantedSuiEventModel
 ) {
-  const { role, timestamp, userId } = eventModel;
-  await grantSuiRole(userId, timestamp, role);
+  const { role, timestamp, user } = eventModel;
+  await grantSuiRole(user, timestamp, role);
 }
 
 export async function handlerRevokedSuiRole(
   eventModel: RoleRevokedSuiEventModel
 ) {
-  const { role, userId } = eventModel;
-  await revokeSuiRole(userId, role);
+  const { role, user } = eventModel;
+  await revokeSuiRole(user, role);
 }
 
 export async function handleSetDocumentationTree(
@@ -221,6 +221,6 @@ export async function handleSetDocumentationTree(
   await setDocumentationTree(
     eventModel.communityId,
     eventModel.timestamp,
-    eventModel.userId
+    eventModel.user
   );
 }

@@ -443,15 +443,4 @@ export class SetDocumentationTreeSuiEventModel
   }
 }
 
-export class SuiExportEventModel {
-  public name!: string;
-
-  public transactionHash: string;
-
-  public args: any;
-
-  constructor(event: Event) {
-    this.transactionHash = event.id.txDigest;
-    this.args = event.parsedJson;
-  }
-}
+export type SuiExportEventModel = Event & { name: string };
