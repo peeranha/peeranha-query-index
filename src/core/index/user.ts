@@ -113,7 +113,7 @@ export async function updatePostUsersRatings(
   promises.push(updateUserRating(post.author, post.communityId, network));
 
   for (let i = 1; i <= post.replyCount; i++) {
-    const reply = await replyRepository.get(`${post.id}-${i}`);
+    const reply = await replyRepository.get(`${post.id}-${network}-${i}`); // ???
 
     if (
       reply &&

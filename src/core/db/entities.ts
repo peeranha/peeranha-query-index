@@ -477,7 +477,7 @@ export class CommentEntity {
 }
 
 export class AchievementEntity {
-  public id: number;
+  public id: string;
 
   public factCount: number;
 
@@ -504,7 +504,7 @@ export class AchievementEntity {
   public attrType?: string;
 
   constructor(achievement: {
-    id: number;
+    id: string;
     factCount: number;
     maxCount: number;
     achievementURI: string;
@@ -655,12 +655,12 @@ export class UserAchievementEntity {
 
   public userId: string;
 
-  public achievementId: number;
+  public achievementId: string;
 
   constructor(userAchievement: {
     id: string;
     userId: string;
-    achievementId: number;
+    achievementId: string;
   }) {
     this.id = userAchievement.id;
     this.userId = userAchievement.userId;

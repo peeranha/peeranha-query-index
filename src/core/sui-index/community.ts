@@ -53,7 +53,7 @@ async function deleteTagTranslations(translations: string[]) {
   await Promise.all(promises);
 }
 
-export async function createSuiTag(communityId: string, tagId: number) {
+export async function createSuiTag(communityId: string, tagId: string) {
   if (await tagRepository.get(`${communityId}-${tagId}`)) {
     return;
   }
@@ -75,7 +75,7 @@ export async function createSuiTag(communityId: string, tagId: number) {
   await createTagTranslations(peeranhaTag);
 }
 
-export async function updateSuiTag(communityId: string, tagId: number) {
+export async function updateSuiTag(communityId: string, tagId: string) {
   const id = `${communityId}-${tagId}`;
   log(`Updating sui tag by id ${id}`);
 
@@ -179,7 +179,7 @@ export async function createSuiCommunity(
 
   const tagsPromises: Promise<any>[] = [];
   for (let index = 1; index <= peeranhaCommunity.tags.length; index++) {
-    tagsPromises.push(createSuiTag(communityId, index));
+    tagsPromises.push(createSuiTag(communityId, `${network}-${index}`));
   }
   await Promise.all(tagsPromises);
 

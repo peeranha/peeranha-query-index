@@ -8,16 +8,16 @@ export class PeeranhaCommunityWrapper extends BaseContractWrapper {
     return this.contract.getCommunitiesCount();
   }
 
-  public async getCommunity(communityId: number): Promise<any> {
-    return this.contract.getCommunity(communityId);
+  public async getCommunity(communityId: string): Promise<any> {
+    return this.contract.getCommunity(communityId.split('-')[1]);
   }
 
-  public async getTag(communityId: number, tagId: number): Promise<any> {
-    return this.contract.getTag(communityId, tagId);
+  public async getTag(communityId: string, tagId: string): Promise<any> {
+    return this.contract.getTag(communityId.split('-')[1], tagId.split('-')[1]);
   }
 
-  public async getTags(communityId: number): Promise<any[]> {
-    return this.contract.getTags(communityId);
+  public async getTags(communityId: string): Promise<any[]> {
+    return this.contract.getTags(communityId.split('-')[1]);
   }
 
   public getAddress(network: Network): string {

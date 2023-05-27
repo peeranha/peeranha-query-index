@@ -9,7 +9,7 @@ import { Network } from 'src/models/event-models';
 
 export async function createAchievement(
   achievementRepository: AchievementRepository,
-  achievementId: number,
+  achievementId: string,
   network: Network
 ) {
   const [achievementData, peeranhaAchievementConfig, achievementCommunity] =
@@ -47,8 +47,8 @@ export async function createAchievement(
     lowerValue: peeranhaAchievementConfig?.lowerBound || 0,
     image: achievementData.image,
     description: achievementData.description,
-    communityId: String(achievementCommunity),
-    attrCommunityId: attrCommunityId || '0',
+    communityId: `${network}-${String(achievementCommunity)}`,
+    attrCommunityId: attrCommunityId || '0', // ???
     attrEvent,
     attrType,
   });

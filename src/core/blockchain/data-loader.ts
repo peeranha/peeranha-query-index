@@ -21,7 +21,7 @@ import { log, LogLevel } from 'src/core/utils/logger';
 import { Network } from 'src/models/event-models';
 
 export async function getPost(
-  postId: number,
+  postId: string,
   network: Network
 ): Promise<PostData> {
   const provider = await createRpcProvider(network);
@@ -31,8 +31,8 @@ export async function getPost(
 }
 
 export async function getReply(
-  postId: number,
-  replyId: number,
+  postId: string,
+  replyId: string,
   network: Network
 ): Promise<ReplyData | undefined> {
   try {
@@ -50,9 +50,9 @@ export async function getReply(
 }
 
 export async function getComment(
-  postId: number,
-  replyId: number,
-  commentId: number,
+  postId: string,
+  replyId: string,
+  commentId: string,
   network: Network
 ): Promise<CommentData | undefined> {
   try {
@@ -120,7 +120,9 @@ export async function getCommunity(
 ): Promise<CommunityData> {
   const provider = await createRpcProvider(network);
   const contract = new PeeranhaCommunityWrapper(provider, network);
-  const community = new CommunityData(await contract.getCommunity(Number(id)));
+  const community = new CommunityData(
+    await contract.getCommunity(`${network}-${id}`)
+  );
   return AddIpfsData(community, community.ipfsDoc[0]);
 }
 
@@ -130,7 +132,7 @@ export async function getTags(
 ): Promise<TagData[]> {
   const provider = await createRpcProvider(network);
   const contract = new PeeranhaCommunityWrapper(provider, network);
-  const tags = await contract.getTags(Number(communityId));
+  const tags = await contract.getTags(`${network}-${communityId}`);
   const tagsWithIpfsData: TagData[] = [];
   const promises: Promise<any>[] = [];
   tags.forEach((tag, index) => {
@@ -139,7 +141,7 @@ export async function getTags(
         .then((tagData) => {
           return {
             ...tagData,
-            tagId: `${communityId}-${index + 1}`,
+            tagId: `${index + 1}`, // ???
             communityId,
           };
         })
@@ -152,12 +154,14 @@ export async function getTags(
 
 export async function getTag(
   communityId: string,
-  tagId: number,
+  tagId: string,
   network: Network
 ): Promise<TagData> {
   const provider = await createRpcProvider(network);
   const contract = new PeeranhaCommunityWrapper(provider, network);
-  const tag = new TagData(await contract.getTag(Number(communityId), tagId));
+  const tag = new TagData(
+    await contract.getTag(`${network}-${communityId}`, tagId)
+  );
   const tagWithIpfs = await AddIpfsData(tag, tag.ipfsDoc[0]);
   return {
     ...tagWithIpfs,
@@ -167,7 +171,7 @@ export async function getTag(
 }
 
 export async function getAchievementsNFTConfig(
-  achievementId: number,
+  achievementId: string,
   network: Network
 ): Promise<AchievementData> {
   const provider = await createRpcProvider(network);
@@ -188,15 +192,15 @@ export async function getDocumentationTree(
 ): Promise<Documentation> {
   const provider = await createRpcProvider(network);
   const contract = new PeeranhaContentWrapper(provider, network);
-  return contract.getDocumentationTree(Number(communityId));
+  return contract.getDocumentationTree(`${network}-${communityId}`);
 }
 
 export async function getItemProperty(
   propertyId: number,
-  postId: number,
+  postId: string,
   network: Network,
-  replyId?: number,
-  commentId?: number
+  replyId?: string,
+  commentId?: string
 ): Promise<string | undefined> {
   try {
     const provider = await createRpcProvider(network);
@@ -218,7 +222,7 @@ export async function getItemProperty(
 }
 
 export async function getAchievementConfig(
-  achievementId: number,
+  achievementId: string,
   network: Network
 ) {
   try {
@@ -237,7 +241,7 @@ export async function getAchievementConfig(
 }
 
 export async function getAchievementCommunity(
-  achievementId: number,
+  achievementId: string,
   network: Network
 ) {
   try {
@@ -261,15 +265,18 @@ export async function getUserRatingCollection(
   const provider = await createRpcProvider(network);
   const userContract = new PeeranhaUserWrapper(provider, network);
   return new UserRating(
-    await userContract.getUserRatingCollection(address, Number(communityId))
+    await userContract.getUserRatingCollection(
+      address,
+      `${network}-${communityId}`
+    )
   );
 }
 
 export async function getItemLanguage(
-  postId: number,
+  postId: string,
   network: Network,
-  replyId?: number,
-  commentId?: number
+  replyId?: string,
+  commentId?: string
 ): Promise<number | undefined> {
   try {
     const provider = await createRpcProvider(network);

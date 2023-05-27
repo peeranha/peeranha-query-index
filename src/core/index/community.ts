@@ -8,9 +8,12 @@ import { Network } from 'src/models/event-models';
 const communityRepository = new CommunityRepository();
 const tagRepository = new TagRepository();
 
-export async function createTag(tag: TagData): Promise<TagEntity> {
+export async function createTag(
+  tag: TagData,
+  network: Network
+): Promise<TagEntity> {
   const tagEntity = new TagEntity({
-    id: tag.tagId,
+    id: `${network}-${tag.communityId}-${tag.tagId}`,
     name: tag.name,
     description: tag.description,
     communityId: tag.communityId,
@@ -59,7 +62,7 @@ export async function createCommunity(
   await communityRepository.create(community);
 
   const promises: Promise<TagEntity>[] = [];
-  peeranhaTags.forEach((tag) => promises.push(createTag(tag)));
+  peeranhaTags.forEach((tag) => promises.push(createTag(tag, network)));
   await Promise.all(promises);
 
   return community;

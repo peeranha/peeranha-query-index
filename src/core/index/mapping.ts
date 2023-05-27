@@ -136,7 +136,9 @@ export async function handleConfigureNewAchievement(
 
 export async function handleTransfer(eventModel: TransferEventModel) {
   const { timestamp, to: user } = eventModel;
-  const achievementId = Math.floor(eventModel.tokenId / POOL_NFT + 1);
+  const achievementId = `${eventModel.network}-${Math.floor(
+    eventModel.tokenId / POOL_NFT + 1
+  )}`;
   const achievement = await achievementRepository.get(achievementId);
 
   if (achievement) {
@@ -323,7 +325,7 @@ export async function handleNewTag(eventModel: TagCreatedEventModel) {
       tagsCount: community.tagsCount + 1,
     }),
 
-    createTag(tag),
+    createTag(tag, eventModel.network),
   ]);
 }
 
@@ -334,7 +336,7 @@ export async function handleEditedTag(eventModel: TagUpdatedEventModel) {
     tagRepository.get(`${communityId}-${tagId}`),
   ]);
   if (!tagEntity) {
-    await createTag(tag);
+    await createTag(tag, eventModel.network);
   } else {
     await tagRepository.update(tag.tagId, {
       ipfsHash: tag.ipfsDoc[0],
@@ -542,11 +544,7 @@ export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
     storedReply = createdReply;
   }
 
-  const peeranhaReply = await getReply(
-    Number(postId),
-    replyId,
-    eventModel.network
-  );
+  const peeranhaReply = await getReply(postId, replyId, eventModel.network);
   if (!peeranhaReply) return;
 
   if (!storedReply) {
@@ -597,7 +595,9 @@ export async function handleDeletedReply(eventModel: ReplyDeletedEventModel) {
       }),
 
       postRepository.update(postId, {
-        bestReply: reply.isBestReply ? 0 : post.bestReply,
+        bestReply: reply.isBestReply
+          ? `${eventModel.network}-0`
+          : post.bestReply,
         officialReply: reply.isOfficialReply ? 0 : post.officialReply,
       })
     );
@@ -639,7 +639,7 @@ export async function handleNewComment(eventModel: CommentCreatedEventModel) {
   if (!comment) {
     const post = await postRepository.get(postId);
     if (post) {
-      if (replyId === 0) {
+      if (Number(replyId.split('-')[1]) === 0) {
         await postRepository.update(post.id, {
           commentCount: post.commentCount + 1,
         });
@@ -685,7 +685,7 @@ export async function handleEditedComment(eventModel: CommentEditedEventModel) {
   if (!storedComment) storedComment = createdComment;
 
   const comment = await getComment(
-    Number(postId),
+    postId,
     replyId,
     commentId,
     eventModel.network
@@ -752,7 +752,7 @@ export async function handlerForumItemVoted(eventModel: ItemVotedEventModel) {
   const { replyId, commentId, timestamp, user } = eventModel;
   const postId = String(eventModel.postId);
 
-  if (commentId !== 0) {
+  if (Number(commentId.split('-')[1]) !== 0) {
     let comment = await commentRepository.get(
       `${postId}-${replyId}-${commentId}`
     );
@@ -767,7 +767,7 @@ export async function handlerForumItemVoted(eventModel: ItemVotedEventModel) {
     }
     if (comment) {
       const peeranhaComment = await getComment(
-        Number(postId),
+        postId,
         replyId,
         commentId,
         eventModel.network
@@ -777,7 +777,7 @@ export async function handlerForumItemVoted(eventModel: ItemVotedEventModel) {
           rating: peeranhaComment.rating,
         });
     }
-  } else if (replyId !== 0) {
+  } else if (Number(replyId.split('-')[1]) !== 0) {
     let post = await postRepository.get(postId);
     if (!post) post = await createPost(postId, timestamp, eventModel.network);
 
@@ -788,11 +788,7 @@ export async function handlerForumItemVoted(eventModel: ItemVotedEventModel) {
     const promises: Promise<any>[] = [];
 
     if (reply) {
-      const peeranhaReply = await getReply(
-        Number(postId),
-        replyId,
-        eventModel.network
-      );
+      const peeranhaReply = await getReply(postId, replyId, eventModel.network);
       if (peeranhaReply) {
         promises.push(
           replyRepository.update(reply.id, {
@@ -813,7 +809,7 @@ export async function handlerForumItemVoted(eventModel: ItemVotedEventModel) {
 
     const promises: Promise<any>[] = [];
 
-    const peeranhaPost = await getPost(Number(postId), eventModel.network);
+    const peeranhaPost = await getPost(postId, eventModel.network);
     if (peeranhaPost) {
       promises.push(
         postRepository.update(postId, {
@@ -838,11 +834,11 @@ export async function handlerChangedStatusBestReply(
   const postId = String(eventModel.postId);
 
   let post = await postRepository.get(postId);
-  let previousBestReply = 0;
+  let previousBestReply = `${eventModel.network}-0`;
   if (!post) {
     post = await createPost(postId, timestamp, eventModel.network);
   } else {
-    previousBestReply = Number(post.bestReply);
+    previousBestReply = post.bestReply;
 
     await postRepository.update(postId, {
       bestReply: replyId,
@@ -857,7 +853,7 @@ export async function handlerChangedStatusBestReply(
     if (!previousReply)
       previousReply = await createReply(
         postId,
-        previousBestReply,
+        `${eventModel.network}-${previousBestReply}`,
         timestamp,
         eventModel.network
       );
@@ -879,7 +875,7 @@ export async function handlerChangedStatusBestReply(
   if (!reply)
     reply = await createReply(postId, replyId, timestamp, eventModel.network);
   if (reply) {
-    if (replyId !== 0) {
+    if (Number(replyId.split('-')[1]) !== 0) {
       if (reply.author !== post.author) {
         await updateUserRating(
           reply.author,

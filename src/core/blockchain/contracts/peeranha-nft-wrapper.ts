@@ -4,8 +4,8 @@ import { ConfigurationError } from 'src/core/errors';
 import { Network } from 'src/models/event-models';
 
 export class PeeranhaNFTWrapper extends BaseContractWrapper {
-  public getAchievementsNFTConfig(achievementId: number): Promise<any> {
-    return this.contract.getAchievementsNFTConfig(achievementId);
+  public getAchievementsNFTConfig(achievementId: string): Promise<any> {
+    return this.contract.getAchievementsNFTConfig(achievementId.split('-')[1]);
   }
 
   public getAddress(network: Network): string {

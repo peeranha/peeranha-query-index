@@ -624,7 +624,7 @@ export async function deleteSuiPost(postId: string, network: Network) {
 
 export async function createSuiReply(
   postId: string,
-  replyId: number,
+  replyId: string,
   timestamp: number,
   network: Network
 ): Promise<ReplyEntity> {
@@ -711,7 +711,7 @@ export async function createSuiReply(
 
 export async function editSuiReply(
   postId: string,
-  replyId: number,
+  replyId: string,
   timestamp: number,
   network: Network
 ) {
@@ -759,7 +759,7 @@ export async function editSuiReply(
 
 export async function deleteSuiReply(
   postId: string,
-  replyId: number,
+  replyId: string,
   network: Network
 ) {
   const reply = await replyRepository.get(`${postId}-${replyId}`);
@@ -819,23 +819,23 @@ export async function deleteSuiReply(
 
 export async function changeStatusBestSuiReply(
   postId: string,
-  replyId: number,
+  replyId: string,
   timestamp: number,
   network: Network
 ) {
   let post = await postRepository.get(postId);
-  let previousBestReply = 0;
+  let previousBestReply = `${network}-0`;
   if (!post) {
     post = await createSuiPost(postId, timestamp, network);
   } else {
-    previousBestReply = Number(post.bestReply);
+    previousBestReply = post.bestReply;
     if (replyId !== previousBestReply) {
       await postRepository.update(postId, {
-        bestReply: replyId.toString(),
+        bestReply: replyId,
       });
     } else {
       await postRepository.update(postId, {
-        bestReply: '0',
+        bestReply: `${network}-0`,
       });
     }
   }
@@ -868,7 +868,7 @@ export async function changeStatusBestSuiReply(
   }
 
   if (reply) {
-    if (replyId !== 0 && replyId !== previousBestReply) {
+    if (Number(replyId.split('-')[1]) !== 0 && replyId !== previousBestReply) {
       if (reply.author !== post.author) {
         await updateSuiUserRating(reply.author, post.communityId);
       }
@@ -884,8 +884,8 @@ export async function changeStatusBestSuiReply(
 
 export async function createSuiComment(
   postId: string,
-  parentReplyId: number,
-  commentId: number,
+  parentReplyId: string,
+  commentId: string,
   timestamp: number
 ): Promise<CommentEntity> {
   const peeranhaComment = await getSuiComment(
@@ -915,8 +915,10 @@ export async function createSuiComment(
   const post = await postRepository.get(postId);
   if (post) {
     const postCommentCount =
-      parentReplyId === 0 ? post.commentCount + 1 : post.commentCount;
-    if (parentReplyId !== 0) {
+      Number(parentReplyId.split('-')[0]) === 0
+        ? post.commentCount + 1
+        : post.commentCount;
+    if (Number(parentReplyId.split('-')[0]) !== 0) {
       const reply = await replyRepository.get(`${postId}-${parentReplyId}`);
       if (reply) {
         await replyRepository.update(reply.id, {
@@ -941,8 +943,8 @@ export async function createSuiComment(
 
 export async function editSuiComment(
   postId: string,
-  replyId: number,
-  commentId: number,
+  replyId: string,
+  commentId: string,
   timestamp: number
 ) {
   let storedComment = await commentRepository.get(
@@ -973,8 +975,8 @@ export async function editSuiComment(
 
 export async function deleteSuiComment(
   postId: string,
-  replyId: number,
-  commentId: number
+  replyId: string,
+  commentId: string
 ) {
   const comment = await commentRepository.get(
     `${postId}-${replyId}-${commentId}`
@@ -1010,13 +1012,13 @@ export async function deleteSuiComment(
 export async function voteSuiItem(
   userId: string,
   postId: string,
-  replyId: number,
-  commentId: number,
+  replyId: string,
+  commentId: string,
   timestamp: number,
   voteDirection: number,
   network: Network
 ) {
-  if (commentId !== 0) {
+  if (Number(commentId.split('-')[0]) !== 0) {
     let comment = await commentRepository.get(
       `${postId}-${replyId}-${commentId}`
     );
@@ -1031,7 +1033,7 @@ export async function voteSuiItem(
         rating: peeranhaComment.rating,
       });
     }
-  } else if (replyId !== 0) {
+  } else if (Number(replyId.split('-')[0]) !== 0) {
     let post = await postRepository.get(postId);
     if (!post) {
       post = await createSuiPost(postId, timestamp, network);

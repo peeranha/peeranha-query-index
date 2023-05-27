@@ -5,7 +5,7 @@ const TABLE_NAME = 'achievement';
 
 export class AchievementRepository extends BaseRepository<
   AchievementEntity,
-  number
+  string
 > {
   constructor() {
     super(TABLE_NAME);
