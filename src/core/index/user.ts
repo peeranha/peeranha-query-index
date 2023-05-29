@@ -86,7 +86,7 @@ export async function updateUserRating(
     rating = userRatingCollection.rating;
   }
 
-  const userRatingId = `${communityId} ${userAddress}`;
+  const userRatingId = `${communityId}-${userAddress}`;
   let userComunityRating = await userCommunityRatingRepository.get(
     userRatingId
   );

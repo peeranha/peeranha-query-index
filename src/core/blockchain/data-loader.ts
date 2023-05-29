@@ -120,9 +120,7 @@ export async function getCommunity(
 ): Promise<CommunityData> {
   const provider = await createRpcProvider(network);
   const contract = new PeeranhaCommunityWrapper(provider, network);
-  const community = new CommunityData(
-    await contract.getCommunity(`${network}-${id}`)
-  );
+  const community = new CommunityData(await contract.getCommunity(id));
   return AddIpfsData(community, community.ipfsDoc[0]);
 }
 
@@ -132,7 +130,7 @@ export async function getTags(
 ): Promise<TagData[]> {
   const provider = await createRpcProvider(network);
   const contract = new PeeranhaCommunityWrapper(provider, network);
-  const tags = await contract.getTags(`${network}-${communityId}`);
+  const tags = await contract.getTags(communityId);
   const tagsWithIpfsData: TagData[] = [];
   const promises: Promise<any>[] = [];
   tags.forEach((tag, index) => {
@@ -159,9 +157,7 @@ export async function getTag(
 ): Promise<TagData> {
   const provider = await createRpcProvider(network);
   const contract = new PeeranhaCommunityWrapper(provider, network);
-  const tag = new TagData(
-    await contract.getTag(`${network}-${communityId}`, tagId)
-  );
+  const tag = new TagData(await contract.getTag(communityId, tagId));
   const tagWithIpfs = await AddIpfsData(tag, tag.ipfsDoc[0]);
   return {
     ...tagWithIpfs,
@@ -192,7 +188,7 @@ export async function getDocumentationTree(
 ): Promise<Documentation> {
   const provider = await createRpcProvider(network);
   const contract = new PeeranhaContentWrapper(provider, network);
-  return contract.getDocumentationTree(`${network}-${communityId}`);
+  return contract.getDocumentationTree(communityId);
 }
 
 export async function getItemProperty(
@@ -265,10 +261,7 @@ export async function getUserRatingCollection(
   const provider = await createRpcProvider(network);
   const userContract = new PeeranhaUserWrapper(provider, network);
   return new UserRating(
-    await userContract.getUserRatingCollection(
-      address,
-      `${network}-${communityId}`
-    )
+    await userContract.getUserRatingCollection(address, communityId)
   );
 }
 

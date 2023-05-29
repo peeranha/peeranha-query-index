@@ -40,8 +40,8 @@ export class PeeranhaContentWrapper extends BaseContractWrapper {
     return this.contract.getItemProperty(
       propertyId,
       postId.split('-')[1],
-      replyId?.split('-')[1] ?? 0,
-      commentId?.split('-')[1] ?? 0
+      replyId ? replyId?.split('-')[1] : 0,
+      commentId ? commentId?.split('-')[1] : 0
     );
   }
 

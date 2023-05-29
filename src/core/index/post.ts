@@ -138,7 +138,7 @@ export async function createPost(
     commentCount: 0,
     replyCount: 0,
     rating: 0,
-    officialReply: '0',
+    officialReply: `${network}-0`,
     bestReply: `${network}-${peeranhaPost.bestReply}`,
     ipfsHash: peeranhaPost.ipfsDoc[0],
     ipfsHash2: peeranhaPost.ipfsDoc[1],
@@ -152,7 +152,9 @@ export async function createPost(
     );
   }
 
-  const tagIds = peeranhaPost.tags.map((tag) => `${post.communityId}-${tag}`);
+  const tagIds = peeranhaPost.tags.map(
+    (tag) => `${post.communityId}-${network}-${tag}`
+  );
   post.postContent += await updateTagsPostCount(tagIds, []);
 
   const community = await getCommunityById(post.communityId, network);
@@ -179,9 +181,9 @@ export async function createPost(
   const promises: Promise<any>[] = [];
   tagIds.forEach((tag) => {
     const postTag = new PostTagEntity({
-      id: `${network}-${post.id}-${tag}`,
-      postId: `${network}-${post.id}`,
-      tagId: `${network}-${tag}`,
+      id: `${post.id}-${tag}`,
+      postId,
+      tagId: tag,
     });
     promises.push(postTagRepository.create(postTag));
   });
@@ -306,7 +308,7 @@ export async function createComment(
     id: `${postId}-${parentReplyId}-${commentId}`,
     id2: '',
     postId,
-    parentReplyId: String(parentReplyId),
+    parentReplyId,
     content: peeranhaComment.content,
     author: peeranhaComment.author.toLowerCase(),
     isDeleted: false,
@@ -321,10 +323,10 @@ export async function createComment(
   const post = await postRepository.get(postId);
   if (post) {
     const postCommentCount =
-      Number(parentReplyId.split('-')[0]) === 0
+      Number(parentReplyId.split('-')[1]) === 0
         ? post.commentCount + 1
         : post.commentCount;
-    if (Number(parentReplyId.split('-')[0]) !== 0) {
+    if (Number(parentReplyId.split('-')[1]) !== 0) {
       const reply = await replyRepository.get(`${postId}-${parentReplyId}`);
       if (reply) {
         await replyRepository.update(reply.id, {
@@ -385,7 +387,7 @@ export async function updatePostContent(
   }
 
   const newTags = peeranhaPost.tags.map(
-    (tag) => `${peeranhaPost.communityId}-${network}-${tag}`
+    (tag) => `${network}-${peeranhaPost.communityId}-${network}-${tag}`
   );
   const oldTagsResponse = await postTagRepository.getListOfProperties(
     'tagId',
@@ -393,7 +395,7 @@ export async function updatePostContent(
     post.id
   );
   const oldTags = oldTagsResponse.map(
-    (tag) => `${post.communityId}-${tag.tagId}`
+    (tag) => `${network}-${post.communityId}-${network}-${tag.tagId}`
   );
 
   const uniqueNewTags = newTags.filter((newTag) => !oldTags.includes(newTag)); // ???
@@ -401,14 +403,14 @@ export async function updatePostContent(
 
   uniqueNewTags.forEach((tag) => {
     const postTag = new PostTagEntity({
-      id: `${network}-${post.id}-${tag}`,
-      postId: `${network}-${post.id}`,
-      tagId: `${network}-${tag}`,
+      id: `${post.id}-${tag}`,
+      postId: post.id,
+      tagId: tag,
     });
     promises.push(postTagRepository.create(postTag));
   });
   uniqueOldTags.forEach((tag) =>
-    promises.push(postTagRepository.delete(`${network}-${post.id}-${tag}`))
+    promises.push(postTagRepository.delete(`${post.id}-${tag}`))
   );
 
   postForSave.postContent += await updateTagsPostCount(
@@ -421,16 +423,16 @@ export async function updatePostContent(
     postForSave.postType = peeranhaPost.postType;
   }
 
-  if (post.communityId !== peeranhaPost.communityId) {
+  if (post.communityId !== `${network}-${peeranhaPost.communityId}`) {
     const [oldCommunity, newCommunity] = await Promise.all([
       communityRepository.get(post.communityId),
-      communityRepository.get(peeranhaPost.communityId),
+      communityRepository.get(`${network}-${peeranhaPost.communityId}`),
     ]);
 
     let postReplyCount = 0;
 
     for (let i = 1; i <= post.replyCount; i++) {
-      const reply = await replyRepository.get(`${postId}-${i}`);
+      const reply = await replyRepository.get(`${postId}-${network}-${i}`);
       if (reply && !reply.isDeleted) {
         postReplyCount += 1;
       }
@@ -553,6 +555,7 @@ export async function setCommunityDocumentation(
   userId: string,
   newDocumentationIpfsHash: string,
   timestamp: number,
+  network: Network,
   oldDocumentationIpfsHash?: string
 ) {
   const newPosts: string[] = [];
@@ -599,12 +602,11 @@ export async function setCommunityDocumentation(
   });
 
   const postPromises: Promise<void>[] = [];
-
   postsForCreating.forEach(async (post) => {
     const postData = await getDataFromIpfs(getIpfsHashFromBytes32(post));
 
     const postEntity = new PostEntity({
-      id: post,
+      id: `${network}-${post}`,
       id2: '',
       postType: PostTypes.Documentation,
       communityId,
@@ -618,8 +620,8 @@ export async function setCommunityDocumentation(
       lastMod: timestamp,
       commentCount: 0,
       replyCount: 0,
-      officialReply: '0',
-      bestReply: '1-0', // ???
+      officialReply: '1-0',
+      bestReply: '1-0',
       ipfsHash: post,
       ipfsHash2: '',
       language: 0,

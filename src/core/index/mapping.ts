@@ -429,7 +429,9 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
   let communityReplyCount = community.replyCount;
 
   for (let i = 1; i <= replyCount; i++) {
-    const reply = await replyRepository.get(`${postId}-${i}`);
+    const reply = await replyRepository.get(
+      `${postId}-${eventModel.network}-${i}`
+    );
     if (reply && !reply.isDeleted) {
       promises.push(
         updateUserRating(reply.author, communityId, eventModel.network)
@@ -446,12 +448,16 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
 
       for (let j = 1; j <= reply.commentCount; j++) {
         const comment = await commentRepository.get(
-          `${postId.toString()}-${i.toString()}-${j.toString()}`
+          `${postId.toString()}-${eventModel.network}-${i.toString()}-${
+            eventModel.network
+          }-${j.toString()}`
         );
         if (comment) {
           promises.push(
             commentRepository.update(
-              `${postId.toString()}-${i.toString()}-${j.toString()}`,
+              `${postId.toString()}-${eventModel.network}-${i.toString()}-${
+                eventModel.network
+              }-${j.toString()}`,
               {
                 isDeleted: true,
               }
@@ -469,7 +475,9 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
     'postId',
     post.id
   );
-  const postTags = tagsResponse.map((tag) => tag.tagId);
+  const postTags = tagsResponse.map(
+    (tag) => `${eventModel.network}-${tag.tagId}`
+  );
 
   postTags.forEach(async (tag) => {
     const id = `${communityId}-${tag}`;
@@ -598,7 +606,9 @@ export async function handleDeletedReply(eventModel: ReplyDeletedEventModel) {
         bestReply: reply.isBestReply
           ? `${eventModel.network}-0`
           : post.bestReply,
-        officialReply: reply.isOfficialReply ? 0 : post.officialReply,
+        officialReply: reply.isOfficialReply
+          ? `${eventModel.network}-0`
+          : post.officialReply,
       })
     );
   }
@@ -844,8 +854,7 @@ export async function handlerChangedStatusBestReply(
       bestReply: replyId,
     });
   }
-
-  if (previousBestReply) {
+  if (previousBestReply?.split('-')[1]) {
     let previousReply = await replyRepository.get(
       `${postId}-${previousBestReply}`
     );
@@ -928,6 +937,7 @@ export async function handlerSetDocumentationTree(
     userAddr,
     communityDocumentation.hash,
     timestamp,
+    eventModel.network,
     oldDocumentation?.ipfsHash
   );
 }

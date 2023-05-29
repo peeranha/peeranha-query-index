@@ -290,7 +290,6 @@ export async function readEvents(
     }
 
     const configuratedEvents: any[] = [];
-    const pushToSqsPromises = new Array<Promise<any>>();
 
     Object.keys(eventsResults).forEach((eventName) => {
       const results = eventsResults[eventName];
@@ -336,13 +335,9 @@ export async function readEvents(
         )}`,
         LogLevel.INFO
       );
-      pushToSqsPromises.push(
-        pushToSQS(Queues[readEventsRequest.network], configuratedEvents[i])
-      );
+      // eslint-disable-next-line no-await-in-loop
+      await pushToSQS(Queues[readEventsRequest.network], configuratedEvents[i]);
     }
-
-    log('Pushing events to SQS.', LogLevel.INFO);
-    await Promise.allSettled(pushToSqsPromises);
 
     log('DONE!', LogLevel.INFO);
     return new ReadNotificationsResponseModel();

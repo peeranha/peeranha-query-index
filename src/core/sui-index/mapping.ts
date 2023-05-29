@@ -290,6 +290,7 @@ export async function handleSetDocumentationTree(
   await setDocumentationTree(
     eventModel.communityId,
     eventModel.timestamp,
-    eventModel.userId
+    eventModel.userId,
+    eventModel.network
   );
 }

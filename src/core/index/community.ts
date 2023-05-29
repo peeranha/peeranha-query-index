@@ -13,7 +13,7 @@ export async function createTag(
   network: Network
 ): Promise<TagEntity> {
   const tagEntity = new TagEntity({
-    id: `${network}-${tag.communityId}-${tag.tagId}`,
+    id: `${tag.communityId}-${network}-${tag.tagId}`,
     name: tag.name,
     description: tag.description,
     communityId: tag.communityId,
