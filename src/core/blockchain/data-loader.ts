@@ -261,7 +261,7 @@ export async function getUserRatingCollection(
   const provider = await createRpcProvider(network);
   const userContract = new PeeranhaUserWrapper(provider, network);
   return new UserRating(
-    await userContract.getUserRatingCollection(address, Number(communityId))
+    await userContract.getUserRatingCollection(address, communityId)
   );
 }
 

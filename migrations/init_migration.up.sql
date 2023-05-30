@@ -1,3 +1,8 @@
+CREATE TABLE IF NOT EXISTS network (
+  id INT PRIMARY KEY,
+  name VARCHAR(20) NOT NULL
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 CREATE TABLE IF NOT EXISTS user (
   id VARCHAR(66) PRIMARY KEY,
   displayName VARCHAR(20),
@@ -11,7 +16,9 @@ CREATE TABLE IF NOT EXISTS user (
   creationTime INT NOT NULL,
   ipfsHash VARCHAR(66),
   ipfsHash2 VARCHAR(66),
-  network VARCHAR(20)
+  networkId INT NOT NULL,
+
+  FOREIGN KEY (networkId) REFERENCES network (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS community (
@@ -32,7 +39,9 @@ CREATE TABLE IF NOT EXISTS community (
   followingUsers INT DEFAULT 0,
   ipfsHash VARCHAR(66),
   ipfsHash2 VARCHAR(66),
-  network VARCHAR(20)
+  networkId INT NOT NULL,
+
+  FOREIGN KEY (networkId) REFERENCES network (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS usercommunity (
@@ -215,10 +224,11 @@ CREATE TABLE IF NOT EXISTS history (
   eventName VARCHAR(15),
   actionUser VARCHAR(66) NOT NULL,
   timeStamp INT NOT NULL,
-  network VARCHAR(20),
+  networkId INT NOT NULL,
 
   FOREIGN KEY (postId) REFERENCES post (id),
-  FOREIGN KEY (actionUser) REFERENCES user (id)
+  FOREIGN KEY (actionUser) REFERENCES user (id),
+  FOREIGN KEY (networkId) REFERENCES network (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS communitydocumentation (

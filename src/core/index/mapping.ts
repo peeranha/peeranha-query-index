@@ -846,7 +846,7 @@ export async function handlerChangedStatusBestReply(
   if (!post) {
     post = await createPost(postId, timestamp, eventModel.network);
   } else {
-    previousBestReply = Number(post.bestReply);
+    previousBestReply = post.bestReply;
 
     await postRepository.update(postId, {
       bestReply: replyId,

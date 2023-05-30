@@ -25,13 +25,6 @@ environment:
   SUI_USERS_RATING_COLLECTION: '0x923f0f7fc9464e994a6ba317da2f5ecad30b5c5086efe65ce3ea8bd1a725c995'
   RPC_SUI_ENDPOINT: 'https://rpc.devnet.sui.io'
 
-  DYNAMODB_ENDPOINT: 'http://127.0.0.1:4659'
-  SQS_ENDPOINT: 'http://0.0.0.0:9324'
-
-  SUI_PACKAGE_ADDRESS: '0x638348e40aee7c47b019830aaca72b52b3fce4bebd5c5579a2e405ecda45ebc1'
-  SUI_USERS_RATING_COLLECTION: '0x923f0f7fc9464e994a6ba317da2f5ecad30b5c5086efe65ce3ea8bd1a725c995'
-  SUI_RPC_ENDPOINT: 'https://rpc.devnet.sui.io'
-
   SECURITY_GROUP_ID: 'sg'
   SUBNET_ID_1: 'subnet-1'
   SUBNET_ID_2: 'subnet-2'

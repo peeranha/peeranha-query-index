@@ -39,7 +39,6 @@ import { createRpcProvider } from 'src/core/blockchain/rpc';
 import {
   EDGEWARE_INDEXING_QUEUE,
   POLYGON_INDEXING_QUEUE,
-  SUI_INDEXING_QUEUE,
 } from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
@@ -128,15 +127,15 @@ export async function readEvents(
   readEventsRequest: ReadNotificationsRequestModel
 ): Promise<ReadNotificationsResponseModel> {
   try {
-    const Queues = {
-      [Network.Polygon]: POLYGON_INDEXING_QUEUE,
-      [Network.Edgeware]: EDGEWARE_INDEXING_QUEUE,
-      [Network.Sui]: SUI_INDEXING_QUEUE,
-    };
+    let Queue;
+    if (readEventsRequest.network === Network.Edgeware) {
+      Queue = EDGEWARE_INDEXING_QUEUE;
+    } else {
+      Queue = POLYGON_INDEXING_QUEUE;
+    }
     const startsBlocks = {
       [Network.Polygon]: process.env.POLYGON_START_BLOCK_NUMBER,
       [Network.Edgeware]: process.env.EDGEWARE_START_BLOCK_NUMBER,
-      [Network.Sui]: '0',
     };
     const provider = await createRpcProvider(readEventsRequest.network);
     const lastBlockNumber = await getKeyForLastBlockByNetwork(
@@ -147,9 +146,17 @@ export async function readEvents(
 
     const listenBlocksNumber = 2000 - 1;
 
-    const startBlock = !configEndBlock
-      ? parseInt(startsBlocks[readEventsRequest.network]!, 10)
-      : parseInt(configEndBlock?.value!.toString(), 10) + 1;
+    let startBlock: number;
+
+    if (!configEndBlock) {
+      startBlock =
+        readEventsRequest.network === Network.Polygon ||
+        readEventsRequest.network === Network.Edgeware
+          ? parseInt(startsBlocks[readEventsRequest.network]!, 10)
+          : 0;
+    } else {
+      startBlock = parseInt(configEndBlock?.value!.toString(), 10) + 1;
+    }
 
     const endBlock = Math.min(
       startBlock + listenBlocksNumber,
@@ -336,7 +343,7 @@ export async function readEvents(
         LogLevel.INFO
       );
       // eslint-disable-next-line no-await-in-loop
-      await pushToSQS(Queues[readEventsRequest.network], configuratedEvents[i]);
+      await pushToSQS(Queue, configuratedEvents[i]);
     }
 
     log('DONE!', LogLevel.INFO);

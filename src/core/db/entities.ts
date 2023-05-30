@@ -25,7 +25,7 @@ export class UserEntity {
 
   public ipfsHash2: string;
 
-  public network: Network;
+  public networkId: Network;
 
   constructor(user: {
     id: string;
@@ -54,7 +54,7 @@ export class UserEntity {
     this.creationTime = user.creationTime;
     this.ipfsHash = user.ipfsHash;
     this.ipfsHash2 = user.ipfsHash2;
-    this.network = user.network;
+    this.networkId = user.network;
   }
 }
 
@@ -93,7 +93,7 @@ export class CommunityEntity {
 
   public ipfsHash2: string;
 
-  public network: Network;
+  public networkId: Network;
 
   constructor(community: {
     id: string;
@@ -132,7 +132,7 @@ export class CommunityEntity {
     this.followingUsers = community.followingUsers;
     this.ipfsHash = community.ipfsHash;
     this.ipfsHash2 = community.ipfsHash2;
-    this.network = community.network;
+    this.networkId = community.network;
   }
 }
 
@@ -623,7 +623,7 @@ export class HistoryEntity {
 
   public timestamp: number;
 
-  public network: Network;
+  public networkId: Network;
 
   constructor(history: {
     id: string;
@@ -646,7 +646,7 @@ export class HistoryEntity {
     this.eventName = history.eventName;
     this.actionUser = history.actionUser;
     this.timestamp = history.timestamp;
-    this.network = history.network;
+    this.networkId = history.network;
   }
 }
 
