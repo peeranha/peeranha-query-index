@@ -475,12 +475,10 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
     'postId',
     post.id
   );
-  const postTags = tagsResponse.map(
-    (tag) => `${eventModel.network}-${tag.tagId}`
-  );
+  const postTags = tagsResponse.map((tag) => tag.tagId);
 
   postTags.forEach(async (tag) => {
-    const id = `${communityId}-${tag}`;
+    const id = tag;
     const tagEntity = await tagRepository.get(id);
     if (tagEntity) {
       promises.push(

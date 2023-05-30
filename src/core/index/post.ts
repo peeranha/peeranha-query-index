@@ -87,7 +87,7 @@ async function changedStatusOfficialReply(
   let previousOfficialReplyId = `${network}-0`;
   if (
     `${network}-${peeranhaPost.officialReply}` === replyId &&
-    `${network}-${peeranhaPost.officialReply}` !== replyId
+    post.officialReply !== replyId
   ) {
     previousOfficialReplyId = post.officialReply;
     officialReply = replyId;
@@ -394,9 +394,8 @@ export async function updatePostContent(
     'postId',
     post.id
   );
-  const oldTags = oldTagsResponse.map(
-    (tag) => `${network}-${post.communityId}-${network}-${tag.tagId}`
-  );
+
+  const oldTags = oldTagsResponse.map((tag) => tag.tagId);
 
   const uniqueNewTags = newTags.filter((newTag) => !oldTags.includes(newTag)); // ???
   const uniqueOldTags = oldTags.filter((oldTag) => !newTags.includes(oldTag));
