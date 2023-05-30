@@ -40,7 +40,7 @@ import {
   createPost,
   updatePostContent,
   createReply,
-  generateDocumentationPosts,
+  setCommunityDocumentation,
 } from 'src/core/index/post';
 import {
   createUser,
@@ -79,6 +79,8 @@ import {
   ReplyMarkedTheBestEventModel,
 } from 'src/models/event-models';
 
+import { RuntimeError } from '../errors';
+
 const userAchievementRepository = new UserAchievementRepository();
 const achievementRepository = new AchievementRepository();
 const postRepository = new PostRepository();
@@ -96,10 +98,10 @@ const communityDocumentationRepository = new CommunityDocumentationRepository();
 
 const POOL_NFT = 1_000_000;
 
-async function createHistory(
+export async function createHistory(
   event: any,
-  entityType: string,
-  operationType: string
+  entityType: EntityType,
+  operationType: OperationType
 ) {
   const history = new HistoryEntity({
     id: event.transaction,
@@ -111,7 +113,7 @@ async function createHistory(
       : undefined,
     eventEntity: entityType,
     eventName: operationType,
-    actionUser: event.user,
+    actionUser: event.user ?? event.userId,
     timestamp: event.timestamp,
   });
 
@@ -408,7 +410,7 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
     'postId',
     post.id
   );
-  const postTags: number[] = tagsResponse.map((tag: any) => tag.tagId);
+  const postTags = tagsResponse.map((tag) => tag.tagId);
 
   postTags.forEach(async (tag) => {
     const id = `${communityId}-${tag}`;
@@ -462,7 +464,7 @@ export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
   if (!storedReply) {
     createdReply = await createReply(postId, replyId, timestamp);
   }
-  if (!createdReply) return;
+  if (createdReply) return;
 
   if (!storedReply) {
     storedReply = createdReply;
@@ -470,6 +472,10 @@ export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
 
   const peeranhaReply = await getReply(Number(postId), replyId);
   if (!peeranhaReply) return;
+
+  if (!storedReply) {
+    throw new RuntimeError('Unexpected null stored reply');
+  }
 
   await Promise.all([
     replyRepository.update(storedReply.id, {
@@ -702,7 +708,7 @@ export async function handlerChangedStatusBestReply(
   if (!post) {
     post = await createPost(postId, timestamp);
   } else {
-    previousBestReply = post.bestReply;
+    previousBestReply = Number(post.bestReply);
 
     await postRepository.update(postId, {
       bestReply: replyId,
@@ -773,7 +779,7 @@ export async function handlerSetDocumentationTree(
     return;
   }
 
-  await generateDocumentationPosts(
+  await setCommunityDocumentation(
     communityId,
     userAddr,
     communityDocumentation.hash,

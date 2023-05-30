@@ -1,4 +1,4 @@
-import { SendMessageCommand, SQSClient } from '@aws-sdk/client-sqs';
+import AWS from 'aws-sdk';
 import fetch from 'cross-fetch';
 import { DatabaseManager } from 'src/core/db/db-manager';
 import { log, LogLevel } from 'src/core/utils/logger';
@@ -7,27 +7,29 @@ import { publishSlackMessage } from 'src/core/utils/slack';
 
 global.fetch = fetch;
 
-const client = new SQSClient({
+const client = new AWS.SQS({
+  endpoint: process.env.SQS_ENDPOINT,
   region: process.env.REGION,
 });
 
-const QUEUE_URL = `https://sqs.${process.env.REGION}.amazonaws.com/${
+const QUEUE_URL = `${process.env.SQS_ENDPOINT}/${
   process.env.ENV === 'offline' ? 'queue' : process.env.AWS_ACCOUNT_ID
 }/`;
 
 export async function pushToSQS(queueName: string, content: any) {
   try {
-    const command = new SendMessageCommand({
-      QueueUrl: QUEUE_URL + queueName,
-      MessageBody: JSON.stringify(content),
-      MessageGroupId: 'event',
-    });
-
-    const result = await client.send(command);
     log(
-      `Successfully published event to SQS. Message ID: ${
-        result.MessageId
-      } Model: ${JSON.stringify(content)}`,
+      `Pushing event to queue ${queueName}. Model: ${JSON.stringify(content)}`
+    );
+    const result = await client
+      .sendMessage({
+        QueueUrl: QUEUE_URL + queueName,
+        MessageBody: JSON.stringify(content),
+        MessageGroupId: 'event',
+      })
+      .promise();
+    log(
+      `Successfully published event to SQS. Message ID: ${result.MessageId}`,
       LogLevel.DEBUG
     );
     return result;

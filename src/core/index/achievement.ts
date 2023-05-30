@@ -45,8 +45,8 @@ export async function createAchievement(
     lowerValue: peeranhaAchievementConfig?.lowerBound || 0,
     image: achievementData.image,
     description: achievementData.description,
-    communityId: achievementCommunity,
-    attrCommunityId: Number(attrCommunityId) || 0,
+    communityId: String(achievementCommunity),
+    attrCommunityId: attrCommunityId || '0',
     attrEvent,
     attrType,
   });

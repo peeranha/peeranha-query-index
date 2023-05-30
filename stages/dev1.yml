@@ -4,7 +4,7 @@ environment:
   REGION: 'us-east-2'
   AWS_ACCOUNT_ID: '939077196930'
 
-  DB_NAME: 'test_serverless_cluster'
+  DB_NAME: 'dev1_first_query_index'
 
   MAIN_CONTRACT_ADDRESS: '0xfC65F146B6a7ED57E802E5E1F9aD329F40D26d3B'
   COMMUNITY_CONTRACT_ADDRESS: '0x11C0eAF9B163caECa5DA9932187892e72f508b97'
@@ -12,9 +12,16 @@ environment:
   TOKEN_CONTRACT_ADDRESS: '0xbCf7A789abC7f6D8aAEf378586326668757b7216'
   NFT_CONTRACT_ADDRESS: '0x06B65F0583F4D9E534fc96EA0D777fC7267a0bF3'
 
+  DYNAMODB_ENDPOINT: 'https://dynamodb.us-east-2.amazonaws.com'
+  SQS_ENDPOINT: 'https://sqs.us-east-2.amazonaws.com'
+
   SECURITY_GROUP_ID: 'sg-b90a3dde'
   SUBNET_ID_1: 'subnet-f4be9c8e'
   SUBNET_ID_2: 'subnet-0b05f160'
 
   IPFS_CDN_URL: 'https://ipfs-cdn.testpeeranha.io/'
   RPC_ENDPOINT: 'https://rpc.ankr.com/polygon_mumbai'
+
+  SUI_PACKAGE_ADDRESS: '0x2991972afccad9892c7aa38549a7dd5b0049d7f1539c8f7719138ac1d6be2ba1'
+  SUI_USERS_RATING_COLLECTION: '0xc34342096a74dfb489f4febc93e41d34036c124e56aa98e082e15e1b49895e27'
+  SUI_RPC_ENDPOINT: 'https://fullnode.devnet.sui.io'

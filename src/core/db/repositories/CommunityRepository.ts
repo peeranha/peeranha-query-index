@@ -5,7 +5,7 @@ const TABLE_NAME = 'community';
 
 export class CommunityRepository extends BaseRepository<
   CommunityEntity,
-  number
+  string
 > {
   constructor() {
     super(TABLE_NAME);

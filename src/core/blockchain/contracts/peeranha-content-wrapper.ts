@@ -40,6 +40,14 @@ export class PeeranhaContentWrapper extends BaseContractWrapper {
     );
   }
 
+  public async getItemLanguage(
+    postId: number,
+    replyId?: number,
+    commentId?: number
+  ) {
+    return this.contract.getItemLanguage(postId, replyId ?? 0, commentId ?? 0);
+  }
+
   public getAddress(): string {
     if (!process.env.MAIN_CONTRACT_ADDRESS) {
       throw new ConfigurationError('MAIN_CONTRACT_ADDRESS is not configured');

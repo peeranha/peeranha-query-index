@@ -33,14 +33,14 @@ export class EventListenerRequest {
 export class PostCreatedEventModel extends BaseEventModel {
   public user: string;
 
-  public communityId: number;
+  public communityId: string;
 
   public postId: number;
 
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.communityId = event.communityId;
+    this.communityId = String(event.communityId);
     this.postId = event.postId;
   }
 }
@@ -111,24 +111,24 @@ export class UserUpdatedEventModel extends BaseEventModel {
 export class FollowedCommunityEventModel extends BaseEventModel {
   public userAddress: string;
 
-  public communityId: number;
+  public communityId: string;
 
   constructor(event: any) {
     super(event);
     this.userAddress = event.userAddress;
-    this.communityId = event.communityId;
+    this.communityId = String(event.communityId);
   }
 }
 
 export class UnfollowedCommunityEventModel extends BaseEventModel {
   public userAddress: string;
 
-  public communityId: number;
+  public communityId: string;
 
   constructor(event: any) {
     super(event);
     this.userAddress = event.userAddress;
-    this.communityId = event.communityId;
+    this.communityId = String(event.communityId);
   }
 }
 
@@ -159,48 +159,48 @@ export class RoleRevokedEventModel extends BaseEventModel {
 export class CommunityCreatedEventModel extends BaseEventModel {
   public user: string;
 
-  public id: number;
+  public id: string;
 
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.id = event.id;
+    this.id = String(event.id);
   }
 }
 
 export class CommunityUpdatedEventModel extends BaseEventModel {
   public user: string;
 
-  public id: number;
+  public id: string;
 
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.id = event.id;
+    this.id = String(event.id);
   }
 }
 
 export class CommunityFrozenEventModel extends BaseEventModel {
   public user: string;
 
-  public communityId: number;
+  public communityId: string;
 
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.communityId = event.communityId;
+    this.communityId = String(event.communityId);
   }
 }
 
 export class CommunityUnfrozenEventModel extends BaseEventModel {
   public user: string;
 
-  public communityId: number;
+  public communityId: string;
 
   constructor(event: any) {
     super(event);
     this.user = event.user;
-    this.communityId = event.communityId;
+    this.communityId = String(event.communityId);
   }
 }
 
@@ -209,13 +209,13 @@ export class TagCreatedEventModel extends BaseEventModel {
 
   public tagId: number;
 
-  public communityId: number;
+  public communityId: string;
 
   constructor(event: any) {
     super(event);
     this.user = event.user;
     this.tagId = event.tagId;
-    this.communityId = event.communityId;
+    this.communityId = String(event.communityId);
   }
 }
 
@@ -224,13 +224,13 @@ export class TagUpdatedEventModel extends BaseEventModel {
 
   public tagId: number;
 
-  public communityId: number;
+  public communityId: string;
 
   constructor(event: any) {
     super(event);
     this.user = event.user;
     this.tagId = event.tagId;
-    this.communityId = event.communityId;
+    this.communityId = String(event.communityId);
   }
 }
 
@@ -402,11 +402,11 @@ export class CommentCreatedEventModel extends BaseEventModel {
 export class SetDocumentationTreeEventModel extends BaseEventModel {
   public userAddr: string;
 
-  public communityId: number;
+  public communityId: string;
 
   constructor(event: any) {
     super(event);
     this.userAddr = event.userAddr;
-    this.communityId = event.communityId;
+    this.communityId = String(event.communityId);
   }
 }

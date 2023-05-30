@@ -10,6 +10,25 @@ custom:
     httpPort: 5000
     noPrependStageInUrl: true
     ignoreJWTSignature: true
+  dynamodb:
+    stages:
+      - offline
+    start:
+      port: 4659
+      inMemory: true
+      migrate: true
+  serverless-offline-sqs:
+    autoCreate: true
+    endpoint: http://0.0.0.0:9324
+    region: ${self:custom.region}
+    accessKeyId: root
+    secretAccessKey: root
+  elasticmq:
+    stages:
+      - dev
+    start:
+      port: 9324
+      noStart: false
 
 provider:
   name: aws
@@ -23,6 +42,11 @@ provider:
     httpApi: true
   httpApi:
     cors: true
+  ecr:
+    images:
+      peeranha-ecs-nodejs:
+        path: ./
+        file: Dockerfile
   iam:
     role:
       statements:
@@ -30,6 +54,15 @@ provider:
           Action:
             - secretsmanager:GetSecretValue
             - sqs:SendMessage
+            - dynamodb:DescribeTable
+            - dynamodb:Query
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+            - translate:TranslateText
+            - comprehend:DetectDominantLanguage
           Resource: "*"
   vpc:
     securityGroupIds:
@@ -37,6 +70,28 @@ provider:
     subnetIds:
       - ${self:provider.environment.SUBNET_ID_1}
       - ${self:provider.environment.SUBNET_ID_2}
+fargate:
+  vpc:
+    securityGroupIds:
+      - ${self:provider.environment.SECURITY_GROUP_ID}
+    subnetIds:
+      - ${self:provider.environment.SUBNET_ID_1}
+      - ${self:provider.environment.SUBNET_ID_2}
+    assignPublicIp: true
+  tasks:
+    first-sui-events-listener:
+      name: ${self:custom.stage}-first-sui-events-listener
+      image: peeranha-ecs-nodejs
+      command:
+        - "./dist/sui-events-listener.mjs"
+      environment:
+        ENV: ${self:provider.environment.ENV}
+        REGION: ${self:provider.environment.REGION}
+        SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
+        AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
+        DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
+        SUI_PACKAGE_ADDRESS: ${self:provider.environment.SUI_PACKAGE_ADDRESS}
+        SUI_USERS_RATING_COLLECTION: ${self:provider.environment.SUI_USERS_RATING_COLLECTION}
 
 functions:
   graphql:
@@ -78,6 +133,14 @@ functions:
           path: '/polygon-event-listener/second-webhook'
           method: 'POST'
 
+  # first-sui-onchain-events-read:
+  #   handler: src/handlers/first-sui-onchain-events-read.handler
+  #   timeout: 300
+  #   events:
+  #     - schedule:
+  #         name: first-sui-read-onchain-events-${self:custom.stage}
+  #         rate: rate(1 minute)
+
   first-indexing-queue:
     handler: src/handlers/first-indexing-queue.handler
     timeout: 50
@@ -97,9 +160,41 @@ functions:
             Fn::GetAtt:
               - secondQueue
               - Arn
+      
+  first-sui-indexing-queue:
+    handler: src/handlers/sui-first-indexing-queue.handler
+    timeout: 50
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - firstSuiQueue
+              - Arn
+
+  first-sui-content-queue:
+    handler: src/handlers/sui-first-content-queue.handler
+    timeout: 50
+    events:
+      - sqs:
+          arn:
+            Fn::GetAtt:
+              - firstSuiContentQueue
+              - Arn
 
 resources:
   Resources:
+    queryIndexConfigTable:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:custom.stage}-query-index-config
+        AttributeDefinitions:
+          - AttributeName: key
+            AttributeType: S
+        KeySchema:
+          - AttributeName: key
+            KeyType: HASH
+        BillingMode: PAY_PER_REQUEST
+
     firstQueue:
       Type: AWS::SQS::Queue
       Properties:
@@ -120,6 +215,26 @@ resources:
         DeduplicationScope: messageGroup
         FifoThroughputLimit: perMessageGroupId
 
+    firstSuiQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.stage}-firstSuiQueue.fifo
+        VisibilityTimeout: 50
+        FifoQueue: true
+        ContentBasedDeduplication: true
+        DeduplicationScope: messageGroup
+        FifoThroughputLimit: perMessageGroupId
+
+    firstSuiContentQueue:
+      Type: AWS::SQS::Queue
+      Properties:
+        QueueName: ${self:custom.stage}-firstSuiContentQueue.fifo
+        VisibilityTimeout: 50
+        FifoQueue: true
+        ContentBasedDeduplication: true
+        DeduplicationScope: messageGroup
+        FifoThroughputLimit: perMessageGroupId
+
 package:
   individually: true
 
@@ -127,3 +242,7 @@ plugins:
   - serverless-webpack
   - serverless-offline
   - serverless-dotenv-plugin
+  - serverless-dynamodb-local
+  - serverless-offline-sqs
+  - serverless-offline-elasticmq
+  - serverless-fargate

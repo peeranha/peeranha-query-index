@@ -3,8 +3,10 @@
   "version": "1.0.0",
   "scripts": {
     "prepare:offline": "mustache config/offline.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
-    "prepare:test1": "mustache config/test1.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
-    "prepare:test2": "mustache config/test2.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
+    "prepare:dev1": "mustache config/dev1.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
+    "prepare:dev2": "mustache config/dev2.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
+    "prepare:dev3": "mustache config/dev3.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
+    "prepare:prod": "mustache config/prod.json .meshrc.template.yaml > .meshrc.yaml & mesh build",
     "dev": "cross-env sls offline start --stage offline",
     "deploy:test": "cross-env sls deploy --stage test",
     "remove:test": "sls remove --stage test",
@@ -23,19 +25,23 @@
     "clean": "rimraf dist .webpack .serverless",
     "lint": "eslint --ext .js,.ts .",
     "build-types": "tsc --noEmit --pretty",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "build-ecs": "node build-ecs.js",
+    "dynamodb:install": "sls dynamodb install"
   },
   "dependencies": {
-    "@aws-sdk/client-secrets-manager": "^3.267.0",
-    "@aws-sdk/client-sqs": "^3.267.0",
-    "@graphql-mesh/cli": "^0.82.6",
-    "@graphql-mesh/mysql": "^0.19.2",
-    "@graphql-mesh/transform-filter-schema": "^0.15.5",
+    "@graphql-mesh/cli": "^0.82.35",
+    "@graphql-mesh/mysql": "^0.93.1",
+    "@graphql-mesh/transform-filter-schema": "^0.93.1",
+    "@mysten/sui.js": "^0.32.2",
     "@slack/web-api": "^6.8.1",
+    "aws-sdk": "^2.1360.0",
     "bs58": "^5.0.0",
     "cors": "^2.8.5",
     "cross-fetch": "^3.1.5",
     "dotenv": "^16.0.3",
+    "esbuild": "^0.17.17",
+    "esbuild-plugin-ignore": "^1.1.1",
     "ethers": "^5.7.2",
     "knex": "^2.4.2",
     "knex-migrate-sql-file": "^1.0.3",
@@ -68,14 +74,15 @@
     "mustache": "^4.2.0",
     "serverless": "^3.27.0",
     "serverless-dotenv-plugin": "^4.0.2",
-    "serverless-offline": "^12.0.4",
+    "serverless-dynamodb-local": "^0.2.40",
+    "serverless-fargate": "^0.0.11",
+    "serverless-offline": "^10.0.2",
+    "serverless-offline-elasticmq": "^0.0.11",
+    "serverless-offline-sqs": "^7.3.2",
     "serverless-webpack": "^5.11.0",
     "ts-loader": "^9.4.2",
     "tsconfig-paths-webpack-plugin": "^4.0.0",
     "typescript": "^4.9.4",
     "webpack": "^5.77.0"
-  },
-  "overrides": {
-    "xml2js": "^0.5.0"
   }
 }

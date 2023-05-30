@@ -19,3 +19,5 @@ export class BadRequestErrorWithBody extends Error {
     this.code = serviceErrorProps.code;
   }
 }
+
+export class RuntimeError extends Error {}

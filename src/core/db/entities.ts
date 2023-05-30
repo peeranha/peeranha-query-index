@@ -53,7 +53,7 @@ export class UserEntity {
 }
 
 export class CommunityEntity {
-  public id: number;
+  public id: string;
 
   public name: string;
 
@@ -88,7 +88,7 @@ export class CommunityEntity {
   public ipfsHash2: string;
 
   constructor(community: {
-    id: number;
+    id: string;
     name: string;
     description: string;
     website: string;
@@ -131,12 +131,12 @@ export class UserCommunityEntity {
 
   public userId: string;
 
-  public communityId: number;
+  public communityId: string;
 
   constructor(userCommunity: {
     id: string;
     userId: string;
-    communityId: number;
+    communityId: string;
   }) {
     this.id = userCommunity.id;
     this.userId = userCommunity.userId;
@@ -165,7 +165,7 @@ export class UserPermissionEntity {
 export class UserCommunityRatingEntity {
   public id: string;
 
-  public communityId: number;
+  public communityId: string;
 
   public rating: number;
 
@@ -173,7 +173,7 @@ export class UserCommunityRatingEntity {
 
   constructor(userCommunityRating: {
     id: string;
-    communityId: number;
+    communityId: string;
     rating: number;
     userId: string;
   }) {
@@ -187,7 +187,7 @@ export class UserCommunityRatingEntity {
 export class TagEntity {
   public id: string;
 
-  public communityId: number;
+  public communityId: string;
 
   public name: string;
 
@@ -197,19 +197,22 @@ export class TagEntity {
 
   public deletedPostCount: number;
 
+  public language: number;
+
   public ipfsHash: string;
 
   public ipfsHash2: string;
 
   constructor(tag: {
     id: string;
-    communityId: number;
+    communityId: string;
     name: string;
     description: string;
     postCount: number;
     deletedPostCount: number;
     ipfsHash: string;
     ipfsHash2: string;
+    language: number;
   }) {
     this.id = tag.id;
     this.name = tag.name;
@@ -219,11 +222,14 @@ export class TagEntity {
     this.deletedPostCount = tag.deletedPostCount;
     this.ipfsHash = tag.ipfsHash;
     this.ipfsHash2 = tag.ipfsHash2;
+    this.language = tag.language;
   }
 }
 
 export class PostEntity {
   public id: string;
+
+  public id2: string;
 
   public ipfsHash: string;
 
@@ -239,7 +245,7 @@ export class PostEntity {
 
   public lastMod: number;
 
-  public communityId: number;
+  public communityId: string;
 
   public title: string;
 
@@ -253,9 +259,11 @@ export class PostEntity {
 
   public isDeleted: boolean;
 
-  public officialReply: number;
+  public officialReply: string;
 
-  public bestReply: number;
+  public bestReply: string;
+
+  public language: number;
 
   public handle?: string;
 
@@ -263,6 +271,7 @@ export class PostEntity {
 
   constructor(post: {
     id: string;
+    id2: string;
     ipfsHash: string;
     ipfsHash2: string;
     postType: number;
@@ -270,19 +279,21 @@ export class PostEntity {
     rating: number;
     postTime: number;
     lastMod: number;
-    communityId: number;
+    communityId: string;
     title: string;
     content: string;
     postContent: string;
     commentCount: number;
     replyCount: number;
     isDeleted: boolean;
-    officialReply: number;
-    bestReply: number;
+    officialReply: string;
+    bestReply: string;
+    language: number;
     handle?: string;
     messengerType?: number;
   }) {
     this.id = post.id;
+    this.id2 = post.id2;
     this.communityId = post.communityId;
     this.postType = post.postType;
     this.title = post.title;
@@ -299,6 +310,7 @@ export class PostEntity {
     this.bestReply = post.bestReply;
     this.ipfsHash = post.ipfsHash;
     this.ipfsHash2 = post.ipfsHash2;
+    this.language = post.language;
     this.handle = post.handle;
     this.messengerType = post.messengerType;
   }
@@ -321,6 +333,8 @@ export class PostTagEntity {
 export class ReplyEntity {
   public id: string;
 
+  public id2: string;
+
   public ipfsHash: string;
 
   public ipfsHash2: string;
@@ -333,7 +347,7 @@ export class ReplyEntity {
 
   public postId: string;
 
-  public parentReplyId: number;
+  public parentReplyId: string;
 
   public content: string;
 
@@ -349,19 +363,22 @@ export class ReplyEntity {
 
   public isQuickReply: boolean;
 
+  public language: number;
+
   public handle?: string;
 
   public messengerType?: number;
 
   constructor(reply: {
     id: string;
+    id2: string;
     ipfsHash: string;
     ipfsHash2: string;
     author: string;
     rating: number;
     postTime: number;
     postId: string;
-    parentReplyId: number;
+    parentReplyId: string;
     content: string;
     commentCount: number;
     isDeleted: boolean;
@@ -369,10 +386,12 @@ export class ReplyEntity {
     isBestReply: boolean;
     isFirstReply: boolean;
     isQuickReply: boolean;
+    language: number;
     handle?: string;
     messengerType?: number;
   }) {
     this.id = reply.id;
+    this.id2 = reply.id2;
     this.postId = reply.postId;
     this.parentReplyId = reply.parentReplyId;
     this.content = reply.content;
@@ -387,6 +406,7 @@ export class ReplyEntity {
     this.isBestReply = reply.isBestReply;
     this.ipfsHash = reply.ipfsHash;
     this.ipfsHash2 = reply.ipfsHash2;
+    this.language = reply.language;
     this.handle = reply.handle;
     this.messengerType = reply.messengerType;
   }
@@ -394,6 +414,8 @@ export class ReplyEntity {
 
 export class CommentEntity {
   public id: string;
+
+  public id2: string;
 
   public ipfsHash: string;
 
@@ -407,25 +429,30 @@ export class CommentEntity {
 
   public postId: string;
 
-  public parentReplyId: number;
+  public parentReplyId: string;
 
   public content: string;
+
+  public language: number;
 
   public isDeleted: boolean;
 
   constructor(comment: {
     id: string;
+    id2: string;
     ipfsHash: string;
     ipfsHash2: string;
     author: string;
     rating: number;
     postTime: number;
     postId: string;
-    parentReplyId: number;
+    parentReplyId: string;
     content: string;
+    language: number;
     isDeleted: boolean;
   }) {
     this.id = comment.id;
+    this.id2 = comment.id2;
     this.postId = comment.postId;
     this.parentReplyId = comment.parentReplyId;
     this.content = comment.content;
@@ -435,6 +462,7 @@ export class CommentEntity {
     this.rating = comment.rating;
     this.ipfsHash = comment.ipfsHash;
     this.ipfsHash2 = comment.ipfsHash2;
+    this.language = comment.language;
   }
 }
 
@@ -457,9 +485,9 @@ export class AchievementEntity {
 
   public image: string;
 
-  public communityId?: number;
+  public communityId?: string;
 
-  public attrCommunityId?: number;
+  public attrCommunityId?: string;
 
   public attrEvent?: string;
 
@@ -475,12 +503,9 @@ export class AchievementEntity {
     name: string;
     description: string;
     image: string;
-    communityId?: number;
-
-    attrCommunityId?: number;
-
+    communityId?: string;
+    attrCommunityId?: string;
     attrEvent?: string;
-
     attrType?: string;
   }) {
     this.id = achievement.id;
@@ -630,19 +655,213 @@ export class UserAchievementEntity {
 }
 
 export class CommunityDocumentationEntity {
-  public id: number;
+  public id: string;
 
   public documentationJSON: string;
 
   public ipfsHash: string;
 
   constructor(documentation: {
-    id: number;
+    id: string;
     documentationJSON: string;
     ipfsHash: string;
   }) {
     this.id = documentation.id;
     this.documentationJSON = documentation.documentationJSON;
     this.ipfsHash = documentation.ipfsHash;
+  }
+}
+
+export class CommunityTranslationEntity {
+  id: string;
+
+  communityId: string;
+
+  name: string;
+
+  description: string;
+
+  language: string;
+
+  enableAutotranslation: boolean;
+
+  constructor(params: {
+    id: string;
+    communityId: string;
+    name: string;
+    description: string;
+    language: string;
+    enableAutotranslation: boolean;
+  }) {
+    this.id = params.id;
+    this.communityId = params.communityId;
+    this.name = params.name;
+    this.description = params.description;
+    this.language = params.language;
+    this.enableAutotranslation = params.enableAutotranslation;
+  }
+}
+
+export class TagTranslationEntity {
+  id: string;
+
+  tagId: string;
+
+  name: string;
+
+  description: string;
+
+  language: number;
+
+  constructor(params: {
+    id: string;
+    tagId: string;
+    name: string;
+    description: string;
+    language: number;
+  }) {
+    this.id = params.id;
+    this.tagId = params.tagId;
+    this.name = params.name;
+    this.description = params.description;
+    this.language = params.language;
+  }
+}
+
+export class PostTranslationEntity {
+  id: string;
+
+  postId: string;
+
+  author: string;
+
+  title: string;
+
+  content: string;
+
+  ipfsHash: string;
+
+  language: number;
+
+  constructor(params: {
+    id: string;
+    postId: string;
+    author: string;
+    title: string;
+    content: string;
+    ipfsHash: string;
+    language: number;
+  }) {
+    this.id = params.id;
+    this.postId = params.postId;
+    this.title = params.title;
+    this.content = params.content;
+    this.language = params.language;
+    this.ipfsHash = params.ipfsHash;
+    this.author = params.author;
+  }
+}
+
+export class ReplyTranslationEntity {
+  id: string;
+
+  replyId: string;
+
+  author: string;
+
+  content: string;
+
+  ipfsHash: string;
+
+  language: number;
+
+  constructor(params: {
+    id: string;
+    replyId: string;
+    author: string;
+    content: string;
+    ipfsHash: string;
+    language: number;
+  }) {
+    this.id = params.id;
+    this.replyId = params.replyId;
+    this.content = params.content;
+    this.language = params.language;
+    this.ipfsHash = params.ipfsHash;
+    this.author = params.author;
+  }
+}
+
+export class CommentTranslationEntity {
+  id: string;
+
+  commentId: string;
+
+  author: string;
+
+  content: string;
+
+  ipfsHash: string;
+
+  language: number;
+
+  constructor(params: {
+    id: string;
+    commentId: string;
+    author: string;
+    content: string;
+    ipfsHash: string;
+    language: number;
+  }) {
+    this.id = params.id;
+    this.commentId = params.commentId;
+    this.content = params.content;
+    this.language = params.language;
+    this.ipfsHash = params.ipfsHash;
+    this.author = params.author;
+  }
+}
+
+export class PostVoteHistoryEntity {
+  id: string;
+
+  postId: string;
+
+  userId: string;
+
+  direction: number;
+
+  constructor(params: {
+    id: string;
+    postId: string;
+    userId: string;
+    direction: number;
+  }) {
+    this.id = params.id;
+    this.postId = params.postId;
+    this.userId = params.userId;
+    this.direction = params.direction;
+  }
+}
+
+export class ReplyVoteHistoryEntity {
+  id: string;
+
+  replyId: string;
+
+  userId: string;
+
+  direction: number;
+
+  constructor(params: {
+    id: string;
+    replyId: string;
+    userId: string;
+    direction: number;
+  }) {
+    this.id = params.id;
+    this.replyId = params.replyId;
+    this.userId = params.userId;
+    this.direction = params.direction;
   }
 }

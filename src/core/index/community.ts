@@ -17,6 +17,7 @@ export async function createTag(tag: TagData): Promise<TagEntity> {
     deletedPostCount: 0,
     ipfsHash: tag.ipfsDoc[0],
     ipfsHash2: tag.ipfsDoc[1],
+    language: 0,
   });
 
   await tagRepository.create(tagEntity);
@@ -25,7 +26,7 @@ export async function createTag(tag: TagData): Promise<TagEntity> {
 }
 
 export async function createCommunity(
-  communityId: number
+  communityId: string
 ): Promise<CommunityEntity> {
   const [peeranhaCommunity, peeranhaTags] = await Promise.all([
     getCommunity(communityId),
@@ -62,7 +63,7 @@ export async function createCommunity(
 }
 
 export async function getCommunityById(
-  communityId: number
+  communityId: string
 ): Promise<CommunityEntity> {
   let community = await communityRepository.get(communityId);
   if (!community) {

@@ -1,4 +1,6 @@
 export class Reply {
+  id2: string;
+
   ipfsDoc: [string, string];
 
   author: string;
@@ -7,11 +9,13 @@ export class Reply {
 
   postTime: number;
 
-  parentReplyId: number;
+  parentReplyId: string;
 
   commentCount: number;
 
   propertyCount: number;
+
+  language: number;
 
   isFirstReply: boolean;
 
@@ -19,19 +23,22 @@ export class Reply {
 
   isDeleted: boolean;
 
+  historyVotes: { userId: string; direction: number }[];
+
   constructor(reply: any) {
-    [
-      this.ipfsDoc,
-      this.author,
-      this.rating,
-      this.postTime,
-      this.parentReplyId,
-      this.commentCount,
-      this.propertyCount,
-      this.isFirstReply,
-      this.isQuickReply,
-      this.isDeleted,
-    ] = reply;
+    this.id2 = reply.id2;
+    this.author = reply.author;
+    this.parentReplyId = String(reply.parentReplyId);
+    this.rating = reply.rating;
+    this.postTime = reply.postTime;
+    this.propertyCount = reply.propertyCount;
+    this.commentCount = reply.commentCount;
+    this.isDeleted = reply.isDeleted;
+    this.ipfsDoc = reply.ipfsDoc;
+    this.isFirstReply = reply.isFirstReply;
+    this.isQuickReply = reply.isQuickReply;
+    this.language = reply.language;
+    this.historyVotes = reply.historyVotes;
   }
 }
 

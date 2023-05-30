@@ -8,10 +8,14 @@ type Query {
   count_achievement(where: achievement_WhereInput): Int
   comment(limit: Int, offset: Int, where: comment_WhereInput, orderBy: comment_OrderByInput): [comment]
   count_comment(where: comment_WhereInput): Int
+  commenttranslation(limit: Int, offset: Int, where: commenttranslation_WhereInput, orderBy: commenttranslation_OrderByInput): [commenttranslation]
+  count_commenttranslation(where: commenttranslation_WhereInput): Int
   community(limit: Int, offset: Int, where: community_WhereInput, orderBy: community_OrderByInput): [community]
   count_community(where: community_WhereInput): Int
   communitydocumentation(limit: Int, offset: Int, where: communitydocumentation_WhereInput, orderBy: communitydocumentation_OrderByInput): [communitydocumentation]
   count_communitydocumentation(where: communitydocumentation_WhereInput): Int
+  communitytranslation(limit: Int, offset: Int, where: communitytranslation_WhereInput, orderBy: communitytranslation_OrderByInput): [communitytranslation]
+  count_communitytranslation(where: communitytranslation_WhereInput): Int
   contractinfo(limit: Int, offset: Int, where: contractinfo_WhereInput, orderBy: contractinfo_OrderByInput): [contractinfo]
   count_contractinfo(where: contractinfo_WhereInput): Int
   history(limit: Int, offset: Int, where: history_WhereInput, orderBy: history_OrderByInput): [history]
@@ -22,10 +26,20 @@ type Query {
   count_post(where: post_WhereInput): Int
   posttag(limit: Int, offset: Int, where: posttag_WhereInput, orderBy: posttag_OrderByInput): [posttag]
   count_posttag(where: posttag_WhereInput): Int
+  posttranslation(limit: Int, offset: Int, where: posttranslation_WhereInput, orderBy: posttranslation_OrderByInput): [posttranslation]
+  count_posttranslation(where: posttranslation_WhereInput): Int
+  postvotehistory(limit: Int, offset: Int, where: postvotehistory_WhereInput, orderBy: postvotehistory_OrderByInput): [postvotehistory]
+  count_postvotehistory(where: postvotehistory_WhereInput): Int
   reply(limit: Int, offset: Int, where: reply_WhereInput, orderBy: reply_OrderByInput): [reply]
   count_reply(where: reply_WhereInput): Int
+  replytranslation(limit: Int, offset: Int, where: replytranslation_WhereInput, orderBy: replytranslation_OrderByInput): [replytranslation]
+  count_replytranslation(where: replytranslation_WhereInput): Int
+  replyvotehistory(limit: Int, offset: Int, where: replyvotehistory_WhereInput, orderBy: replyvotehistory_OrderByInput): [replyvotehistory]
+  count_replyvotehistory(where: replyvotehistory_WhereInput): Int
   tag(limit: Int, offset: Int, where: tag_WhereInput, orderBy: tag_OrderByInput): [tag]
   count_tag(where: tag_WhereInput): Int
+  tagtranslation(limit: Int, offset: Int, where: tagtranslation_WhereInput, orderBy: tagtranslation_OrderByInput): [tagtranslation]
+  count_tagtranslation(where: tagtranslation_WhereInput): Int
   user(limit: Int, offset: Int, where: user_WhereInput, orderBy: user_OrderByInput): [user]
   count_user(where: user_WhereInput): Int
   userachievement(limit: Int, offset: Int, where: userachievement_WhereInput, orderBy: userachievement_OrderByInput): [userachievement]
@@ -50,8 +64,8 @@ type achievement {
   name: String
   description: String
   image: String
-  communityId: Int
-  attrCommunityId: Int
+  communityId: String
+  attrcommunityId: String
   attrEvent: String
   attrType: String
   userachievement(limit: Int, offset: Int, where: userachievement_WhereInput, orderBy: userachievement_OrderByInput): [userachievement]
@@ -76,7 +90,7 @@ input achievement_WhereInput {
   description: String
   image: String
   communityId: String
-  attrCommunityId: String
+  attrcommunityId: String
   attrEvent: String
   attrType: String
 }
@@ -92,7 +106,7 @@ input achievement_OrderByInput {
   description: OrderBy
   image: OrderBy
   communityId: OrderBy
-  attrCommunityId: OrderBy
+  attrcommunityId: OrderBy
   attrEvent: OrderBy
   attrType: OrderBy
 }
@@ -116,9 +130,14 @@ type user {
   ipfsHash: String
   ipfsHash2: String
   comment(limit: Int, offset: Int, where: comment_WhereInput, orderBy: comment_OrderByInput): [comment]
+  commenttranslation(limit: Int, offset: Int, where: commenttranslation_WhereInput, orderBy: commenttranslation_OrderByInput): [commenttranslation]
   history(limit: Int, offset: Int, where: history_WhereInput, orderBy: history_OrderByInput): [history]
   post(limit: Int, offset: Int, where: post_WhereInput, orderBy: post_OrderByInput): [post]
+  posttranslation(limit: Int, offset: Int, where: posttranslation_WhereInput, orderBy: posttranslation_OrderByInput): [posttranslation]
+  postvotehistory(limit: Int, offset: Int, where: postvotehistory_WhereInput, orderBy: postvotehistory_OrderByInput): [postvotehistory]
   reply(limit: Int, offset: Int, where: reply_WhereInput, orderBy: reply_OrderByInput): [reply]
+  replytranslation(limit: Int, offset: Int, where: replytranslation_WhereInput, orderBy: replytranslation_OrderByInput): [replytranslation]
+  replyvotehistory(limit: Int, offset: Int, where: replyvotehistory_WhereInput, orderBy: replyvotehistory_OrderByInput): [replyvotehistory]
   userachievement(limit: Int, offset: Int, where: userachievement_WhereInput, orderBy: userachievement_OrderByInput): [userachievement]
   usercommunity(limit: Int, offset: Int, where: usercommunity_WhereInput, orderBy: usercommunity_OrderByInput): [usercommunity]
   usercommunityrating(limit: Int, offset: Int, where: usercommunityrating_WhereInput, orderBy: usercommunityrating_OrderByInput): [usercommunityrating]
@@ -128,6 +147,7 @@ type user {
 
 type comment {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String!
@@ -136,13 +156,16 @@ type comment {
   postId: String!
   parentReplyId: Int
   content: String!
+  language: Int
   isDeleted: Int
   post(where: post_WhereInput, orderBy: post_OrderByInput, limit: Int, offset: Int): [post]
   user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
+  commenttranslation(limit: Int, offset: Int, where: commenttranslation_WhereInput, orderBy: commenttranslation_OrderByInput): [commenttranslation]
 }
 
 type post {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   postType: Int!
@@ -150,7 +173,7 @@ type post {
   rating: Int
   postTime: Int
   lastMod: Int
-  communityId: Int!
+  communityId: String!
   title: String!
   content: String!
   postContent: String!
@@ -159,6 +182,7 @@ type post {
   isDeleted: Int
   officialReply: Int
   bestReply: Int
+  language: Int
   handle: String
   messengerType: Int
   comment(limit: Int, offset: Int, where: comment_WhereInput, orderBy: comment_OrderByInput): [comment]
@@ -166,11 +190,14 @@ type post {
   community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
   user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
   posttag(limit: Int, offset: Int, where: posttag_WhereInput, orderBy: posttag_OrderByInput): [posttag]
+  posttranslation(limit: Int, offset: Int, where: posttranslation_WhereInput, orderBy: posttranslation_OrderByInput): [posttranslation]
+  postvotehistory(limit: Int, offset: Int, where: postvotehistory_WhereInput, orderBy: postvotehistory_OrderByInput): [postvotehistory]
   reply(limit: Int, offset: Int, where: reply_WhereInput, orderBy: reply_OrderByInput): [reply]
 }
 
 input comment_WhereInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String
@@ -179,11 +206,13 @@ input comment_WhereInput {
   postId: String
   parentReplyId: String
   content: String
+  language: String
   isDeleted: String
 }
 
 input comment_OrderByInput {
   id: OrderBy
+  id2: OrderBy
   ipfsHash: OrderBy
   ipfsHash2: OrderBy
   author: OrderBy
@@ -192,6 +221,7 @@ input comment_OrderByInput {
   postId: OrderBy
   parentReplyId: OrderBy
   content: OrderBy
+  language: OrderBy
   isDeleted: OrderBy
 }
 
@@ -211,6 +241,7 @@ type history {
 
 input post_WhereInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   postType: String
@@ -227,12 +258,14 @@ input post_WhereInput {
   isDeleted: String
   officialReply: String
   bestReply: String
+  language: String
   handle: String
   messengerType: String
 }
 
 input post_OrderByInput {
   id: OrderBy
+  id2: OrderBy
   ipfsHash: OrderBy
   ipfsHash2: OrderBy
   postType: OrderBy
@@ -249,6 +282,7 @@ input post_OrderByInput {
   isDeleted: OrderBy
   officialReply: OrderBy
   bestReply: OrderBy
+  language: OrderBy
   handle: OrderBy
   messengerType: OrderBy
 }
@@ -308,7 +342,7 @@ input history_OrderByInput {
 }
 
 type community {
-  id: Int!
+  id: String!
   name: String
   description: String
   website: String
@@ -326,6 +360,7 @@ type community {
   ipfsHash: String
   ipfsHash2: String
   communitydocumentation(limit: Int, offset: Int, where: communitydocumentation_WhereInput, orderBy: communitydocumentation_OrderByInput): [communitydocumentation]
+  communitytranslation(limit: Int, offset: Int, where: communitytranslation_WhereInput, orderBy: communitytranslation_OrderByInput): [communitytranslation]
   post(limit: Int, offset: Int, where: post_WhereInput, orderBy: post_OrderByInput): [post]
   tag(limit: Int, offset: Int, where: tag_WhereInput, orderBy: tag_OrderByInput): [tag]
   usercommunity(limit: Int, offset: Int, where: usercommunity_WhereInput, orderBy: usercommunity_OrderByInput): [usercommunity]
@@ -333,7 +368,7 @@ type community {
 }
 
 type communitydocumentation {
-  id: Int!
+  id: String!
   documentationJSON: String
   ipfsHash: String
   community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
@@ -391,17 +426,47 @@ input communitydocumentation_OrderByInput {
   ipfsHash: OrderBy
 }
 
+type communitytranslation {
+  id: String!
+  communityId: String!
+  name: String
+  description: String
+  language: String
+  enableAutotranslation: Int
+  community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
+}
+
+input communitytranslation_WhereInput {
+  id: String
+  communityId: String
+  name: String
+  description: String
+  language: String
+  enableAutotranslation: String
+}
+
+input communitytranslation_OrderByInput {
+  id: OrderBy
+  communityId: OrderBy
+  name: OrderBy
+  description: OrderBy
+  language: OrderBy
+  enableAutotranslation: OrderBy
+}
+
 type tag {
   id: String!
-  communityId: Int!
+  communityId: String!
   name: String!
   description: String
   postCount: Int
   deletedPostCount: Int
+  language: Int
   ipfsHash: String
   ipfsHash2: String
   posttag(limit: Int, offset: Int, where: posttag_WhereInput, orderBy: posttag_OrderByInput): [posttag]
   community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
+  tagtranslation(limit: Int, offset: Int, where: tagtranslation_WhereInput, orderBy: tagtranslation_OrderByInput): [tagtranslation]
 }
 
 type posttag {
@@ -419,6 +484,7 @@ input tag_WhereInput {
   description: String
   postCount: String
   deletedPostCount: String
+  language: String
   ipfsHash: String
   ipfsHash2: String
 }
@@ -430,6 +496,7 @@ input tag_OrderByInput {
   description: OrderBy
   postCount: OrderBy
   deletedPostCount: OrderBy
+  language: OrderBy
   ipfsHash: OrderBy
   ipfsHash2: OrderBy
 }
@@ -446,10 +513,35 @@ input posttag_OrderByInput {
   tagId: OrderBy
 }
 
+type tagtranslation {
+  id: String!
+  tagId: String!
+  name: String!
+  description: String
+  language: Int
+  tag(where: tag_WhereInput, orderBy: tag_OrderByInput, limit: Int, offset: Int): [tag]
+}
+
+input tagtranslation_WhereInput {
+  id: String
+  tagId: String
+  name: String
+  description: String
+  language: String
+}
+
+input tagtranslation_OrderByInput {
+  id: OrderBy
+  tagId: OrderBy
+  name: OrderBy
+  description: OrderBy
+  language: OrderBy
+}
+
 type usercommunity {
   id: String!
   userId: String!
-  communityId: Int!
+  communityId: String!
   community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
   user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
 }
@@ -468,7 +560,7 @@ input usercommunity_OrderByInput {
 
 type usercommunityrating {
   id: String!
-  communityId: Int!
+  communityId: String!
   rating: Int
   userId: String!
   community(where: community_WhereInput, orderBy: community_OrderByInput, limit: Int, offset: Int): [community]
@@ -489,8 +581,64 @@ input usercommunityrating_OrderByInput {
   userId: OrderBy
 }
 
+type posttranslation {
+  id: String!
+  postId: String!
+  language: Int
+  author: String!
+  ipfsHash: String
+  title: String!
+  content: String
+  post(where: post_WhereInput, orderBy: post_OrderByInput, limit: Int, offset: Int): [post]
+  user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
+}
+
+input posttranslation_WhereInput {
+  id: String
+  postId: String
+  language: String
+  author: String
+  ipfsHash: String
+  title: String
+  content: String
+}
+
+input posttranslation_OrderByInput {
+  id: OrderBy
+  postId: OrderBy
+  language: OrderBy
+  author: OrderBy
+  ipfsHash: OrderBy
+  title: OrderBy
+  content: OrderBy
+}
+
+type postvotehistory {
+  id: String!
+  postId: String!
+  direction: Int
+  userId: String!
+  post(where: post_WhereInput, orderBy: post_OrderByInput, limit: Int, offset: Int): [post]
+  user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
+}
+
+input postvotehistory_WhereInput {
+  id: String
+  postId: String
+  direction: String
+  userId: String
+}
+
+input postvotehistory_OrderByInput {
+  id: OrderBy
+  postId: OrderBy
+  direction: OrderBy
+  userId: OrderBy
+}
+
 type reply {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String!
@@ -505,14 +653,29 @@ type reply {
   isBestReply: Int
   isFirstReply: Int
   isQuickReply: Int
+  language: Int
   handle: String
   messengerType: Int
   post(where: post_WhereInput, orderBy: post_OrderByInput, limit: Int, offset: Int): [post]
+  user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
+  replytranslation(limit: Int, offset: Int, where: replytranslation_WhereInput, orderBy: replytranslation_OrderByInput): [replytranslation]
+  replyvotehistory(limit: Int, offset: Int, where: replyvotehistory_WhereInput, orderBy: replyvotehistory_OrderByInput): [replyvotehistory]
+}
+
+type replytranslation {
+  id: String!
+  replyId: String!
+  language: Int
+  author: String!
+  ipfsHash: String
+  content: String
+  reply(where: reply_WhereInput, orderBy: reply_OrderByInput, limit: Int, offset: Int): [reply]
   user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
 }
 
 input reply_WhereInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String
@@ -527,12 +690,14 @@ input reply_WhereInput {
   isBestReply: String
   isFirstReply: String
   isQuickReply: String
+  language: String
   handle: String
   messengerType: String
 }
 
 input reply_OrderByInput {
   id: OrderBy
+  id2: OrderBy
   ipfsHash: OrderBy
   ipfsHash2: OrderBy
   author: OrderBy
@@ -547,8 +712,79 @@ input reply_OrderByInput {
   isBestReply: OrderBy
   isFirstReply: OrderBy
   isQuickReply: OrderBy
+  language: OrderBy
   handle: OrderBy
   messengerType: OrderBy
+}
+
+input replytranslation_WhereInput {
+  id: String
+  replyId: String
+  language: String
+  author: String
+  ipfsHash: String
+  content: String
+}
+
+input replytranslation_OrderByInput {
+  id: OrderBy
+  replyId: OrderBy
+  language: OrderBy
+  author: OrderBy
+  ipfsHash: OrderBy
+  content: OrderBy
+}
+
+type replyvotehistory {
+  id: String!
+  replyId: String!
+  direction: Int
+  userId: String!
+  reply(where: reply_WhereInput, orderBy: reply_OrderByInput, limit: Int, offset: Int): [reply]
+  user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
+}
+
+input replyvotehistory_WhereInput {
+  id: String
+  replyId: String
+  direction: String
+  userId: String
+}
+
+input replyvotehistory_OrderByInput {
+  id: OrderBy
+  replyId: OrderBy
+  direction: OrderBy
+  userId: OrderBy
+}
+
+type commenttranslation {
+  id: String!
+  commentId: String!
+  language: Int
+  author: String!
+  ipfsHash: String
+  content: String
+  comment(where: comment_WhereInput, orderBy: comment_OrderByInput, limit: Int, offset: Int): [comment]
+  user(where: user_WhereInput, orderBy: user_OrderByInput, limit: Int, offset: Int): [user]
+}
+
+input commenttranslation_WhereInput {
+  id: String
+  commentId: String
+  language: String
+  author: String
+  ipfsHash: String
+  content: String
+}
+
+input commenttranslation_OrderByInput {
+  id: OrderBy
+  commentId: OrderBy
+  language: OrderBy
+  author: OrderBy
+  ipfsHash: OrderBy
+  content: OrderBy
 }
 
 input userachievement_WhereInput {
@@ -693,8 +929,8 @@ input achievement_InsertInput {
   name: String
   description: String
   image: String
-  communityId: Int
-  attrCommunityId: Int
+  communityId: String
+  attrcommunityId: String
   attrEvent: String
   attrType: String
 }
@@ -709,14 +945,15 @@ input achievement_UpdateInput {
   name: String
   description: String
   image: String
-  communityId: Int
-  attrCommunityId: Int
+  communityId: String
+  attrcommunityId: String
   attrEvent: String
   attrType: String
 }
 
 input comment_InsertInput {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String!
@@ -725,11 +962,13 @@ input comment_InsertInput {
   postId: String!
   parentReplyId: Int
   content: String!
+  language: Int
   isDeleted: Int
 }
 
 input comment_UpdateInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String
@@ -738,11 +977,30 @@ input comment_UpdateInput {
   postId: String
   parentReplyId: Int
   content: String
+  language: Int
   isDeleted: Int
 }
 
+input commenttranslation_InsertInput {
+  id: String!
+  commentId: String!
+  language: Int
+  author: String!
+  ipfsHash: String
+  content: String
+}
+
+input commenttranslation_UpdateInput {
+  id: String
+  commentId: String
+  language: Int
+  author: String
+  ipfsHash: String
+  content: String
+}
+
 input community_InsertInput {
-  id: Int!
+  id: String!
   name: String
   description: String
   website: String
@@ -762,7 +1020,7 @@ input community_InsertInput {
 }
 
 input community_UpdateInput {
-  id: Int
+  id: String
   name: String
   description: String
   website: String
@@ -782,15 +1040,33 @@ input community_UpdateInput {
 }
 
 input communitydocumentation_InsertInput {
-  id: Int!
+  id: String!
   documentationJSON: String
   ipfsHash: String
 }
 
 input communitydocumentation_UpdateInput {
-  id: Int
+  id: String
   documentationJSON: String
   ipfsHash: String
+}
+
+input communitytranslation_InsertInput {
+  id: String!
+  communityId: String!
+  name: String
+  description: String
+  language: String
+  enableAutotranslation: Int
+}
+
+input communitytranslation_UpdateInput {
+  id: String
+  communityId: String
+  name: String
+  description: String
+  language: String
+  enableAutotranslation: Int
 }
 
 input contractinfo_InsertInput {
@@ -871,6 +1147,7 @@ input period_UpdateInput {
 
 input post_InsertInput {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   postType: Int!
@@ -878,7 +1155,7 @@ input post_InsertInput {
   rating: Int
   postTime: Int
   lastMod: Int
-  communityId: Int!
+  communityId: String!
   title: String!
   content: String!
   postContent: String!
@@ -887,12 +1164,14 @@ input post_InsertInput {
   isDeleted: Int
   officialReply: Int
   bestReply: Int
+  language: Int
   handle: String
   messengerType: Int
 }
 
 input post_UpdateInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   postType: Int
@@ -900,7 +1179,7 @@ input post_UpdateInput {
   rating: Int
   postTime: Int
   lastMod: Int
-  communityId: Int
+  communityId: String
   title: String
   content: String
   postContent: String
@@ -909,6 +1188,7 @@ input post_UpdateInput {
   isDeleted: Int
   officialReply: Int
   bestReply: Int
+  language: Int
   handle: String
   messengerType: Int
 }
@@ -925,8 +1205,43 @@ input posttag_UpdateInput {
   tagId: String
 }
 
+input posttranslation_InsertInput {
+  id: String!
+  postId: String!
+  language: Int
+  author: String!
+  ipfsHash: String
+  title: String!
+  content: String
+}
+
+input posttranslation_UpdateInput {
+  id: String
+  postId: String
+  language: Int
+  author: String
+  ipfsHash: String
+  title: String
+  content: String
+}
+
+input postvotehistory_InsertInput {
+  id: String!
+  postId: String!
+  direction: Int
+  userId: String!
+}
+
+input postvotehistory_UpdateInput {
+  id: String
+  postId: String
+  direction: Int
+  userId: String
+}
+
 input reply_InsertInput {
   id: String!
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String!
@@ -941,12 +1256,14 @@ input reply_InsertInput {
   isBestReply: Int
   isFirstReply: Int
   isQuickReply: Int
+  language: Int
   handle: String
   messengerType: Int
 }
 
 input reply_UpdateInput {
   id: String
+  id2: String
   ipfsHash: String
   ipfsHash2: String
   author: String
@@ -961,30 +1278,81 @@ input reply_UpdateInput {
   isBestReply: Int
   isFirstReply: Int
   isQuickReply: Int
+  language: Int
   handle: String
   messengerType: Int
 }
 
+input replytranslation_InsertInput {
+  id: String!
+  replyId: String!
+  language: Int
+  author: String!
+  ipfsHash: String
+  content: String
+}
+
+input replytranslation_UpdateInput {
+  id: String
+  replyId: String
+  language: Int
+  author: String
+  ipfsHash: String
+  content: String
+}
+
+input replyvotehistory_InsertInput {
+  id: String!
+  replyId: String!
+  direction: Int
+  userId: String!
+}
+
+input replyvotehistory_UpdateInput {
+  id: String
+  replyId: String
+  direction: Int
+  userId: String
+}
+
 input tag_InsertInput {
   id: String!
-  communityId: Int!
+  communityId: String!
   name: String!
   description: String
   postCount: Int
   deletedPostCount: Int
+  language: Int
   ipfsHash: String
   ipfsHash2: String
 }
 
 input tag_UpdateInput {
   id: String
-  communityId: Int
+  communityId: String
   name: String
   description: String
   postCount: Int
   deletedPostCount: Int
+  language: Int
   ipfsHash: String
   ipfsHash2: String
+}
+
+input tagtranslation_InsertInput {
+  id: String!
+  tagId: String!
+  name: String!
+  description: String
+  language: Int
+}
+
+input tagtranslation_UpdateInput {
+  id: String
+  tagId: String
+  name: String
+  description: String
+  language: Int
 }
 
 input user_InsertInput {
@@ -1032,25 +1400,25 @@ input userachievement_UpdateInput {
 input usercommunity_InsertInput {
   id: String!
   userId: String!
-  communityId: Int!
+  communityId: String!
 }
 
 input usercommunity_UpdateInput {
   id: String
   userId: String
-  communityId: Int
+  communityId: String
 }
 
 input usercommunityrating_InsertInput {
   id: String!
-  communityId: Int!
+  communityId: String!
   rating: Int
   userId: String!
 }
 
 input usercommunityrating_UpdateInput {
   id: String
-  communityId: Int
+  communityId: String
   rating: Int
   userId: String
 }

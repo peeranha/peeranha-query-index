@@ -1,4 +1,6 @@
 export class Comment {
+  id2: string;
+
   ipfsDoc: [string, string];
 
   author: string;
@@ -9,17 +11,19 @@ export class Comment {
 
   propertyCount: number;
 
+  language: number;
+
   isDeleted: boolean;
 
   constructor(comment: any) {
-    [
-      this.ipfsDoc,
-      this.author,
-      this.rating,
-      this.postTime,
-      this.propertyCount,
-      this.isDeleted,
-    ] = comment;
+    this.id2 = comment.id2;
+    this.ipfsDoc = comment.ipfsDoc;
+    this.author = comment.author;
+    this.rating = comment.rating;
+    this.postTime = comment.postTime;
+    this.propertyCount = comment.propertyCount;
+    this.isDeleted = comment.isDeleted;
+    this.language = comment.language;
   }
 }
 

@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS user (
-  id VARCHAR(42) NOT NULL PRIMARY KEY,
+  id VARCHAR(66) PRIMARY KEY,
   displayName VARCHAR(20),
   postCount INT DEFAULT 0,
   replyCount INT DEFAULT 0,
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS user (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS community (
-  id INT NOT NULL PRIMARY KEY,
+  id VARCHAR(66) PRIMARY KEY,
   name VARCHAR(20),
   description VARCHAR(250),
   website VARCHAR(250),
@@ -34,39 +34,40 @@ CREATE TABLE IF NOT EXISTS community (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS usercommunity (
-  id VARCHAR(50) NOT NULL PRIMARY KEY,
-  userId VARCHAR(42) NOT NULL,
-  communityId INT NOT NULL,
+  id VARCHAR(133) PRIMARY KEY,
+  userId VARCHAR(66) NOT NULL,
+  communityId VARCHAR(66) NOT NULL,
 
   FOREIGN KEY (userId) REFERENCES user (id),
   FOREIGN KEY (communityId) REFERENCES community (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS userpermission (
-  id VARCHAR(109) NOT NULL PRIMARY KEY,
-  userId VARCHAR(42) NOT NULL,
+  id VARCHAR(133) PRIMARY KEY,
+  userId VARCHAR(66) NOT NULL,
   permission VARCHAR(66) NOT NULL,
 
   FOREIGN KEY (userId) REFERENCES user (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS usercommunityrating (
-  id VARCHAR(50) NOT NULL PRIMARY KEY,
-  communityId INT NOT NULL,
+  id VARCHAR(133) PRIMARY KEY,
+  communityId VARCHAR(66) NOT NULL,
   rating INT,
-  userId VARCHAR(42) NOT NULL,
+  userId VARCHAR(66) NOT NULL,
 
   FOREIGN KEY (communityId) REFERENCES community (id),
   FOREIGN KEY (userId) REFERENCES user (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS tag (
-  id VARCHAR(15) NOT NULL PRIMARY KEY,
-  communityId INT NOT NULL,
+  id VARCHAR(71) PRIMARY KEY,
+  communityId VARCHAR(66) NOT NULL,
   name VARCHAR(25) NOT NULL,
   description TEXT,
   postCount INT DEFAULT 0,
   deletedPostCount INT DEFAULT 0,
+  language INT,
   ipfsHash VARCHAR(66),
   ipfsHash2 VARCHAR(66),
 
@@ -74,15 +75,16 @@ CREATE TABLE IF NOT EXISTS tag (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS post (
-  id VARCHAR(66) NOT NULL PRIMARY KEY,
+  id VARCHAR(66) PRIMARY KEY,
+  id2 VARCHAR(66),
   ipfsHash VARCHAR(66),
   ipfsHash2 VARCHAR(66),
   postType TINYINT NOT NULL,
-  author VARCHAR(42) NOT NULL,
+  author VARCHAR(66) NOT NULL,
   rating INT DEFAULT 0,
   postTime INT,
   lastMod INT,
-  communityId INT NOT NULL,
+  communityId VARCHAR(66) NOT NULL,
   title VARCHAR(100) NOT NULL,
   content TEXT NOT NULL,
   postContent TEXT NOT NULL,
@@ -91,6 +93,7 @@ CREATE TABLE IF NOT EXISTS post (
   isDeleted BOOLEAN DEFAULT 0,
   officialReply INT DEFAULT 0,
   bestReply INT DEFAULT 0,
+  language INT,
   handle VARCHAR(66),
   messengerType INT,
 
@@ -99,19 +102,20 @@ CREATE TABLE IF NOT EXISTS post (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS posttag (
-  id VARCHAR(25) PRIMARY KEY,
+  id VARCHAR(138) PRIMARY KEY,
   postId VARCHAR(66) NOT NULL,
-  tagId VARCHAR(15) NOT NULL,
+  tagId VARCHAR(71) NOT NULL,
 
   FOREIGN KEY (postId) REFERENCES post (id),
   FOREIGN KEY (tagId) REFERENCES tag (id)
-);
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS reply (
-  id VARCHAR(20) NOT NULL PRIMARY KEY,
+  id VARCHAR(74) PRIMARY KEY,
+  id2 VARCHAR(66),
   ipfsHash VARCHAR(66),
   ipfsHash2 VARCHAR(66),
-  author VARCHAR(42) NOT NULL,
+  author VARCHAR(66) NOT NULL,
   rating INT DEFAULT 0,
   postTime INT NOT NULL,
   postId VARCHAR(66) NOT NULL,
@@ -123,6 +127,7 @@ CREATE TABLE IF NOT EXISTS reply (
   isBestReply BOOLEAN DEFAULT 0,
   isFirstReply BOOLEAN DEFAULT 0,
   isQuickReply BOOLEAN DEFAULT 0,
+  language INT,
   handle VARCHAR(66),
   messengerType INT,
 
@@ -131,15 +136,17 @@ CREATE TABLE IF NOT EXISTS reply (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS comment (
-  id VARCHAR(25) NOT NULL PRIMARY KEY,
+  id VARCHAR(78) PRIMARY KEY,
+  id2 VARCHAR(66),
   ipfsHash VARCHAR(66),
   ipfsHash2 VARCHAR(66),
-  author VARCHAR(42) NOT NULL,
+  author VARCHAR(66) NOT NULL,
   rating INT DEFAULT 0,
   postTime INT NOT NULL,
   postId VARCHAR(66) NOT NULL,
   parentReplyId SMALLINT,
   content TEXT NOT NULL,
+  language INT,
   isDeleted BOOLEAN DEFAULT 0,
 
   FOREIGN KEY (author) REFERENCES user (id),
@@ -147,7 +154,7 @@ CREATE TABLE IF NOT EXISTS comment (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS achievement (
-  id INT NOT NULL PRIMARY KEY,
+  id INT PRIMARY KEY,
   factCount INT,
   maxCount INT,
   achievementURI VARCHAR(66),
@@ -156,15 +163,15 @@ CREATE TABLE IF NOT EXISTS achievement (
   name VARCHAR(30),
   description VARCHAR(250),
   image VARCHAR(66),
-  communityId INT,
-  attrCommunityId INT,
+  communityId VARCHAR(66),
+  attrcommunityId VARCHAR(66),
   attrEvent VARCHAR(50),
   attrType VARCHAR(20)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS userachievement (
-  id VARCHAR(50) NOT NULL PRIMARY KEY,
-  userId VARCHAR(42) NOT NULL,
+  id VARCHAR(74) PRIMARY KEY,
+  userId VARCHAR(66) NOT NULL,
   achievementId INT NOT NULL,
 
   FOREIGN KEY (userId) REFERENCES user (id),
@@ -172,16 +179,16 @@ CREATE TABLE IF NOT EXISTS userachievement (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS period (
-  id INT NOT NULL PRIMARY KEY,
+  id INT PRIMARY KEY,
   startPeriodTime INT NOT NULL,
   endPeriodTime INT NOT NULL,
   isFinished BOOLEAN NOT NULL DEFAULT 0
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS userreward (
-  id VARCHAR(60) NOT NULL PRIMARY KEY,
+  id VARCHAR(84) PRIMARY KEY,
   periodId INT NOT NULL,
-  userId VARCHAR(42) NOT NULL,
+  userId VARCHAR(66) NOT NULL,
   tokenToReward VARCHAR(40) NOT NULL,
   isPaid BOOLEAN DEFAULT 0,
 
@@ -190,21 +197,21 @@ CREATE TABLE IF NOT EXISTS userreward (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS contractinfo (
-  id VARCHAR(42) NOT NULL PRIMARY KEY,
+  id VARCHAR(66) PRIMARY KEY,
   deployTime INT NOT NULL,
   periodLength INT NOT NULL,
   lastUpdatePeriod INT
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS history (
-  id VARCHAR(66) NOT NULL PRIMARY KEY,
+  id VARCHAR(66) PRIMARY KEY,
   transactionHash VARCHAR(66) NOT NULL,
   postId VARCHAR(66) NOT NULL,
-  replyId VARCHAR(20),
-  commentId VARCHAR(25),
+  replyId VARCHAR(133),
+  commentId VARCHAR(200),
   eventEntity VARCHAR(15),
   eventName VARCHAR(15),
-  actionUser VARCHAR(42) NOT NULL,
+  actionUser VARCHAR(66) NOT NULL,
   timeStamp INT NOT NULL,
 
   FOREIGN KEY (postId) REFERENCES post (id),
@@ -212,9 +219,87 @@ CREATE TABLE IF NOT EXISTS history (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS communitydocumentation (
-  id INT NOT NULL PRIMARY KEY,
+  id VARCHAR(66) PRIMARY KEY,
   documentationJSON TEXT,
   ipfsHash VARCHAR(66),
 
   FOREIGN KEY (id) REFERENCES community (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS communitytranslation (
+  id VARCHAR(70) PRIMARY KEY,
+  communityId VARCHAR(66) NOT NULL,
+  name VARCHAR(40),
+  description VARCHAR(250),
+  language VARCHAR(5),
+  enableAutotranslation BOOLEAN,
+
+  FOREIGN KEY (communityId) REFERENCES community (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS tagtranslation (
+  id VARCHAR(75) PRIMARY KEY,
+  tagId VARCHAR(71) NOT NULL,
+  name VARCHAR(40) NOT NULL,
+  description TEXT,
+  language INT,
+
+  FOREIGN KEY (tagId) REFERENCES tag (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS posttranslation (
+  id VARCHAR(70) PRIMARY KEY,
+  postId VARCHAR(66) NOT NULL,
+  language INT,
+  author VARCHAR(66) NOT NULL,
+  ipfsHash VARCHAR(66),
+  title VARCHAR(130) NOT NULL,
+  content TEXT,
+
+  FOREIGN KEY (postId) REFERENCES post (id),
+  FOREIGN KEY (author) REFERENCES user (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS replytranslation (
+  id VARCHAR(74) PRIMARY KEY,
+  replyId VARCHAR(74) NOT NULL,
+  language INT,
+  author VARCHAR(66) NOT NULL,
+  ipfsHash VARCHAR(66),
+  content TEXT,
+
+  FOREIGN KEY (replyId) REFERENCES reply (id),
+  FOREIGN KEY (author) REFERENCES user (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS commenttranslation (
+  id VARCHAR(82) PRIMARY KEY,
+  commentId VARCHAR(78) NOT NULL,
+  language INT,
+  author VARCHAR(66) NOT NULL,
+  ipfsHash VARCHAR(66),
+  content TEXT,
+
+  FOREIGN KEY (commentId) REFERENCES comment (id),
+  FOREIGN KEY (author) REFERENCES user (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS postvotehistory (
+  id VARCHAR(133) PRIMARY KEY,
+  postId VARCHAR(66) NOT NULL,
+  direction INT,
+  userId VARCHAR(66) NOT NULL,
+
+  FOREIGN KEY (postId) REFERENCES post (id),
+  FOREIGN KEY (userId) REFERENCES user (id)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+CREATE TABLE IF NOT EXISTS replyvotehistory (
+  id VARCHAR(141) PRIMARY KEY,
+  replyId VARCHAR(74) NOT NULL,
+  direction INT,
+  userId VARCHAR(66) NOT NULL,
+
+  FOREIGN KEY (replyId) REFERENCES reply (id),
+  FOREIGN KEY (userId) REFERENCES user (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;

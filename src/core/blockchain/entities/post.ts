@@ -1,4 +1,8 @@
 export class Post {
+  id: string;
+
+  id2: string;
+
   postType: number;
 
   author: string;
@@ -7,11 +11,11 @@ export class Post {
 
   postTime: number;
 
-  communityId: number;
+  communityId: string;
 
-  officialReply: number;
+  officialReply: string;
 
-  bestReply: number;
+  bestReply: string;
 
   propertyCount: number;
 
@@ -23,27 +27,33 @@ export class Post {
 
   isDeleted: boolean;
 
+  language: number;
+
   tags: number[];
 
   ipfsDoc: [string, string];
 
+  historyVotes: { userId: string; direction: number }[];
+
   constructor(post: any) {
-    [
-      this.postType,
-      this.author,
-      this.rating,
-      this.postTime,
-      this.communityId,
-      this.officialReply,
-      this.bestReply,
-      this.propertyCount,
-      this.commentCount,
-      this.replyCount,
-      this.deletedReplyCount,
-      this.isDeleted,
-      this.tags,
-      this.ipfsDoc,
-    ] = post;
+    this.id = post.id;
+    this.id2 = post.id2;
+    this.postType = post.postType;
+    this.author = post.author;
+    this.rating = post.rating;
+    this.postTime = post.postTime;
+    this.communityId = String(post.communityId);
+    this.officialReply = String(post.officialReply);
+    this.bestReply = String(post.bestReply);
+    this.propertyCount = post.propertyCount;
+    this.commentCount = post.commentCount;
+    this.replyCount = post.replyCount;
+    this.deletedReplyCount = post.deletedReplyCount;
+    this.isDeleted = post.isDeleted;
+    this.tags = post.tags;
+    this.ipfsDoc = post.ipfsDoc;
+    this.language = post.language;
+    this.historyVotes = post.historyVotes;
   }
 }
 

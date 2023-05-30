@@ -30,7 +30,6 @@ import {
 } from 'src/core/index/user';
 import { ItemProperties } from 'src/core/index/utils';
 import { getDataFromIpfs, getIpfsHashFromBytes32 } from 'src/core/utils/ipfs';
-import { log } from 'src/core/utils/logger';
 
 const postRepository = new PostRepository();
 const replyRepository = new ReplyRepository();
@@ -79,11 +78,11 @@ async function updateTagsPostCount(
 
 async function changedStatusOfficialReply(
   peeranhaPost: PostData,
-  replyId: number,
+  replyId: string,
   post: PostEntity
 ) {
   let { officialReply } = post;
-  let previousOfficialReplyId = 0;
+  let previousOfficialReplyId = '0';
   if (
     peeranhaPost.officialReply === replyId &&
     post.officialReply !== replyId
@@ -91,13 +90,13 @@ async function changedStatusOfficialReply(
     previousOfficialReplyId = post.officialReply;
     officialReply = replyId;
   } else if (
-    peeranhaPost.officialReply === 0 &&
+    peeranhaPost.officialReply === '0' &&
     post.officialReply === replyId
   ) {
-    officialReply = 0;
+    officialReply = '0';
   }
 
-  if (previousOfficialReplyId !== 0) {
+  if (previousOfficialReplyId !== '0') {
     const previousOfficialReply = await replyRepository.get(
       `${post.id}-${previousOfficialReplyId}`
     );
@@ -123,6 +122,7 @@ export async function createPost(
 
   const post = new PostEntity({
     id: postId,
+    id2: '',
     postType: peeranhaPost.postType,
     communityId: peeranhaPost.communityId,
     title: peeranhaPost.title,
@@ -135,10 +135,11 @@ export async function createPost(
     commentCount: 0,
     replyCount: 0,
     rating: 0,
-    officialReply: 0,
+    officialReply: '0',
     bestReply: peeranhaPost.bestReply,
     ipfsHash: peeranhaPost.ipfsDoc[0],
     ipfsHash2: peeranhaPost.ipfsDoc[1],
+    language: 0,
   });
 
   if (messengerUserData) {
@@ -203,6 +204,7 @@ export async function createReply(
 
   const reply = new ReplyEntity({
     id: `${postId}-${replyId}`,
+    id2: '',
     postId,
     content: peeranhaReply.content,
     author: peeranhaReply.author.toLowerCase(),
@@ -217,6 +219,7 @@ export async function createReply(
     isOfficialReply: false,
     ipfsHash: peeranhaReply.ipfsDoc[0],
     ipfsHash2: peeranhaReply.ipfsDoc[1],
+    language: 0,
   });
 
   if (messengerUserData) {
@@ -250,10 +253,10 @@ export async function createReply(
 
     const officialReply = await changedStatusOfficialReply(
       peeranhaPost,
-      replyId,
+      String(replyId),
       post
     );
-    reply.isOfficialReply = replyId === officialReply;
+    reply.isOfficialReply = String(replyId) === officialReply;
 
     promises.push(
       postRepository.update(postId, {
@@ -294,8 +297,9 @@ export async function createComment(
 
   const comment = new CommentEntity({
     id: `${postId}-${parentReplyId}-${commentId}`,
+    id2: '',
     postId,
-    parentReplyId,
+    parentReplyId: String(parentReplyId),
     content: peeranhaComment.content,
     author: peeranhaComment.author.toLowerCase(),
     isDeleted: false,
@@ -303,6 +307,7 @@ export async function createComment(
     rating: 0,
     ipfsHash: peeranhaComment.ipfsDoc[0],
     ipfsHash2: peeranhaComment.ipfsDoc[1],
+    language: 0,
   });
   await commentRepository.create(comment);
 
@@ -362,7 +367,7 @@ export async function updatePostContent(
   if (editedReplyId) {
     const officialReply = await changedStatusOfficialReply(
       peeranhaPost,
-      editedReplyId,
+      String(editedReplyId),
       post
     );
     postForSave.officialReply = officialReply;
@@ -376,8 +381,8 @@ export async function updatePostContent(
     'postId',
     post.id
   );
-  const oldTags: string[] = oldTagsResponse.map(
-    (tag: any) => `${post.communityId}-${tag.tagId}`
+  const oldTags = oldTagsResponse.map(
+    (tag) => `${post.communityId}-${tag.tagId}`
   );
 
   const uniqueNewTags = newTags.filter((newTag) => !oldTags.includes(newTag));
@@ -474,33 +479,29 @@ export async function updatePostContent(
   await postRepository.update(String(postId), postForSave);
 }
 
-function indexingJson(children: any[], posts: string[]) {
+function getPostsFromChild(children: any[]) {
+  const posts: string[] = [];
+
   children.forEach((child) => {
     const { id, title } = child;
     if (typeof id === 'string' && typeof title === 'string') {
       if (id !== '' && title !== '') {
         posts.push(id);
-        if (typeof child === 'object') {
-          if (child.children && Array.isArray(child.children)) {
-            if (child.children.length > 0) {
-              indexingJson(child.children, posts);
-            }
-          } else {
-            log("field 'children' in children post is empty or not an array");
+
+        if (child.children && Array.isArray(child.children)) {
+          if (child.children.length > 0) {
+            const childPosts = getPostsFromChild(child.children);
+            posts.push(...childPosts);
           }
-        } else {
-          log('children post is not an object');
         }
-      } else {
-        log('id or/and title of children post is empty');
       }
-    } else {
-      log('id or/and title of children post not found or not a string');
     }
   });
+
+  return posts;
 }
 
-async function indexingDocumentation(ipfsHash: string) {
+export async function getDocumentationData(ipfsHash: string) {
   const posts: string[] = [];
   const result = await getDataFromIpfs(getIpfsHashFromBytes32(ipfsHash));
   const documentationJSON = JSON.stringify(result);
@@ -511,13 +512,7 @@ async function indexingDocumentation(ipfsHash: string) {
     if (pinnedPost && typeof pinnedPost === 'object') {
       const { id, title } = pinnedPost;
       if (typeof id === 'string' && typeof title === 'string') {
-        if (id !== '' && title !== '') {
-          posts.push(id);
-        } else {
-          log('id or/and title of pinned post is empty');
-        }
-      } else {
-        log('id or/and title of pinned post not found or not a string');
+        posts.push(id);
       }
     }
 
@@ -526,30 +521,23 @@ async function indexingDocumentation(ipfsHash: string) {
         const documentationObject = documentations[i];
         const { id, title } = documentationObject;
         if (typeof id === 'string' && typeof title === 'string') {
-          if (id !== '' && title !== '') {
-            const { children } = documentationObject;
-            posts.push(id);
-            if (children && Array.isArray(children) && children.length > 0) {
-              indexingJson(children, posts);
-            }
-          } else {
-            log('id or/and title of post is empty');
+          const { children } = documentationObject;
+          posts.push(id);
+          if (children && Array.isArray(children) && children.length > 0) {
+            const childPosts = getPostsFromChild(children);
+            posts.push(...childPosts);
           }
-        } else {
-          log('id or/and title of post not found or not a string');
         }
       }
-    } else {
-      log('documentations not found or not an array');
     }
   }
 
   return { posts, documentationJSON };
 }
 
-export async function generateDocumentationPosts(
-  communityId: number,
-  userAddr: string,
+export async function setCommunityDocumentation(
+  communityId: string,
+  userId: string,
   newDocumentationIpfsHash: string,
   timestamp: number,
   oldDocumentationIpfsHash?: string
@@ -557,13 +545,13 @@ export async function generateDocumentationPosts(
   const newPosts: string[] = [];
   const oldPosts: string[] = [];
 
-  const documentationData = await indexingDocumentation(
+  const documentationData = await getDocumentationData(
     newDocumentationIpfsHash
   );
   newPosts.push(...documentationData.posts);
 
   if (oldDocumentationIpfsHash) {
-    const oldDocumentationData = await indexingDocumentation(
+    const oldDocumentationData = await getDocumentationData(
       oldDocumentationIpfsHash
     );
 
@@ -582,11 +570,6 @@ export async function generateDocumentationPosts(
     await communityDocumentationRepository.create(documentation);
   }
 
-  const user = await userRepository.get(userAddr);
-  if (!user) {
-    await createUser(userAddr, timestamp);
-  }
-
   const postsForCreating = newPosts.filter(
     (post, index) =>
       newPosts.indexOf(post) === index && oldPosts.indexOf(post) === -1
@@ -598,8 +581,7 @@ export async function generateDocumentationPosts(
   const documentationCount =
     oldPosts.length - postsForDeleting.length + postsForCreating.length;
 
-  const community = await getCommunityById(communityId);
-  await communityRepository.update(community.id, {
+  await communityRepository.update(communityId, {
     documentationCount,
   });
 
@@ -610,22 +592,24 @@ export async function generateDocumentationPosts(
 
     const postEntity = new PostEntity({
       id: post,
+      id2: '',
       postType: PostTypes.Documentation,
       communityId,
       title: postData.title,
       content: postData.content,
       postContent: `${postData.title} ${postData.content}`,
-      author: userAddr,
+      author: userId,
       isDeleted: false,
       rating: 0,
       postTime: timestamp,
       lastMod: timestamp,
       commentCount: 0,
       replyCount: 0,
-      officialReply: 0,
-      bestReply: 0,
+      officialReply: '0',
+      bestReply: '0',
       ipfsHash: post,
       ipfsHash2: '',
+      language: 0,
     });
 
     postPromises.push(postRepository.create(postEntity));

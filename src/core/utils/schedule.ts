@@ -18,9 +18,9 @@ export async function handleScheduleRequest(
       LogLevel.INFO
     );
   } catch (error: any) {
-    const slackChannel = await getSecretValue('API_ERRORS_SLACK_CHANNEL');
     log('Scheduled handler execution failed.', LogLevel.ERROR);
     log(error, LogLevel.ERROR);
+    const slackChannel = await getSecretValue('API_ERRORS_SLACK_CHANNEL');
     await publishSlackMessage(
       slackChannel,
       `*API error reported: Scheduled handler ${handlerFunc.name} execution failed.*\n\`\`\`${error.stack}\`\`\``
