@@ -3,6 +3,9 @@ CREATE TABLE IF NOT EXISTS network (
   name VARCHAR(20) NOT NULL
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+INSERT INTO network (id, name)
+VALUES (1, 'Polygon'), (2, 'Edgeware'), (3, 'Sui');
+
 CREATE TABLE IF NOT EXISTS user (
   id VARCHAR(66) PRIMARY KEY,
   displayName VARCHAR(20),
