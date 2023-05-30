@@ -30,7 +30,7 @@ environment:
   RPC_POLYGON_ENDPOINT: 'https://rpc.ankr.com/polygon_mumbai'
   POLYGON_START_BLOCK_NUMBER: 28738784
   
-  RPC_EDGEWARE_ENDPOINT: 'https://edgeware-evm.jelliedowl.net/'
+  RPC_EDGEWARE_ENDPOINT: 'https://rpc.ankr.com/polygon_mumbai'
   EDGEWARE_START_BLOCK_NUMBER: 36071263
 
   SUI_PACKAGE_ADDRESS: '0x83f909002b471f7e1dbec27c837ff143189f51dff9faf42697542df82113b2ec'
