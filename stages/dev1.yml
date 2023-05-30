@@ -15,6 +15,9 @@ environment:
   DYNAMODB_ENDPOINT: 'https://dynamodb.us-east-2.amazonaws.com'
   SQS_ENDPOINT: 'https://sqs.us-east-2.amazonaws.com'
 
+  DYNAMODB_ENDPOINT: 'https://dynamodb.us-east-2.amazonaws.com'
+  SQS_ENDPOINT: 'https://sqs.us-east-2.amazonaws.com'
+
   SECURITY_GROUP_ID: 'sg-b90a3dde'
   SUBNET_ID_1: 'subnet-f4be9c8e'
   SUBNET_ID_2: 'subnet-0b05f160'

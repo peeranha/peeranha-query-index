@@ -308,7 +308,7 @@ export async function createComment(
     id: `${postId}-${parentReplyId}-${commentId}`,
     id2: '',
     postId,
-    parentReplyId,
+    parentReplyId: String(parentReplyId),
     content: peeranhaComment.content,
     author: peeranhaComment.author.toLowerCase(),
     isDeleted: false,
