@@ -2,8 +2,16 @@ import { AttributeMap } from 'aws-sdk/clients/dynamodb';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
 import { BaseDynamoDbRepository } from 'src/core/dynamodb/repositories/BaseDynamoDbRepository';
+import { Network } from 'src/models/event-models';
 
 const BASE_TABLE_NAME_CONFIG = 'query-index-config';
+
+export async function getKeyForLastBlockByNetwork(
+  network: Network
+): Promise<string> {
+  const key = `lastBlockNumber${Network[network]}`;
+  return key;
+}
 
 export class ConfigRepository extends BaseDynamoDbRepository<Config, string> {
   constructor(conn: DynamoDBConnector) {

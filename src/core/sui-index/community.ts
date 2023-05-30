@@ -16,6 +16,7 @@ import {
   getSuiTagById,
 } from 'src/core/sui-blockchain/data-loader';
 import { log } from 'src/core/utils/logger';
+import { Network } from 'src/models/event-models';
 
 const communityRepository = new CommunityRepository();
 const tagTranslationRepository = new TagTranslationRepository();
@@ -52,7 +53,7 @@ async function deleteTagTranslations(translations: string[]) {
   await Promise.all(promises);
 }
 
-export async function createSuiTag(communityId: string, tagId: number) {
+export async function createSuiTag(communityId: string, tagId: string) {
   if (await tagRepository.get(`${communityId}-${tagId}`)) {
     return;
   }
@@ -74,7 +75,7 @@ export async function createSuiTag(communityId: string, tagId: number) {
   await createTagTranslations(peeranhaTag);
 }
 
-export async function updateSuiTag(communityId: string, tagId: number) {
+export async function updateSuiTag(communityId: string, tagId: string) {
   const id = `${communityId}-${tagId}`;
   log(`Updating sui tag by id ${id}`);
 
@@ -148,6 +149,7 @@ async function deleteCommunityTranslations(translations: string[]) {
 
 export async function createSuiCommunity(
   communityId: string,
+  network: Network,
   timestamp?: number
 ) {
   const peeranhaCommunity = await getSuiCommunityById(communityId);
@@ -170,13 +172,14 @@ export async function createSuiCommunity(
     followingUsers: 0,
     ipfsHash: peeranhaCommunity.ipfsDoc[0],
     ipfsHash2: peeranhaCommunity.ipfsDoc[1],
+    network,
   });
 
   await communityRepository.create(communityEntity);
 
   const tagsPromises: Promise<any>[] = [];
   for (let index = 1; index <= peeranhaCommunity.tags.length; index++) {
-    tagsPromises.push(createSuiTag(communityId, index));
+    tagsPromises.push(createSuiTag(communityId, `${network}-${index}`));
   }
   await Promise.all(tagsPromises);
 
@@ -190,12 +193,15 @@ export async function createSuiCommunity(
   return communityEntity;
 }
 
-export async function updateSuiCommunity(communityId: string) {
+export async function updateSuiCommunity(
+  communityId: string,
+  network: Network
+) {
   log(`Updating sui community by id ${communityId}`);
 
   const storedCommunity = await communityRepository.get(communityId);
   if (!storedCommunity) {
-    await createSuiCommunity(communityId);
+    await createSuiCommunity(communityId, network);
   } else {
     const peeranhaCommunity = await getSuiCommunityById(communityId);
     if (!peeranhaCommunity) {
@@ -231,11 +237,12 @@ export async function updateSuiCommunity(communityId: string) {
 }
 
 export async function getSuiCommunity(
-  communityId: string
+  communityId: string,
+  network: Network
 ): Promise<CommunityEntity> {
   let community = await communityRepository.get(communityId);
   if (!community) {
-    community = await createSuiCommunity(communityId);
+    community = await createSuiCommunity(communityId, network);
   }
   return community;
 }

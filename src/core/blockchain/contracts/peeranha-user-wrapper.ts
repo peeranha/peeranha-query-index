@@ -1,6 +1,7 @@
 import peeranhaUserInterface from 'src/core/blockchain/contracts/abi/PeeranhaUser.json';
 import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
 import { ConfigurationError } from 'src/core/errors';
+import { Network } from 'src/models/event-models';
 
 export class PeeranhaUserWrapper extends BaseContractWrapper {
   public async getUserByAddress(address: string): Promise<any> {
@@ -19,24 +20,34 @@ export class PeeranhaUserWrapper extends BaseContractWrapper {
     return this.contract.getActiveUsersInPeriod(period);
   }
 
-  public async getAchievementConfig(achievementId: number) {
-    return this.contract.getAchievementConfig(achievementId);
+  public async getAchievementConfig(achievementId: string) {
+    return this.contract.getAchievementConfig(achievementId.split('-')[1]);
   }
 
-  public async getAchievementCommunity(achievementId: number): Promise<number> {
-    return this.contract.getAchievementCommunity(achievementId);
+  public async getAchievementCommunity(achievementId: string): Promise<number> {
+    return this.contract.getAchievementCommunity(achievementId.split('-')[1]);
   }
 
-  public async getUserRatingCollection(address: string, communityId: number) {
-    return this.contract.getUserRatingCollection(address, communityId);
+  public async getUserRatingCollection(address: string, communityId: string) {
+    return this.contract.getUserRatingCollection(
+      address,
+      communityId.split('-')[1]
+    );
   }
 
-  public getAddress(): string {
-    if (!process.env.USER_CONTRACT_ADDRESS) {
-      throw new ConfigurationError('USER_CONTRACT_ADDRESS is not configured');
+  public getAddress(network: Network): string {
+    let userAddress;
+    if (network === Network.Polygon) {
+      userAddress = process.env.POLYGON_USER_ADDRESS;
+    }
+    if (network === Network.Edgeware) {
+      userAddress = process.env.EDGEWARE_USER_ADDRESS;
+    }
+    if (!userAddress) {
+      throw new ConfigurationError('USER_ADDRESS is not configured');
     }
 
-    return process.env.USER_CONTRACT_ADDRESS;
+    return userAddress;
   }
 
   public getAbi() {

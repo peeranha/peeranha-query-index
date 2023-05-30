@@ -5,16 +5,18 @@ import {
 } from 'src/core/blockchain/data-loader';
 import { AchievementEntity } from 'src/core/db/entities';
 import { AchievementRepository } from 'src/core/db/repositories/AchievementRepository';
+import { Network } from 'src/models/event-models';
 
 export async function createAchievement(
   achievementRepository: AchievementRepository,
-  achievementId: number
+  achievementId: string,
+  network: Network
 ) {
   const [achievementData, peeranhaAchievementConfig, achievementCommunity] =
     await Promise.all([
-      getAchievementsNFTConfig(achievementId),
-      getAchievementConfig(achievementId),
-      getAchievementCommunity(achievementId),
+      getAchievementsNFTConfig(achievementId, network),
+      getAchievementConfig(achievementId, network),
+      getAchievementCommunity(achievementId, network),
     ]);
 
   let attrCommunityId;
@@ -45,8 +47,8 @@ export async function createAchievement(
     lowerValue: peeranhaAchievementConfig?.lowerBound || 0,
     image: achievementData.image,
     description: achievementData.description,
-    communityId: String(achievementCommunity),
-    attrCommunityId: attrCommunityId || '0',
+    communityId: `${network}-${String(achievementCommunity)}`,
+    attrCommunityId: attrCommunityId || '0', // ???
     attrEvent,
     attrType,
   });

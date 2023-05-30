@@ -109,7 +109,7 @@ export async function getSuiCommunityById(
 
 export async function getSuiTagById(
   communityId: string,
-  tagId: number
+  tagId: string
 ): Promise<TagData> {
   const communityObject = await getObject(communityId);
 
@@ -221,7 +221,7 @@ export async function getSuiPostById(
 
 export async function getSuiReply(
   postId: string,
-  replyId: number,
+  replyId: string,
   timestamp: number
 ): Promise<ReplyData> {
   const postMetaDataObject = await getObject(postId);
@@ -287,8 +287,8 @@ export async function getSuiReply(
 
 export async function getSuiComment(
   postId: string,
-  replyId: number,
-  commentId: number,
+  replyId: string,
+  commentId: string,
   timestamp: number
 ): Promise<CommentData> {
   const postMetaDataObject = await getObject(postId);
@@ -300,7 +300,7 @@ export async function getSuiComment(
   }
 
   let commentTableId;
-  if (replyId > 0) {
+  if (Number(replyId.split('-')[1]) > 0) {
     const replyTableId = fields.replies?.fields?.id?.id;
     if (!replyTableId) {
       throw new RuntimeError(

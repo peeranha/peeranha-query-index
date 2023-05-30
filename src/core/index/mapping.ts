@@ -49,6 +49,7 @@ import {
 } from 'src/core/index/user';
 import { EntityType, OperationType } from 'src/core/index/utils';
 import {
+  Network,
   UserCreatedEventModel,
   FollowedCommunityEventModel,
   RoleGrantedEventModel,
@@ -101,7 +102,8 @@ const POOL_NFT = 1_000_000;
 export async function createHistory(
   event: any,
   entityType: EntityType,
-  operationType: OperationType
+  operationType: OperationType,
+  network: Network
 ) {
   const history = new HistoryEntity({
     id: event.transaction,
@@ -115,6 +117,7 @@ export async function createHistory(
     eventName: operationType,
     actionUser: event.user ?? event.userId,
     timestamp: event.timestamp,
+    network,
   });
 
   await historyRepository.create(history);
@@ -124,26 +127,39 @@ export async function handleConfigureNewAchievement(
   eventModel: ConfigureNewAchievementNFTEventModel
 ) {
   const { achievementId } = eventModel;
-  await createAchievement(achievementRepository, achievementId);
+  await createAchievement(
+    achievementRepository,
+    achievementId,
+    eventModel.network
+  );
 }
 
 export async function handleTransfer(eventModel: TransferEventModel) {
   const { timestamp, to: user } = eventModel;
-  const achievementId = Math.floor(eventModel.tokenId / POOL_NFT + 1);
+  const achievementId = `${eventModel.network}-${Math.floor(
+    eventModel.tokenId / POOL_NFT + 1
+  )}`;
   const achievement = await achievementRepository.get(achievementId);
 
   if (achievement) {
-    const peeranhaAchievement = await getAchievementsNFTConfig(achievementId);
+    const peeranhaAchievement = await getAchievementsNFTConfig(
+      achievementId,
+      eventModel.network
+    );
     await achievementRepository.update(achievementId, {
       factCount: peeranhaAchievement.factCount,
     });
   } else {
-    await createAchievement(achievementRepository, achievementId);
+    await createAchievement(
+      achievementRepository,
+      achievementId,
+      eventModel.network
+    );
   }
 
   let userEntity = await userRepository.get(user);
   if (!userEntity) {
-    userEntity = await createUser(user, timestamp);
+    userEntity = await createUser(user, timestamp, eventModel.network);
   }
   if (!userEntity) {
     return;
@@ -158,15 +174,19 @@ export async function handleTransfer(eventModel: TransferEventModel) {
 }
 
 export async function handleNewUser(eventModel: UserCreatedEventModel) {
-  await createUser(eventModel.userAddress, eventModel.timestamp);
+  await createUser(
+    eventModel.userAddress,
+    eventModel.timestamp,
+    eventModel.network
+  );
 }
 
 export async function handleUpdatedUser(eventModel: UserUpdatedEventModel) {
   const { timestamp, userAddress } = eventModel;
   if (!(await userRepository.get(userAddress))) {
-    await createUser(userAddress, timestamp);
+    await createUser(userAddress, timestamp, eventModel.network);
   } else {
-    const user = await getUserByAddress(userAddress);
+    const user = await getUserByAddress(userAddress, eventModel.network);
     if (!user) {
       return;
     }
@@ -181,6 +201,7 @@ export async function handleUpdatedUser(eventModel: UserUpdatedEventModel) {
       avatar: user.avatar,
       ipfsHash: user.ipfsDoc[0],
       ipfsHash2: user.ipfsDoc[1],
+      network: eventModel.network,
     };
     await userRepository.update(userAddress, userForSave);
   }
@@ -189,7 +210,7 @@ export async function handleUpdatedUser(eventModel: UserUpdatedEventModel) {
 export async function handlerGrantedRole(eventModel: RoleGrantedEventModel) {
   const { role, timestamp, account } = eventModel;
   if (!(await userRepository.get(account))) {
-    await createUser(account, timestamp);
+    await createUser(account, timestamp, eventModel.network);
   }
   const userPermission = new UserPermissionEntity({
     id: `${account}-${role}`,
@@ -210,7 +231,8 @@ export async function handlerFollowCommunity(
   const { communityId, timestamp, userAddress } = eventModel;
 
   let user = await userRepository.get(userAddress);
-  if (!user) user = await createUser(userAddress, timestamp);
+  if (!user)
+    user = await createUser(userAddress, timestamp, eventModel.network);
 
   const userCommunity = new UserCommunityEntity({
     id: `${userAddress}-${communityId}`,
@@ -219,7 +241,7 @@ export async function handlerFollowCommunity(
   });
   await userCommunityRepository.create(userCommunity);
 
-  const community = await getCommunityById(communityId);
+  const community = await getCommunityById(communityId, eventModel.network);
   await communityRepository.update(communityId, {
     followingUsers: community.followingUsers + 1,
   });
@@ -231,11 +253,12 @@ export async function handlerUnfollowCommunity(
   const { communityId, timestamp, userAddress } = eventModel;
 
   let user = await userRepository.get(userAddress);
-  if (!user) user = await createUser(userAddress, timestamp);
+  if (!user)
+    user = await createUser(userAddress, timestamp, eventModel.network);
 
   await userCommunityRepository.delete(`${userAddress}-${communityId}`);
 
-  const community = await getCommunityById(communityId);
+  const community = await getCommunityById(communityId, eventModel.network);
   await communityRepository.update(communityId, {
     followingUsers: community.followingUsers - 1,
   });
@@ -244,7 +267,7 @@ export async function handlerUnfollowCommunity(
 export async function handleNewCommunity(
   eventModel: CommunityCreatedEventModel
 ) {
-  await createCommunity(eventModel.id);
+  await createCommunity(eventModel.id, eventModel.network);
 }
 
 export async function handleUpdatedCommunity(
@@ -253,9 +276,9 @@ export async function handleUpdatedCommunity(
   const { id } = eventModel;
   const community = await communityRepository.get(id);
   if (!community) {
-    await createCommunity(id);
+    await createCommunity(id, eventModel.network);
   } else {
-    const peeranhaCommunity = await getCommunity(id);
+    const peeranhaCommunity = await getCommunity(id, eventModel.network);
     await communityRepository.update(id, {
       ipfsHash: peeranhaCommunity.ipfsDoc[0],
       ipfshash2: peeranhaCommunity.ipfsDoc[1],
@@ -282,7 +305,10 @@ export async function handleFrozenCommunity(
 export async function handleUnfrozenCommunity(
   eventModel: CommunityUnfrozenEventModel
 ) {
-  const community = await getCommunityById(eventModel.communityId);
+  const community = await getCommunityById(
+    eventModel.communityId,
+    eventModel.network
+  );
   await communityRepository.update(community.id, {
     isFrozen: false,
   });
@@ -291,26 +317,26 @@ export async function handleUnfrozenCommunity(
 export async function handleNewTag(eventModel: TagCreatedEventModel) {
   const { communityId, tagId } = eventModel;
   if (await tagRepository.get(`${communityId}-${tagId}`)) return;
-  const community = await getCommunityById(communityId);
+  const community = await getCommunityById(communityId, eventModel.network);
 
-  const tag = await getTag(communityId, tagId);
+  const tag = await getTag(communityId, tagId, eventModel.network);
   await Promise.all([
     communityRepository.update(communityId, {
       tagsCount: community.tagsCount + 1,
     }),
 
-    createTag(tag),
+    createTag(tag, eventModel.network),
   ]);
 }
 
 export async function handleEditedTag(eventModel: TagUpdatedEventModel) {
   const { communityId, tagId } = eventModel;
   const [tag, tagEntity] = await Promise.all([
-    getTag(communityId, tagId),
+    getTag(communityId, tagId, eventModel.network),
     tagRepository.get(`${communityId}-${tagId}`),
   ]);
   if (!tagEntity) {
-    await createTag(tag);
+    await createTag(tag, eventModel.network);
   } else {
     await tagRepository.update(tag.tagId, {
       ipfsHash: tag.ipfsDoc[0],
@@ -323,20 +349,30 @@ export async function handleEditedTag(eventModel: TagUpdatedEventModel) {
 
 export async function handleNewPost(eventModel: PostCreatedEventModel) {
   const postId = String(eventModel.postId);
-  await createPost(postId, eventModel.timestamp);
+  await createPost(postId, eventModel.timestamp, eventModel.network);
 
-  await createHistory(eventModel, EntityType.Post, OperationType.Create);
+  await createHistory(
+    eventModel,
+    EntityType.Post,
+    OperationType.Create,
+    eventModel.network
+  );
 }
 
 export async function handleEditedPost(eventModel: PostEditedEventModel) {
   const postId = String(eventModel.postId);
 
   if (!(await postRepository.get(postId)))
-    await createPost(postId, eventModel.timestamp);
+    await createPost(postId, eventModel.timestamp, eventModel.network);
 
   await Promise.all([
-    updatePostContent(postId, eventModel.timestamp),
-    createHistory(eventModel, EntityType.Post, OperationType.Edit),
+    updatePostContent(postId, eventModel.timestamp, eventModel.network),
+    createHistory(
+      eventModel,
+      EntityType.Post,
+      OperationType.Edit,
+      eventModel.network
+    ),
   ]);
 }
 
@@ -352,7 +388,7 @@ export async function handleChangedTypePost(
         lastMod: eventModel.timestamp,
       }),
 
-      updatePostUsersRatings(post),
+      updatePostUsersRatings(post, eventModel.network),
     ]);
   }
 }
@@ -379,18 +415,27 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
       isDeleted: true,
     }),
 
-    updateUserRating(author, communityId),
+    updateUserRating(author, communityId, eventModel.network),
 
-    createHistory(eventModel, EntityType.Post, OperationType.Delete)
+    createHistory(
+      eventModel,
+      EntityType.Post,
+      OperationType.Delete,
+      eventModel.network
+    )
   );
 
-  const community = await getCommunityById(communityId);
+  const community = await getCommunityById(communityId, eventModel.network);
   let communityReplyCount = community.replyCount;
 
   for (let i = 1; i <= replyCount; i++) {
-    const reply = await replyRepository.get(`${postId}-${i}`);
+    const reply = await replyRepository.get(
+      `${postId}-${eventModel.network}-${i}`
+    );
     if (reply && !reply.isDeleted) {
-      promises.push(updateUserRating(reply.author, communityId));
+      promises.push(
+        updateUserRating(reply.author, communityId, eventModel.network)
+      );
 
       const replyAuthor = await userRepository.get(reply.author);
       if (replyAuthor) {
@@ -399,6 +444,26 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
             replyCount: replyAuthor.replyCount - 1,
           })
         );
+      }
+
+      for (let j = 1; j <= reply.commentCount; j++) {
+        const comment = await commentRepository.get(
+          `${postId.toString()}-${eventModel.network}-${i.toString()}-${
+            eventModel.network
+          }-${j.toString()}`
+        );
+        if (comment) {
+          promises.push(
+            commentRepository.update(
+              `${postId.toString()}-${eventModel.network}-${i.toString()}-${
+                eventModel.network
+              }-${j.toString()}`,
+              {
+                isDeleted: true,
+              }
+            )
+          );
+        }
       }
 
       communityReplyCount -= 1;
@@ -413,7 +478,7 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
   const postTags = tagsResponse.map((tag) => tag.tagId);
 
   postTags.forEach(async (tag) => {
-    const id = `${communityId}-${tag}`;
+    const id = tag;
     const tagEntity = await tagRepository.get(id);
     if (tagEntity) {
       promises.push(
@@ -440,7 +505,12 @@ export async function handleNewReply(eventModel: ReplyCreatedEventModel) {
   const { replyId, timestamp } = eventModel;
   const postId = String(eventModel.postId);
 
-  const reply = await createReply(postId, replyId, timestamp);
+  const reply = await createReply(
+    postId,
+    replyId,
+    timestamp,
+    eventModel.network
+  );
   if (!reply) {
     const post = await postRepository.get(postId);
     if (post) {
@@ -452,7 +522,12 @@ export async function handleNewReply(eventModel: ReplyCreatedEventModel) {
     return;
   }
 
-  await createHistory(eventModel, EntityType.Reply, OperationType.Create);
+  await createHistory(
+    eventModel,
+    EntityType.Reply,
+    OperationType.Create,
+    eventModel.network
+  );
 }
 
 export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
@@ -462,7 +537,12 @@ export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
   let createdReply;
 
   if (!storedReply) {
-    createdReply = await createReply(postId, replyId, timestamp);
+    createdReply = await createReply(
+      postId,
+      replyId,
+      timestamp,
+      eventModel.network
+    );
   }
   if (createdReply) return;
 
@@ -470,7 +550,7 @@ export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
     storedReply = createdReply;
   }
 
-  const peeranhaReply = await getReply(Number(postId), replyId);
+  const peeranhaReply = await getReply(postId, replyId, eventModel.network);
   if (!peeranhaReply) return;
 
   if (!storedReply) {
@@ -484,10 +564,15 @@ export async function handleEditedReply(eventModel: ReplyEditedEventModel) {
       ipfsHash2: peeranhaReply.ipfsDoc[1],
     }),
 
-    createHistory(eventModel, EntityType.Reply, OperationType.Edit),
+    createHistory(
+      eventModel,
+      EntityType.Reply,
+      OperationType.Edit,
+      eventModel.network
+    ),
   ]);
 
-  await updatePostContent(postId, timestamp, replyId);
+  await updatePostContent(postId, timestamp, eventModel.network, replyId);
 }
 
 export async function handleDeletedReply(eventModel: ReplyDeletedEventModel) {
@@ -503,18 +588,25 @@ export async function handleDeletedReply(eventModel: ReplyDeletedEventModel) {
 
   const post = await postRepository.get(postId);
   if (post) {
-    const community = await getCommunityById(post.communityId);
+    const community = await getCommunityById(
+      post.communityId,
+      eventModel.network
+    );
 
     promises.push(
-      updateUserRating(reply.author, post.communityId),
+      updateUserRating(reply.author, post.communityId, eventModel.network),
 
       communityRepository.update(post.communityId, {
         replyCount: community.replyCount - 1,
       }),
 
       postRepository.update(postId, {
-        bestReply: reply.isBestReply ? 0 : post.bestReply,
-        officialReply: reply.isOfficialReply ? 0 : post.officialReply,
+        bestReply: reply.isBestReply
+          ? `${eventModel.network}-0`
+          : post.bestReply,
+        officialReply: reply.isOfficialReply
+          ? `${eventModel.network}-0`
+          : post.officialReply,
       })
     );
   }
@@ -529,9 +621,14 @@ export async function handleDeletedReply(eventModel: ReplyDeletedEventModel) {
   }
 
   promises.push(
-    updatePostContent(postId, timestamp),
+    updatePostContent(postId, timestamp, eventModel.network),
 
-    createHistory(eventModel, EntityType.Reply, OperationType.Delete)
+    createHistory(
+      eventModel,
+      EntityType.Reply,
+      OperationType.Delete,
+      eventModel.network
+    )
   );
 
   await Promise.all(promises);
@@ -541,11 +638,16 @@ export async function handleNewComment(eventModel: CommentCreatedEventModel) {
   const { replyId, commentId } = eventModel;
   const postId = String(eventModel.postId);
 
-  const comment = await createComment(postId, replyId, commentId);
+  const comment = await createComment(
+    postId,
+    replyId,
+    commentId,
+    eventModel.network
+  );
   if (!comment) {
     const post = await postRepository.get(postId);
     if (post) {
-      if (replyId === 0) {
+      if (Number(replyId.split('-')[1]) === 0) {
         await postRepository.update(post.id, {
           commentCount: post.commentCount + 1,
         });
@@ -562,7 +664,12 @@ export async function handleNewComment(eventModel: CommentCreatedEventModel) {
     return;
   }
 
-  await createHistory(eventModel, EntityType.Comment, OperationType.Create);
+  await createHistory(
+    eventModel,
+    EntityType.Comment,
+    OperationType.Create,
+    eventModel.network
+  );
 }
 
 export async function handleEditedComment(eventModel: CommentEditedEventModel) {
@@ -575,12 +682,22 @@ export async function handleEditedComment(eventModel: CommentEditedEventModel) {
   let createdComment;
 
   if (!storedComment)
-    createdComment = await createComment(postId, replyId, commentId);
+    createdComment = await createComment(
+      postId,
+      replyId,
+      commentId,
+      eventModel.network
+    );
   if (!createdComment) return;
 
   if (!storedComment) storedComment = createdComment;
 
-  const comment = await getComment(Number(postId), replyId, commentId);
+  const comment = await getComment(
+    postId,
+    replyId,
+    commentId,
+    eventModel.network
+  );
   if (!comment) return;
 
   await Promise.all([
@@ -590,10 +707,15 @@ export async function handleEditedComment(eventModel: CommentEditedEventModel) {
       ipfsHash2: comment.ipfsDoc[1],
     }),
 
-    createHistory(eventModel, EntityType.Comment, OperationType.Edit),
+    createHistory(
+      eventModel,
+      EntityType.Comment,
+      OperationType.Edit,
+      eventModel.network
+    ),
   ]);
 
-  await updatePostContent(postId, timestamp);
+  await updatePostContent(postId, timestamp, eventModel.network);
 }
 
 export async function handleDeletedComment(
@@ -615,14 +737,21 @@ export async function handleDeletedComment(
 
   const post = await postRepository.get(postId);
   if (post && comment.author !== post.author) {
-    promises.push(updateUserRating(comment.author, post.communityId));
+    promises.push(
+      updateUserRating(comment.author, post.communityId, eventModel.network)
+    );
   }
 
   promises.push(
-    createHistory(eventModel, EntityType.Comment, OperationType.Delete)
+    createHistory(
+      eventModel,
+      EntityType.Comment,
+      OperationType.Delete,
+      eventModel.network
+    )
   );
 
-  await updatePostContent(postId, timestamp);
+  await updatePostContent(postId, timestamp, eventModel.network);
 
   await Promise.all(promises);
 }
@@ -631,36 +760,43 @@ export async function handlerForumItemVoted(eventModel: ItemVotedEventModel) {
   const { replyId, commentId, timestamp, user } = eventModel;
   const postId = String(eventModel.postId);
 
-  if (commentId !== 0) {
+  if (Number(commentId.split('-')[1]) !== 0) {
     let comment = await commentRepository.get(
       `${postId}-${replyId}-${commentId}`
     );
 
     if (!comment) {
-      comment = await createComment(postId, replyId, commentId);
+      comment = await createComment(
+        postId,
+        replyId,
+        commentId,
+        eventModel.network
+      );
     }
     if (comment) {
       const peeranhaComment = await getComment(
-        Number(postId),
+        postId,
         replyId,
-        commentId
+        commentId,
+        eventModel.network
       );
       if (peeranhaComment)
         await commentRepository.update(comment.id, {
           rating: peeranhaComment.rating,
         });
     }
-  } else if (replyId !== 0) {
+  } else if (Number(replyId.split('-')[1]) !== 0) {
     let post = await postRepository.get(postId);
-    if (!post) post = await createPost(postId, timestamp);
+    if (!post) post = await createPost(postId, timestamp, eventModel.network);
 
     let reply = await replyRepository.get(`${postId}-${replyId}`);
-    if (!reply) reply = await createReply(postId, replyId, timestamp);
+    if (!reply)
+      reply = await createReply(postId, replyId, timestamp, eventModel.network);
 
     const promises: Promise<any>[] = [];
 
     if (reply) {
-      const peeranhaReply = await getReply(Number(postId), replyId);
+      const peeranhaReply = await getReply(postId, replyId, eventModel.network);
       if (peeranhaReply) {
         promises.push(
           replyRepository.update(reply.id, {
@@ -668,18 +804,20 @@ export async function handlerForumItemVoted(eventModel: ItemVotedEventModel) {
           })
         );
       }
-      promises.push(updateUserRating(reply.author, post.communityId));
+      promises.push(
+        updateUserRating(reply.author, post.communityId, eventModel.network)
+      );
     }
 
-    promises.push(updateUserRating(user, post.communityId));
+    promises.push(updateUserRating(user, post.communityId, eventModel.network));
     await Promise.all(promises);
   } else {
     let post = await postRepository.get(postId);
-    if (!post) post = await createPost(postId, timestamp);
+    if (!post) post = await createPost(postId, timestamp, eventModel.network);
 
     const promises: Promise<any>[] = [];
 
-    const peeranhaPost = await getPost(Number(postId));
+    const peeranhaPost = await getPost(postId, eventModel.network);
     if (peeranhaPost) {
       promises.push(
         postRepository.update(postId, {
@@ -689,8 +827,8 @@ export async function handlerForumItemVoted(eventModel: ItemVotedEventModel) {
     }
 
     promises.push(
-      updateUserRating(post.author, post.communityId),
-      updateUserRating(user, post.communityId)
+      updateUserRating(post.author, post.communityId, eventModel.network),
+      updateUserRating(user, post.communityId, eventModel.network)
     );
 
     await Promise.all(promises);
@@ -704,47 +842,60 @@ export async function handlerChangedStatusBestReply(
   const postId = String(eventModel.postId);
 
   let post = await postRepository.get(postId);
-  let previousBestReply = 0;
+  let previousBestReply = `${eventModel.network}-0`;
   if (!post) {
-    post = await createPost(postId, timestamp);
+    post = await createPost(postId, timestamp, eventModel.network);
   } else {
-    previousBestReply = Number(post.bestReply);
+    previousBestReply = post.bestReply;
 
     await postRepository.update(postId, {
       bestReply: replyId,
     });
   }
-
-  if (previousBestReply) {
+  if (previousBestReply?.split('-')[1]) {
     let previousReply = await replyRepository.get(
       `${postId}-${previousBestReply}`
     );
 
     if (!previousReply)
-      previousReply = await createReply(postId, previousBestReply, timestamp);
+      previousReply = await createReply(
+        postId,
+        `${eventModel.network}-${previousBestReply}`,
+        timestamp,
+        eventModel.network
+      );
 
     if (previousReply) {
       await replyRepository.update(previousReply.id, {
         isBestReply: false,
       });
 
-      await updateUserRating(previousReply.author, post.communityId);
+      await updateUserRating(
+        previousReply.author,
+        post.communityId,
+        eventModel.network
+      );
     }
   }
 
   let reply = await replyRepository.get(`${postId}-${replyId}`);
-  if (!reply) reply = await createReply(postId, replyId, timestamp);
+  if (!reply)
+    reply = await createReply(postId, replyId, timestamp, eventModel.network);
   if (reply) {
-    if (replyId !== 0) {
+    if (Number(replyId.split('-')[1]) !== 0) {
       if (reply.author !== post.author) {
-        await updateUserRating(reply.author, post.communityId);
+        await updateUserRating(
+          reply.author,
+          post.communityId,
+          eventModel.network
+        );
       }
       await replyRepository.update(reply.id, {
         isBestReply: true,
       });
     }
     if (reply.author !== post.author) {
-      await updateUserRating(post.author, post.communityId);
+      await updateUserRating(post.author, post.communityId, eventModel.network);
     }
   }
 }
@@ -767,7 +918,7 @@ export async function handlerSetDocumentationTree(
 
   const [oldDocumentation, communityDocumentation] = await Promise.all([
     communityDocumentationRepository.get(communityId),
-    getDocumentationTree(communityId),
+    getDocumentationTree(communityId, eventModel.network),
   ]);
 
   if (
@@ -784,6 +935,7 @@ export async function handlerSetDocumentationTree(
     userAddr,
     communityDocumentation.hash,
     timestamp,
+    eventModel.network,
     oldDocumentation?.ipfsHash
   );
 }

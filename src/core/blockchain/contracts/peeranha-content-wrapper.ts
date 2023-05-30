@@ -2,58 +2,74 @@ import peeranhaContentInterface from 'src/core/blockchain/contracts/abi/Peeranha
 import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
 import { Documentation } from 'src/core/blockchain/entities/documentation';
 import { ConfigurationError } from 'src/core/errors';
+import { Network } from 'src/models/event-models';
 
 export class PeeranhaContentWrapper extends BaseContractWrapper {
-  public async getPost(postId: number): Promise<any> {
-    return this.contract.getPost(postId);
+  public async getPost(postId: string): Promise<any> {
+    return this.contract.getPost(postId.split('-')[1]);
   }
 
-  public async getReply(postId: number, replyId: number): Promise<any> {
-    return this.contract.getReply(postId, replyId);
+  public async getReply(postId: string, replyId: string): Promise<any> {
+    return this.contract.getReply(postId.split('-')[1], replyId.split('-')[1]);
   }
 
   public async getComment(
-    postId: number,
-    replyId: number,
-    commentId: number
+    postId: string,
+    replyId: string,
+    commentId: string
   ): Promise<any> {
-    return this.contract.getComment(postId, replyId, commentId);
+    return this.contract.getComment(
+      postId.split('-')[1],
+      replyId.split('-')[1],
+      commentId.split('-')[1]
+    );
   }
 
   public async getDocumentationTree(
-    communityId: number
+    communityId: string
   ): Promise<Documentation> {
-    return this.contract.getDocumentationTree(communityId);
+    return this.contract.getDocumentationTree(communityId.split('-')[1]);
   }
 
   public async getItemProperty(
     propertyId: number,
-    postId: number,
-    replyId?: number,
-    commentId?: number
+    postId: string,
+    replyId?: string,
+    commentId?: string
   ): Promise<string> {
     return this.contract.getItemProperty(
       propertyId,
-      postId,
-      replyId ?? 0,
-      commentId ?? 0
+      postId.split('-')[1],
+      replyId ? replyId?.split('-')[1] : 0,
+      commentId ? commentId?.split('-')[1] : 0
     );
   }
 
   public async getItemLanguage(
-    postId: number,
-    replyId?: number,
-    commentId?: number
+    postId: string,
+    replyId?: string,
+    commentId?: string
   ) {
-    return this.contract.getItemLanguage(postId, replyId ?? 0, commentId ?? 0);
+    return this.contract.getItemLanguage(
+      postId.split('-')[1],
+      replyId?.split('-')[1] ?? 0,
+      commentId?.split('-')[1] ?? 0
+    );
   }
 
-  public getAddress(): string {
-    if (!process.env.MAIN_CONTRACT_ADDRESS) {
-      throw new ConfigurationError('MAIN_CONTRACT_ADDRESS is not configured');
+  public getAddress(network: Network): string {
+    let contentAddress;
+    if (network === Network.Polygon) {
+      contentAddress = process.env.POLYGON_CONTENT_ADDRESS;
+    }
+    if (network === Network.Edgeware) {
+      contentAddress = process.env.EDGEWARE_CONTENT_ADDRESS;
+    }
+    if (!contentAddress) {
+      throw new ConfigurationError('CONTENT_ADDRESS is not configured');
     }
 
-    return process.env.MAIN_CONTRACT_ADDRESS;
+    return contentAddress;
   }
 
   public getAbi() {

@@ -30,10 +30,11 @@ import {
   USER_UPDATED_EVENT_NAME,
 } from 'src/core/blockchain/constants';
 import { createRpcProvider } from 'src/core/blockchain/rpc';
-import { FIRST_QUEUE, SECOND_QUEUE } from 'src/core/constants';
+import { POLYGON_INDEXING_QUEUE } from 'src/core/constants';
 import { ConfigurationError } from 'src/core/errors';
 import { pushToSQS } from 'src/core/utils/sqs';
 import {
+  Network,
   BaseEventModel,
   ChangePostTypeEventModel,
   CommentCreatedEventModel,
@@ -66,43 +67,57 @@ import {
   UserUpdatedEventModel,
 } from 'src/models/event-models';
 
-const contractEvents = {
-  [process.env.USER_CONTRACT_ADDRESS!.toLowerCase()]: [
-    USER_CREATED_EVENT_NAME,
-    USER_UPDATED_EVENT_NAME,
-    FOLLOWED_COMMUNITY_EVENT_NAME,
-    UNFOLLOWED_COMMUNITY_EVENT_NAME,
-    ROLE_GRANTED_EVENT_NAME,
-    ROLE_REVOKED_EVENT_NAME,
-  ],
-  [process.env.COMMUNITY_CONTRACT_ADDRESS!.toLowerCase()]: [
-    COMMUNITY_CREATED_EVENT_NAME,
-    TAG_CREATED_EVENT_NAME,
-    COMMUNITY_UPDATED_EVENT_NAME,
-    TAG_UPDATED_EVENT_NAME,
-    COMMUNITY_FROZEN_EVENT_NAME,
-    COMMUNITY_UNFROZEN_EVENT_NAME,
-  ],
-  [process.env.MAIN_CONTRACT_ADDRESS!.toLowerCase()]: [
-    POST_CREATED_EVENT_NAME,
-    REPLY_CREATED_EVENT_NAME,
-    COMMENT_CREATED_EVENT_NAME,
-    POST_EDITED_EVENT_NAME,
-    REPLY_EDITED_EVENT_NAME,
-    COMMENT_EDITED_EVENT_NAME,
-    POST_DELETED_EVENT_NAME,
-    REPLY_DELETED_EVENT_NAME,
-    COMMENT_DELETED_EVENT_NAME,
-    ITEM_VOTED_EVENT_NAME,
-    REPLY_MARKED_THE_BEST_EVENT_NAME,
-    CHANGE_POST_TYPE_EVENT_NAME,
-    SET_DOCUMENTATION_TREE_EVENT_NAME,
-  ],
-  [process.env.TOKEN_CONTRACT_ADDRESS!.toLowerCase()]: [GET_REWARD_EVENT_NAME],
-  [process.env.NFT_CONTRACT_ADDRESS!.toLowerCase()]: [
-    CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME,
-    TRANSFER_EVENT_NAME,
-  ],
+export const contractEvents = (network: Network) => {
+  return {
+    [network === Network.Edgeware
+      ? process.env.EDGEWARE_USER_ADDRESS!.toLowerCase()
+      : process.env.POLYGON_USER_ADDRESS!.toLowerCase()]: [
+      USER_CREATED_EVENT_NAME,
+      USER_UPDATED_EVENT_NAME,
+      FOLLOWED_COMMUNITY_EVENT_NAME,
+      UNFOLLOWED_COMMUNITY_EVENT_NAME,
+      ROLE_GRANTED_EVENT_NAME,
+      ROLE_REVOKED_EVENT_NAME,
+    ],
+    [network === Network.Edgeware
+      ? process.env.EDGEWARE_COMMUNITY_ADDRESS!.toLowerCase()
+      : process.env.POLYGON_COMMUNITY_ADDRESS!.toLowerCase()]: [
+      COMMUNITY_CREATED_EVENT_NAME,
+      TAG_CREATED_EVENT_NAME,
+      COMMUNITY_UPDATED_EVENT_NAME,
+      TAG_UPDATED_EVENT_NAME,
+      COMMUNITY_FROZEN_EVENT_NAME,
+      COMMUNITY_UNFROZEN_EVENT_NAME,
+    ],
+    [network === Network.Edgeware
+      ? process.env.EDGEWARE_CONTENT_ADDRESS!.toLowerCase()
+      : process.env.POLYGON_CONTENT_ADDRESS!.toLowerCase()]: [
+      POST_CREATED_EVENT_NAME,
+      REPLY_CREATED_EVENT_NAME,
+      COMMENT_CREATED_EVENT_NAME,
+      POST_EDITED_EVENT_NAME,
+      REPLY_EDITED_EVENT_NAME,
+      COMMENT_EDITED_EVENT_NAME,
+      POST_DELETED_EVENT_NAME,
+      REPLY_DELETED_EVENT_NAME,
+      COMMENT_DELETED_EVENT_NAME,
+      ITEM_VOTED_EVENT_NAME,
+      REPLY_MARKED_THE_BEST_EVENT_NAME,
+      CHANGE_POST_TYPE_EVENT_NAME,
+      SET_DOCUMENTATION_TREE_EVENT_NAME,
+    ],
+    [network === Network.Edgeware
+      ? process.env.EDGEWARE_TOKEN_ADDRESS!.toLowerCase()
+      : process.env.POLYGON_TOKEN_ADDRESS!.toLowerCase()]: [
+      GET_REWARD_EVENT_NAME,
+    ],
+    [network === Network.Edgeware
+      ? process.env.EDGEWARE_NFT_ADDRESS!.toLowerCase()
+      : process.env.POLYGON_NFT_ADDRESS!.toLowerCase()]: [
+      CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME,
+      TRANSFER_EVENT_NAME,
+    ],
+  };
 };
 
 const eventToModelType: Record<string, typeof BaseEventModel> = {};
@@ -139,10 +154,10 @@ eventToModelType[GET_REWARD_EVENT_NAME] = GetRewardEventModel;
 eventToModelType[SET_DOCUMENTATION_TREE_EVENT_NAME] =
   SetDocumentationTreeEventModel;
 
-const getEventModels = (transactions: any[]) =>
+const getEventModels = (transactions: any[], network: Network) =>
   transactions
     .filter((transaction) =>
-      contractEvents[transaction.contract_address]?.includes(
+      contractEvents(network)[transaction.contract_address]?.includes(
         transaction.event_name
       )
     )
@@ -153,13 +168,13 @@ const getEventModels = (transactions: any[]) =>
           `Model type is not configured for event by name ${transaction.event_name}`
         );
       }
-      return new EventModeType(transaction);
+      return new EventModeType({ ...transaction, network });
     });
 
-async function getEvents(transactions: any[]) {
-  const provider = await createRpcProvider();
+async function getEvents(transactions: any[], network: Network) {
+  const provider = await createRpcProvider(network);
 
-  const eventModels = getEventModels(transactions);
+  const eventModels = getEventModels(transactions, network);
 
   const blockPromises: Promise<providers.Block>[] = [];
   eventModels.forEach((eventModel) =>
@@ -178,7 +193,7 @@ async function handleListenWebhook(
   request: EventListenerRequest,
   queueName: string
 ): Promise<void> {
-  const events = await getEvents(request.transactions);
+  const events = await getEvents(request.transactions, request.network);
 
   // TODO: think about possible failed operations
   for (let i = 0; i < events.length; i++) {
@@ -187,14 +202,8 @@ async function handleListenWebhook(
   }
 }
 
-export async function handleListenFirstWebhook(
+export async function handleListenPolygonWebhook(
   request: EventListenerRequest
 ): Promise<void> {
-  await handleListenWebhook(request, FIRST_QUEUE);
-}
-
-export async function handleListenSecondWebhook(
-  request: EventListenerRequest
-): Promise<void> {
-  await handleListenWebhook(request, SECOND_QUEUE);
+  await handleListenWebhook(request, POLYGON_INDEXING_QUEUE);
 }

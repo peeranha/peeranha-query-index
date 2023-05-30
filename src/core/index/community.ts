@@ -3,13 +3,17 @@ import { TagData } from 'src/core/blockchain/entities/tag';
 import { CommunityEntity, TagEntity } from 'src/core/db/entities';
 import { CommunityRepository } from 'src/core/db/repositories/CommunityRepository';
 import { TagRepository } from 'src/core/db/repositories/TagRepository';
+import { Network } from 'src/models/event-models';
 
 const communityRepository = new CommunityRepository();
 const tagRepository = new TagRepository();
 
-export async function createTag(tag: TagData): Promise<TagEntity> {
+export async function createTag(
+  tag: TagData,
+  network: Network
+): Promise<TagEntity> {
   const tagEntity = new TagEntity({
-    id: tag.tagId,
+    id: `${tag.communityId}-${network}-${tag.tagId}`,
     name: tag.name,
     description: tag.description,
     communityId: tag.communityId,
@@ -26,11 +30,12 @@ export async function createTag(tag: TagData): Promise<TagEntity> {
 }
 
 export async function createCommunity(
-  communityId: string
+  communityId: string,
+  network: Network
 ): Promise<CommunityEntity> {
   const [peeranhaCommunity, peeranhaTags] = await Promise.all([
-    getCommunity(communityId),
-    getTags(communityId),
+    getCommunity(communityId, network),
+    getTags(communityId, network),
   ]);
 
   const community = new CommunityEntity({
@@ -51,23 +56,25 @@ export async function createCommunity(
     followingUsers: 0,
     ipfsHash: peeranhaCommunity.ipfsDoc[0],
     ipfsHash2: peeranhaCommunity.ipfsDoc[1],
+    network,
   });
 
   await communityRepository.create(community);
 
   const promises: Promise<TagEntity>[] = [];
-  peeranhaTags.forEach((tag) => promises.push(createTag(tag)));
+  peeranhaTags.forEach((tag) => promises.push(createTag(tag, network)));
   await Promise.all(promises);
 
   return community;
 }
 
 export async function getCommunityById(
-  communityId: string
+  communityId: string,
+  network: Network
 ): Promise<CommunityEntity> {
   let community = await communityRepository.get(communityId);
   if (!community) {
-    community = await createCommunity(communityId);
+    community = await createCommunity(communityId, network);
   }
   return community;
 }
