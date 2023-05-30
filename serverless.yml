@@ -117,19 +117,19 @@ fargate:
         START_BLOCK_NUMBER: ${self:provider.environment.EDGEWARE_START_BLOCK_NUMBER}
         RPC_EDGEWARE_ENDPOINT: ${self:provider.environment.RPC_EDGEWARE_ENDPOINT}
 
-    sui-events-listener:
-      name: ${self:custom.stage}-sui-events-listener
-      image: peeranha-ecs-nodejs
-      command:
-        - "./dist/sui-events-listener.mjs"
-      environment:
-        ENV: ${self:provider.environment.ENV}
-        REGION: ${self:provider.environment.REGION}
-        SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
-        AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
-        DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
-        SUI_PACKAGE_ADDRESS: ${self:provider.environment.SUI_PACKAGE_ADDRESS}
-        SUI_USERS_RATING_COLLECTION: ${self:provider.environment.SUI_USERS_RATING_COLLECTION}
+    # sui-events-listener:
+    #   name: ${self:custom.stage}-sui-events-listener
+    #   image: peeranha-ecs-nodejs
+    #   command:
+    #     - "./dist/sui-events-listener.mjs"
+    #   environment:
+    #     ENV: ${self:provider.environment.ENV}
+    #     REGION: ${self:provider.environment.REGION}
+    #     SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
+    #     AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
+    #     DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
+    #     SUI_PACKAGE_ADDRESS: ${self:provider.environment.SUI_PACKAGE_ADDRESS}
+    #     SUI_USERS_RATING_COLLECTION: ${self:provider.environment.SUI_USERS_RATING_COLLECTION}
 
 functions:
   graphql:
