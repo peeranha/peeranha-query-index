@@ -364,7 +364,7 @@ export class TransferEventModel extends BaseEventModel {
     const args = event.args ?? event;
     this.from = args.from;
     this.to = args.to;
-    this.tokenId = args.tokenId.toNumber();
+    this.tokenId = args.tokenId?.toNumber();
   }
 }
 
