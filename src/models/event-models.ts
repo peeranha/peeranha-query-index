@@ -357,14 +357,16 @@ export class TransferEventModel extends BaseEventModel {
 
   public to: string;
 
-  public tokenId: number;
+  public tokenId: any;
 
   constructor(event: any) {
     super(event);
     const args = event.args ?? event;
     this.from = args.from;
     this.to = args.to;
-    this.tokenId = args.tokenId?.toNumber();
+    this.tokenId = args.tokenId?.hex
+      ? Number(args.tokenId.hex)
+      : args.tokenId?.toNumber();
   }
 }
 

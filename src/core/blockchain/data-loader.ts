@@ -139,7 +139,7 @@ export async function getTags(
         .then((tagData) => {
           return {
             ...tagData,
-            tagId: `${index + 1}`, // ???
+            tagId: `${index + 1}`,
             communityId,
           };
         })

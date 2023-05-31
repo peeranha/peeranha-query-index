@@ -29,7 +29,7 @@ export class Post {
 
   language: number;
 
-  tags: number[];
+  tags: any[];
 
   ipfsDoc: [string, string];
 

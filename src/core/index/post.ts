@@ -153,7 +153,10 @@ export async function createPost(
   }
 
   const tagIds = peeranhaPost.tags.map(
-    (tag) => `${post.communityId}-${network}-${tag}`
+    (tag) =>
+      `${post.communityId}-${network}-${
+        tag?.id?.split('-')[1] || tag?.toString()
+      }`
   );
   post.postContent += await updateTagsPostCount(tagIds, []);
 
@@ -387,7 +390,10 @@ export async function updatePostContent(
   }
 
   const newTags = peeranhaPost.tags.map(
-    (tag) => `${network}-${peeranhaPost.communityId}-${network}-${tag}`
+    (tag) =>
+      `${network}-${peeranhaPost.communityId}-${network}-${
+        tag?.id?.split('-')[1] || tag?.toString()
+      }`
   );
   const oldTagsResponse = await postTagRepository.getListOfProperties(
     'tagId',
@@ -395,7 +401,7 @@ export async function updatePostContent(
     post.id
   );
 
-  const oldTags = oldTagsResponse.map((tag) => tag.tagId);
+  const oldTags = oldTagsResponse.map((tag) => tag.tagId?.toString());
 
   const uniqueNewTags = newTags.filter((newTag) => !oldTags.includes(newTag)); // ???
   const uniqueOldTags = oldTags.filter((oldTag) => !newTags.includes(oldTag));
