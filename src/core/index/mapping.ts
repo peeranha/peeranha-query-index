@@ -606,12 +606,8 @@ export async function handleDeletedReply(eventModel: ReplyDeletedEventModel) {
       }),
 
       postRepository.update(postId, {
-        bestReply: reply.isBestReply
-          ? `${eventModel.network}-0`
-          : post.bestReply,
-        officialReply: reply.isOfficialReply
-          ? `${eventModel.network}-0`
-          : post.officialReply,
+        bestReply: reply.isBestReply ? '' : post.bestReply,
+        officialReply: reply.isOfficialReply ? '' : post.officialReply,
       })
     );
   }
@@ -847,7 +843,7 @@ export async function handlerChangedStatusBestReply(
   const postId = String(eventModel.postId);
 
   let post = await postRepository.get(postId);
-  let previousBestReply = `${eventModel.network}-0`;
+  let previousBestReply = '';
   if (!post) {
     post = await createPost(postId, timestamp, eventModel.network);
   } else {
