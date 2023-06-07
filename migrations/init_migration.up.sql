@@ -1,3 +1,11 @@
+CREATE TABLE IF NOT EXISTS network (
+  id INT PRIMARY KEY,
+  name VARCHAR(20) NOT NULL
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+INSERT INTO network (id, name)
+VALUES (1, 'Polygon'), (2, 'Edgeware'), (3, 'Sui');
+
 CREATE TABLE IF NOT EXISTS user (
   id VARCHAR(66) PRIMARY KEY,
   displayName VARCHAR(20),
@@ -10,7 +18,10 @@ CREATE TABLE IF NOT EXISTS user (
   avatar TEXT,
   creationTime INT NOT NULL,
   ipfsHash VARCHAR(66),
-  ipfsHash2 VARCHAR(66)
+  ipfsHash2 VARCHAR(66),
+  networkId INT NOT NULL,
+
+  FOREIGN KEY (networkId) REFERENCES network (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS community (
@@ -30,7 +41,10 @@ CREATE TABLE IF NOT EXISTS community (
   tagsCount SMALLINT DEFAULT 0,
   followingUsers INT DEFAULT 0,
   ipfsHash VARCHAR(66),
-  ipfsHash2 VARCHAR(66)
+  ipfsHash2 VARCHAR(66),
+  networkId INT NOT NULL,
+
+  FOREIGN KEY (networkId) REFERENCES network (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS usercommunity (
@@ -91,8 +105,8 @@ CREATE TABLE IF NOT EXISTS post (
   commentCount SMALLINT DEFAULT 0,
   replyCount INT DEFAULT 0,
   isDeleted BOOLEAN DEFAULT 0,
-  officialReply INT DEFAULT 0,
-  bestReply INT DEFAULT 0,
+  officialReply VARCHAR(74) DEFAULT '0-0',
+  bestReply VARCHAR(74) DEFAULT '0-0',
   language INT,
   handle VARCHAR(66),
   messengerType INT,
@@ -119,7 +133,7 @@ CREATE TABLE IF NOT EXISTS reply (
   rating INT DEFAULT 0,
   postTime INT NOT NULL,
   postId VARCHAR(66) NOT NULL,
-  parentReplyId INT NOT NULL,
+  parentReplyId VARCHAR(74) NOT NULL,
   content TEXT NOT NULL,
   commentCount SMALLINT DEFAULT 0,
   isDeleted BOOLEAN DEFAULT 0,
@@ -144,7 +158,7 @@ CREATE TABLE IF NOT EXISTS comment (
   rating INT DEFAULT 0,
   postTime INT NOT NULL,
   postId VARCHAR(66) NOT NULL,
-  parentReplyId SMALLINT,
+  parentReplyId VARCHAR(74),
   content TEXT NOT NULL,
   language INT,
   isDeleted BOOLEAN DEFAULT 0,
@@ -213,9 +227,11 @@ CREATE TABLE IF NOT EXISTS history (
   eventName VARCHAR(15),
   actionUser VARCHAR(66) NOT NULL,
   timeStamp INT NOT NULL,
+  networkId INT NOT NULL,
 
   FOREIGN KEY (postId) REFERENCES post (id),
-  FOREIGN KEY (actionUser) REFERENCES user (id)
+  FOREIGN KEY (actionUser) REFERENCES user (id),
+  FOREIGN KEY (networkId) REFERENCES network (id)
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS communitydocumentation (

@@ -9,6 +9,6 @@ export async function triggerPeriodForDb(
   request: TriggerPeriodRequestModel
 ): Promise<TriggerPeriodResponseModel> {
   await DatabaseManager.initialize(request.queueName);
-  await indexingPeriods();
+  await indexingPeriods(request.network);
   return new TriggerPeriodResponseModel();
 }

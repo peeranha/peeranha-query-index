@@ -1,3 +1,19 @@
+export enum Network {
+  Polygon = 1,
+  Edgeware = 2,
+  Sui = 3,
+}
+
+export class ReadNotificationsRequestModel {
+  public network: Network;
+
+  constructor(network: Network) {
+    this.network = network;
+  }
+}
+
+export class ReadNotificationsResponseModel {}
+
 export class BaseEventModel {
   public contractEventName: string;
 
@@ -9,17 +25,27 @@ export class BaseEventModel {
 
   public timestamp: number;
 
+  public network: Network;
+
   constructor(event: any) {
-    this.contractEventName = event.event_name;
-    this.contractAddress = event.contract_address;
-    this.transaction = event.transaction_hash;
-    this.blockNumber = event.block_number;
+    this.contractEventName = event.event ?? '';
+    this.contractAddress = event.address;
+    this.transaction = event.transactionHash;
     this.timestamp = 0;
+
+    this.contractEventName = event.event ?? event.event_name;
+    this.contractAddress = event.address ?? event.contract_address;
+    this.transaction = event.transactionHash ?? event.transaction_hash;
+    this.blockNumber = event.blockNumber ?? event.block_number;
+    this.timestamp = 0;
+    this.network = event.network;
   }
 }
 
 export class EventListenerRequest {
   public transactions: any[];
+
+  public network: Network;
 
   constructor(req: any) {
     const transactions: any[] = [];
@@ -27,6 +53,7 @@ export class EventListenerRequest {
       transactions.push(...item.transactions)
     );
     this.transactions = transactions;
+    this.network = req.network;
   }
 }
 
@@ -35,58 +62,63 @@ export class PostCreatedEventModel extends BaseEventModel {
 
   public communityId: string;
 
-  public postId: number;
+  public postId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.communityId = String(event.communityId);
-    this.postId = event.postId;
+
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.communityId = `${event.network}-${String(args.communityId)}`;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
   }
 }
 
 export class PostEditedEventModel extends BaseEventModel {
   public user: string;
 
-  public postId: number;
+  public postId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.postId = event.postId;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
   }
 }
 
 export class ReplyEditedEventModel extends BaseEventModel {
   public user: string;
 
-  public postId: number;
+  public postId: string;
 
-  public replyId: number;
+  public replyId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.postId = event.postId;
-    this.replyId = event.replyId;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.replyId}`;
   }
 }
 
 export class CommentEditedEventModel extends BaseEventModel {
   public user: string;
 
-  public postId: number;
+  public postId: string;
 
-  public replyId: number;
+  public replyId: string;
 
-  public commentId: number;
+  public commentId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.postId = event.postId;
-    this.replyId = event.parentReplyId;
-    this.commentId = event.commentId;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.parentReplyId}`;
+    this.commentId = `${event.network}-${args.commentId}`;
   }
 }
 
@@ -95,7 +127,8 @@ export class UserCreatedEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.userAddress = event.userAddress;
+    const args = event.args ?? event;
+    this.userAddress = args.userAddress;
   }
 }
 
@@ -104,7 +137,8 @@ export class UserUpdatedEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.userAddress = event.userAddress;
+    const args = event.args ?? event;
+    this.userAddress = args.userAddress;
   }
 }
 
@@ -115,8 +149,9 @@ export class FollowedCommunityEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.userAddress = event.userAddress;
-    this.communityId = String(event.communityId);
+    const args = event.args ?? event;
+    this.userAddress = args.userAddress;
+    this.communityId = `${event.network}-${String(args.communityId)}`;
   }
 }
 
@@ -127,8 +162,9 @@ export class UnfollowedCommunityEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.userAddress = event.userAddress;
-    this.communityId = String(event.communityId);
+    const args = event.args ?? event;
+    this.userAddress = args.userAddress;
+    this.communityId = `${event.network}-${String(args.communityId)}`;
   }
 }
 
@@ -139,8 +175,9 @@ export class RoleGrantedEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.account = event.account;
-    this.role = event.role;
+    const args = event.args ?? event;
+    this.account = args.account;
+    this.role = args.role;
   }
 }
 
@@ -151,8 +188,9 @@ export class RoleRevokedEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.account = event.account;
-    this.role = event.role;
+    const args = event.args ?? event;
+    this.account = args.account;
+    this.role = args.role;
   }
 }
 
@@ -163,8 +201,9 @@ export class CommunityCreatedEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.id = String(event.id);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.id = `${event.network}-${String(args.id)}`;
   }
 }
 
@@ -175,8 +214,9 @@ export class CommunityUpdatedEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.id = String(event.id);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.id = `${event.network}-${String(args.id)}`;
   }
 }
 
@@ -187,8 +227,9 @@ export class CommunityFrozenEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.communityId = String(event.communityId);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.communityId = `${event.network}-${String(args.communityId)}`;
   }
 }
 
@@ -199,50 +240,54 @@ export class CommunityUnfrozenEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.communityId = String(event.communityId);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.communityId = `${event.network}-${String(args.communityId)}`;
   }
 }
 
 export class TagCreatedEventModel extends BaseEventModel {
   public user: string;
 
-  public tagId: number;
+  public tagId: string;
 
   public communityId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.tagId = event.tagId;
-    this.communityId = String(event.communityId);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.tagId = `${event.network}-${args.tagId}`;
+    this.communityId = `${event.network}-${String(args.communityId)}`;
   }
 }
 
 export class TagUpdatedEventModel extends BaseEventModel {
   public user: string;
 
-  public tagId: number;
+  public tagId: string;
 
   public communityId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.tagId = event.tagId;
-    this.communityId = String(event.communityId);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.tagId = `${event.network}-${args.tagId}`;
+    this.communityId = `${event.network}-${String(args.communityId)}`;
   }
 }
 
 export class PostDeletedEventModel extends BaseEventModel {
   public user: string;
 
-  public postId: number;
+  public postId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.postId = event.postId;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
   }
 }
 
@@ -251,55 +296,59 @@ export class ChangePostTypeEventModel extends BaseEventModel {
 
   public newPostType: number;
 
-  public postId: number;
+  public postId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.newPostType = event.newPostType;
-    this.postId = event.postId;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.newPostType = args.newPostType;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
   }
 }
 
 export class ReplyDeletedEventModel extends BaseEventModel {
   public user: string;
 
-  public postId: number;
+  public postId: string;
 
-  public replyId: number;
+  public replyId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.postId = event.postId;
-    this.replyId = event.replyId;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.replyId}`;
   }
 }
 
 export class CommentDeletedEventModel extends BaseEventModel {
   public user: string;
 
-  public postId: number;
+  public postId: string;
 
-  public replyId: number;
+  public replyId: string;
 
-  public commentId: number;
+  public commentId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.postId = event.postId;
-    this.replyId = event.parentReplyId;
-    this.commentId = event.commentId;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.parentReplyId}`;
+    this.commentId = `${event.network}-${args.commentId}`;
   }
 }
 
 export class ConfigureNewAchievementNFTEventModel extends BaseEventModel {
-  public achievementId: number;
+  public achievementId: string;
 
   constructor(event: any) {
     super(event);
-    this.achievementId = event.achievementId;
+    const args = event.args ?? event;
+    this.achievementId = `${event.network}-${args.achievementId}`;
   }
 }
 
@@ -312,9 +361,10 @@ export class TransferEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.from = event.from;
-    this.to = event.to;
-    this.tokenId = event.tokenId;
+    const args = event.args ?? event;
+    this.from = args.from;
+    this.to = args.to;
+    this.tokenId = args.tokenId;
   }
 }
 
@@ -325,77 +375,82 @@ export class GetRewardEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.period = event.period;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.period = args.period;
   }
 }
 
 export class ItemVotedEventModel extends BaseEventModel {
   user: string;
 
-  postId: number;
+  postId: string;
 
-  replyId: number;
+  replyId: string;
 
-  commentId: number;
+  commentId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.postId = event.postId;
-    this.replyId = event.replyId;
-    this.commentId = event.commentId;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.replyId}`;
+    this.commentId = `${event.network}-${args.commentId}`;
   }
 }
 
 export class ReplyMarkedTheBestEventModel extends BaseEventModel {
   user: string;
 
-  postId: number;
+  postId: string;
 
-  replyId: number;
+  replyId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.postId = event.postId;
-    this.replyId = event.replyId;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.replyId}`;
   }
 }
 
 export class ReplyCreatedEventModel extends BaseEventModel {
   user: string;
 
-  postId: number;
+  postId: string;
 
-  parentReplyId: number;
+  parentReplyId: string;
 
-  replyId: number;
+  replyId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.parentReplyId = event.parentReplyId;
-    this.postId = event.postId;
-    this.replyId = event.replyId;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.parentReplyId = `${event.network}-${args.parentReplyId}`; // ???
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.replyId}`;
   }
 }
 
 export class CommentCreatedEventModel extends BaseEventModel {
   user: string;
 
-  postId: number;
+  postId: string;
 
-  replyId: number;
+  replyId: string;
 
-  commentId: number;
+  commentId: string;
 
   constructor(event: any) {
     super(event);
-    this.user = event.user;
-    this.postId = event.postId;
-    this.replyId = event.parentReplyId; // ~parentReplyId
-    this.commentId = event.commentId;
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.parentReplyId}`; // ~parentReplyId
+    this.commentId = `${event.network}-${args.commentId}`;
   }
 }
 
@@ -406,7 +461,8 @@ export class SetDocumentationTreeEventModel extends BaseEventModel {
 
   constructor(event: any) {
     super(event);
-    this.userAddr = event.userAddr;
-    this.communityId = String(event.communityId);
+    const args = event.args ?? event;
+    this.userAddr = args.userAddr;
+    this.communityId = `${event.network}-${String(args.communityId)}`;
   }
 }

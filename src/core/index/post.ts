@@ -30,6 +30,7 @@ import {
 } from 'src/core/index/user';
 import { ItemProperties } from 'src/core/index/utils';
 import { getDataFromIpfs, getIpfsHashFromBytes32 } from 'src/core/utils/ipfs';
+import { Network } from 'src/models/event-models';
 
 const postRepository = new PostRepository();
 const replyRepository = new ReplyRepository();
@@ -79,12 +80,13 @@ async function updateTagsPostCount(
 async function changedStatusOfficialReply(
   peeranhaPost: PostData,
   replyId: string,
-  post: PostEntity
+  post: PostEntity,
+  network: Network
 ) {
   let { officialReply } = post;
-  let previousOfficialReplyId = '0';
+  let previousOfficialReplyId = `${network}-0`;
   if (
-    peeranhaPost.officialReply === replyId &&
+    `${network}-${peeranhaPost.officialReply}` === replyId &&
     post.officialReply !== replyId
   ) {
     previousOfficialReplyId = post.officialReply;
@@ -93,10 +95,10 @@ async function changedStatusOfficialReply(
     peeranhaPost.officialReply === '0' &&
     post.officialReply === replyId
   ) {
-    officialReply = '0';
+    officialReply = `${network}-${0}`;
   }
 
-  if (previousOfficialReplyId !== '0') {
+  if (previousOfficialReplyId !== `${network}-0`) {
     const previousOfficialReply = await replyRepository.get(
       `${post.id}-${previousOfficialReplyId}`
     );
@@ -113,18 +115,19 @@ async function changedStatusOfficialReply(
 
 export async function createPost(
   postId: string,
-  timestamp: number
+  timestamp: number,
+  network: Network
 ): Promise<PostEntity> {
   const [peeranhaPost, messengerUserData] = await Promise.all([
-    getPost(Number(postId)),
-    getItemProperty(ItemProperties.MessengerSender, Number(postId)),
+    getPost(postId, network),
+    getItemProperty(ItemProperties.MessengerSender, postId, network),
   ]);
 
   const post = new PostEntity({
     id: postId,
     id2: '',
     postType: peeranhaPost.postType,
-    communityId: peeranhaPost.communityId,
+    communityId: `${network}-${peeranhaPost.communityId}`,
     title: peeranhaPost.title,
     content: peeranhaPost.content,
     postContent: `${peeranhaPost.title} ${peeranhaPost.content}`,
@@ -135,8 +138,8 @@ export async function createPost(
     commentCount: 0,
     replyCount: 0,
     rating: 0,
-    officialReply: '0',
-    bestReply: peeranhaPost.bestReply,
+    officialReply: `${network}-0`,
+    bestReply: `${network}-${peeranhaPost.bestReply}`,
     ipfsHash: peeranhaPost.ipfsDoc[0],
     ipfsHash2: peeranhaPost.ipfsDoc[1],
     language: 0,
@@ -149,14 +152,16 @@ export async function createPost(
     );
   }
 
-  const tagIds = peeranhaPost.tags.map((tag) => `${post.communityId}-${tag}`);
+  const tagIds = peeranhaPost.tags.map(
+    (tag) => `${post.communityId}-${network}-${tag}`
+  );
   post.postContent += await updateTagsPostCount(tagIds, []);
 
-  const community = await getCommunityById(post.communityId);
+  const community = await getCommunityById(post.communityId, network);
 
   let user = await userRepository.get(post.author);
   if (!user) {
-    user = await createUser(post.author, timestamp);
+    user = await createUser(post.author, timestamp, network);
   }
 
   await Promise.all([
@@ -170,14 +175,14 @@ export async function createPost(
 
     postRepository.create(post),
 
-    updateUserRating(post.author, post.communityId),
+    updateUserRating(post.author, post.communityId, network),
   ]);
 
   const promises: Promise<any>[] = [];
   tagIds.forEach((tag) => {
     const postTag = new PostTagEntity({
       id: `${post.id}-${tag}`,
-      postId: post.id,
+      postId,
       tagId: tag,
     });
     promises.push(postTagRepository.create(postTag));
@@ -189,13 +194,14 @@ export async function createPost(
 
 export async function createReply(
   postId: string,
-  replyId: number,
-  timestamp: number
+  replyId: string,
+  timestamp: number,
+  network: Network
 ): Promise<ReplyEntity | undefined> {
   const [peeranhaReply, peeranhaPost, messengerUserData] = await Promise.all([
-    getReply(Number(postId), replyId),
-    getPost(Number(postId)),
-    getItemProperty(ItemProperties.MessengerSender, Number(postId), replyId),
+    getReply(postId, replyId, network),
+    getPost(postId, network),
+    getItemProperty(ItemProperties.MessengerSender, postId, network, replyId),
   ]);
 
   if (!peeranhaReply) {
@@ -212,7 +218,7 @@ export async function createReply(
     isFirstReply: peeranhaReply.isFirstReply,
     isQuickReply: peeranhaReply.isQuickReply,
     postTime: peeranhaReply.postTime,
-    parentReplyId: peeranhaReply.parentReplyId,
+    parentReplyId: `${network}-${peeranhaReply.parentReplyId}`,
     rating: 0,
     isBestReply: false,
     commentCount: 0,
@@ -231,7 +237,7 @@ export async function createReply(
 
   let user = await userRepository.get(reply.author);
   if (!user) {
-    user = await createUser(reply.author, timestamp);
+    user = await createUser(reply.author, timestamp, network);
   }
 
   const promises: Promise<any>[] = [];
@@ -244,7 +250,7 @@ export async function createReply(
 
   const post = await postRepository.get(postId);
   if (post) {
-    const community = await getCommunityById(post.communityId);
+    const community = await getCommunityById(post.communityId, network);
     promises.push(
       communityRepository.update(post.communityId, {
         replyCount: community.replyCount + 1,
@@ -254,7 +260,8 @@ export async function createReply(
     const officialReply = await changedStatusOfficialReply(
       peeranhaPost,
       String(replyId),
-      post
+      post,
+      network
     );
     reply.isOfficialReply = String(replyId) === officialReply;
 
@@ -266,11 +273,11 @@ export async function createReply(
         lastMod: reply.postTime,
       }),
 
-      updateUserRating(reply.author, post.communityId)
+      updateUserRating(reply.author, post.communityId, network)
     );
 
     if (peeranhaReply.isFirstReply || peeranhaReply.isQuickReply) {
-      promises.push(updateUserRating(reply.author, post.communityId));
+      promises.push(updateUserRating(reply.author, post.communityId, network));
     }
   }
 
@@ -282,13 +289,15 @@ export async function createReply(
 
 export async function createComment(
   postId: string,
-  parentReplyId: number,
-  commentId: number
+  parentReplyId: string,
+  commentId: string,
+  network: Network
 ): Promise<CommentEntity | undefined> {
   const peeranhaComment = await getComment(
-    Number(postId),
+    postId,
     parentReplyId,
-    commentId
+    commentId,
+    network
   );
 
   if (!peeranhaComment) {
@@ -314,8 +323,10 @@ export async function createComment(
   const post = await postRepository.get(postId);
   if (post) {
     const postCommentCount =
-      parentReplyId === 0 ? post.commentCount + 1 : post.commentCount;
-    if (parentReplyId !== 0) {
+      Number(parentReplyId.split('-')[1]) === 0
+        ? post.commentCount + 1
+        : post.commentCount;
+    if (Number(parentReplyId.split('-')[1]) !== 0) {
       const reply = await replyRepository.get(`${postId}-${parentReplyId}`);
       if (reply) {
         await replyRepository.update(reply.id, {
@@ -331,7 +342,7 @@ export async function createComment(
         lastMod: comment.postTime,
       }),
 
-      updateUserRating(post.author, post.communityId),
+      updateUserRating(post.author, post.communityId, network),
     ]);
   }
 
@@ -341,11 +352,12 @@ export async function createComment(
 export async function updatePostContent(
   postId: string,
   timestamp: number,
-  editedReplyId?: number
+  network: Network,
+  editedReplyId?: string
 ) {
   const [post, peeranhaPost] = await Promise.all([
     postRepository.get(postId),
-    getPost(Number(postId)),
+    getPost(postId, network),
   ]);
   if (!(post && peeranhaPost)) return;
 
@@ -368,24 +380,24 @@ export async function updatePostContent(
     const officialReply = await changedStatusOfficialReply(
       peeranhaPost,
       String(editedReplyId),
-      post
+      post,
+      network
     );
     postForSave.officialReply = officialReply;
   }
 
   const newTags = peeranhaPost.tags.map(
-    (tag) => `${peeranhaPost.communityId}-${tag}`
+    (tag) => `${network}-${peeranhaPost.communityId}-${network}-${tag}`
   );
   const oldTagsResponse = await postTagRepository.getListOfProperties(
     'tagId',
     'postId',
     post.id
   );
-  const oldTags = oldTagsResponse.map(
-    (tag) => `${post.communityId}-${tag.tagId}`
-  );
 
-  const uniqueNewTags = newTags.filter((newTag) => !oldTags.includes(newTag));
+  const oldTags = oldTagsResponse.map((tag) => tag.tagId);
+
+  const uniqueNewTags = newTags.filter((newTag) => !oldTags.includes(newTag)); // ???
   const uniqueOldTags = oldTags.filter((oldTag) => !newTags.includes(oldTag));
 
   uniqueNewTags.forEach((tag) => {
@@ -406,20 +418,20 @@ export async function updatePostContent(
   );
 
   if (post.postType !== peeranhaPost.postType) {
-    promises.push(updatePostUsersRatings(post));
+    promises.push(updatePostUsersRatings(post, network));
     postForSave.postType = peeranhaPost.postType;
   }
 
-  if (post.communityId !== peeranhaPost.communityId) {
+  if (post.communityId !== `${network}-${peeranhaPost.communityId}`) {
     const [oldCommunity, newCommunity] = await Promise.all([
       communityRepository.get(post.communityId),
-      communityRepository.get(peeranhaPost.communityId),
+      communityRepository.get(`${network}-${peeranhaPost.communityId}`),
     ]);
 
     let postReplyCount = 0;
 
     for (let i = 1; i <= post.replyCount; i++) {
-      const reply = await replyRepository.get(`${postId}-${i}`);
+      const reply = await replyRepository.get(`${postId}-${network}-${i}`);
       if (reply && !reply.isDeleted) {
         postReplyCount += 1;
       }
@@ -436,7 +448,7 @@ export async function updatePostContent(
 
     if (newCommunity) {
       promises.push(
-        communityRepository.update(peeranhaPost.communityId, {
+        communityRepository.update(`${network}-${peeranhaPost.communityId}`, {
           postCount: newCommunity.postCount + 1,
           replyCount: newCommunity.replyCount + postReplyCount,
         })
@@ -444,21 +456,21 @@ export async function updatePostContent(
     }
 
     if (post.postType === peeranhaPost.postType) {
-      promises.push(updatePostUsersRatings(post));
+      promises.push(updatePostUsersRatings(post, network));
     }
 
-    postForSave.communityId = peeranhaPost.communityId;
-    promises.push(updatePostUsersRatings(postForSave));
+    postForSave.communityId = `${network}-${peeranhaPost.communityId}`;
+    promises.push(updatePostUsersRatings(postForSave, network));
   }
 
   for (let replyId = 1; replyId <= postForSave.replyCount; replyId++) {
-    const reply = await replyRepository.get(`${postId}-${replyId}`);
+    const reply = await replyRepository.get(`${postId}-${network}-${replyId}`);
     if (reply && !reply.isDeleted) {
       postForSave.postContent += ` ${reply.content}`;
 
       for (let commentId = 1; commentId <= reply.commentCount; commentId++) {
         const comment = await commentRepository.get(
-          `${postId}-${replyId}-${commentId}`
+          `${postId}-${network}-${replyId}-${network}-${commentId}`
         );
 
         if (comment && !comment.isDeleted) {
@@ -469,7 +481,9 @@ export async function updatePostContent(
   }
 
   for (let commentId = 1; commentId <= postForSave.commentCount; commentId++) {
-    const comment = await commentRepository.get(`${postId}-0-${commentId}`);
+    const comment = await commentRepository.get(
+      `${postId}-${network}-0-${network}-${commentId}`
+    );
     if (comment && !comment.isDeleted) {
       postForSave.postContent += ` ${comment.content}`;
     }
@@ -540,6 +554,7 @@ export async function setCommunityDocumentation(
   userId: string,
   newDocumentationIpfsHash: string,
   timestamp: number,
+  network: Network,
   oldDocumentationIpfsHash?: string
 ) {
   const newPosts: string[] = [];
@@ -586,12 +601,11 @@ export async function setCommunityDocumentation(
   });
 
   const postPromises: Promise<void>[] = [];
-
   postsForCreating.forEach(async (post) => {
     const postData = await getDataFromIpfs(getIpfsHashFromBytes32(post));
 
     const postEntity = new PostEntity({
-      id: post,
+      id: `${network}-${post}`,
       id2: '',
       postType: PostTypes.Documentation,
       communityId,
@@ -605,8 +619,8 @@ export async function setCommunityDocumentation(
       lastMod: timestamp,
       commentCount: 0,
       replyCount: 0,
-      officialReply: '0',
-      bestReply: '0',
+      officialReply: '1-0',
+      bestReply: '1-0',
       ipfsHash: post,
       ipfsHash2: '',
       language: 0,

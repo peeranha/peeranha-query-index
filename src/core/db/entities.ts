@@ -1,3 +1,5 @@
+import { Network } from 'src/models/event-models';
+
 export class UserEntity {
   public id: string;
 
@@ -23,6 +25,8 @@ export class UserEntity {
 
   public ipfsHash2: string;
 
+  public networkId: Network;
+
   constructor(user: {
     id: string;
     displayName: string;
@@ -36,6 +40,7 @@ export class UserEntity {
     creationTime: number;
     ipfsHash: string;
     ipfsHash2: string;
+    network: Network;
   }) {
     this.id = user.id;
     this.displayName = user.displayName;
@@ -49,6 +54,7 @@ export class UserEntity {
     this.creationTime = user.creationTime;
     this.ipfsHash = user.ipfsHash;
     this.ipfsHash2 = user.ipfsHash2;
+    this.networkId = user.network;
   }
 }
 
@@ -87,6 +93,8 @@ export class CommunityEntity {
 
   public ipfsHash2: string;
 
+  public networkId: Network;
+
   constructor(community: {
     id: string;
     name: string;
@@ -105,6 +113,7 @@ export class CommunityEntity {
     followingUsers: number;
     ipfsHash: string;
     ipfsHash2: string;
+    network: Network;
   }) {
     this.id = community.id;
     this.name = community.name;
@@ -123,6 +132,7 @@ export class CommunityEntity {
     this.followingUsers = community.followingUsers;
     this.ipfsHash = community.ipfsHash;
     this.ipfsHash2 = community.ipfsHash2;
+    this.networkId = community.network;
   }
 }
 
@@ -467,7 +477,7 @@ export class CommentEntity {
 }
 
 export class AchievementEntity {
-  public id: number;
+  public id: string;
 
   public factCount: number;
 
@@ -494,7 +504,7 @@ export class AchievementEntity {
   public attrType?: string;
 
   constructor(achievement: {
-    id: number;
+    id: string;
     factCount: number;
     maxCount: number;
     achievementURI: string;
@@ -613,6 +623,8 @@ export class HistoryEntity {
 
   public timestamp: number;
 
+  public networkId: Network;
+
   constructor(history: {
     id: string;
     transactionHash: string;
@@ -623,6 +635,7 @@ export class HistoryEntity {
     eventName: string;
     actionUser: string;
     timestamp: number;
+    network: Network;
   }) {
     this.id = history.id;
     this.transactionHash = history.transactionHash;
@@ -633,6 +646,7 @@ export class HistoryEntity {
     this.eventName = history.eventName;
     this.actionUser = history.actionUser;
     this.timestamp = history.timestamp;
+    this.networkId = history.network;
   }
 }
 
@@ -641,12 +655,12 @@ export class UserAchievementEntity {
 
   public userId: string;
 
-  public achievementId: number;
+  public achievementId: string;
 
   constructor(userAchievement: {
     id: string;
     userId: string;
-    achievementId: number;
+    achievementId: string;
   }) {
     this.id = userAchievement.id;
     this.userId = userAchievement.userId;

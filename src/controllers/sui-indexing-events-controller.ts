@@ -1,4 +1,4 @@
-import { SUI_CONTENT_FIRST_QUEUE } from 'src/core/constants';
+import { SUI_CONTENT_QUEUE } from 'src/core/constants';
 import { BaseRepository } from 'src/core/db/repositories/BaseRepository';
 import { ConfigurationError } from 'src/core/errors';
 import {
@@ -118,7 +118,7 @@ export async function processSuiIndexing(eventModel: BaseSuiEventModel) {
     eventsForTranslations.includes(eventName) ||
     eventsForChangePostContent.includes(eventName)
   ) {
-    await pushToSQS(SUI_CONTENT_FIRST_QUEUE, eventModel);
+    await pushToSQS(SUI_CONTENT_QUEUE, eventModel);
   }
 
   return eventModel;

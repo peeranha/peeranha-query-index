@@ -81,8 +81,46 @@ fargate:
       - ${self:provider.environment.SUBNET_ID_2}
     assignPublicIp: true
   tasks:
-    first-sui-events-listener:
-      name: ${self:custom.stage}-first-sui-events-listener
+    polygon-events-listener:
+      name: ${self:custom.stage}-polygon-events-listener
+      image: peeranha-ecs-nodejs
+      command:
+        - "./dist/polygon-events-listener.mjs"
+      environment:
+        ENV: ${self:provider.environment.ENV}
+        REGION: ${self:provider.environment.REGION}
+        SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
+        AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
+        DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
+        POLYGON_COMMUNITY_ADDRESS: ${self:provider.environment.POLYGON_COMMUNITY_ADDRESS}
+        POLYGON_CONTENT_ADDRESS: ${self:provider.environment.POLYGON_CONTENT_ADDRESS}
+        POLYGON_USER_ADDRESS: ${self:provider.environment.POLYGON_USER_ADDRESS}
+        POLYGON_TOKEN_ADDRESS: ${self:provider.environment.POLYGON_TOKEN_ADDRESS}
+        POLYGON_NFT_ADDRESS: ${self:provider.environment.POLYGON_NFT_ADDRESS}
+        START_BLOCK_NUMBER: ${self:provider.environment.POLYGON_START_BLOCK_NUMBER}
+        RPC_POLYGON_ENDPOINT: ${self:provider.environment.RPC_POLYGON_ENDPOINT}
+
+    edgeware-events-listener:
+      name: ${self:custom.stage}-edgeware-events-listener
+      image: peeranha-ecs-nodejs
+      command:
+        - "./dist/edgeware-events-listener.mjs"
+      environment:
+        ENV: ${self:provider.environment.ENV}
+        REGION: ${self:provider.environment.REGION}
+        SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
+        AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
+        DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
+        EDGEWARE_COMMUNITY_ADDRESS: ${self:provider.environment.EDGEWARE_COMMUNITY_ADDRESS}
+        EDGEWARE_CONTENT_ADDRESS: ${self:provider.environment.EDGEWARE_CONTENT_ADDRESS}
+        EDGEWARE_USER_ADDRESS: ${self:provider.environment.EDGEWARE_USER_ADDRESS}
+        EDGEWARE_TOKEN_ADDRESS: ${self:provider.environment.EDGEWARE_TOKEN_ADDRESS}
+        EDGEWARE_NFT_ADDRESS: ${self:provider.environment.EDGEWARE_NFT_ADDRESS}
+        START_BLOCK_NUMBER: ${self:provider.environment.EDGEWARE_START_BLOCK_NUMBER}
+        RPC_EDGEWARE_ENDPOINT: ${self:provider.environment.RPC_EDGEWARE_ENDPOINT}
+
+    sui-events-listener:
+      name: ${self:custom.stage}-sui-events-listener
       image: peeranha-ecs-nodejs
       command:
         - "./dist/sui-events-listener.mjs"
@@ -104,84 +142,84 @@ functions:
           path: '/graphql'
           method: 'POST'
 
-  first-period-trigger:
-    handler: src/handlers/first-period-trigger.handler
-    timeout: 300
-    events:
-      - schedule:
-          name: first-period-trigger-${self:custom.stage}
-          rate: rate(10 minutes)
+  # period-trigger:
+  #   handler: src/handlers/period-trigger.handler
+  #   timeout: 300
+  #   events:
+  #     - schedule:
+  #         name: period-trigger-${self:custom.stage}
+  #         rate: rate(10 minutes)
 
-  second-period-trigger:
-    handler: src/handlers/second-period-trigger.handler
+  # polygon-event-listener-webhook:
+  #   handler: src/handlers/polygon-event-listener-webhook.handler
+  #   timeout: 28
+  #   events:
+  #     - httpApi:
+  #         path: '/polygon-event-listener/polygon-webhook'
+  #         method: 'POST'
+  
+  polygon-onchain-events-read:
+    handler: src/handlers/polygon-onchain-events-read.handler
     timeout: 300
     events:
       - schedule:
-          name: second-period-trigger-${self:custom.stage}
-          rate: rate(10 minutes)
+          name: polygon-read-onchain-events-${self:custom.stage}
+          rate: rate(1 minute)
   
-  first-polygon-event-listener-webhook:
-    handler: src/handlers/first-polygon-event-listener-webhook.handler
-    timeout: 28
-    events:
-      - httpApi:
-          path: '/polygon-event-listener/first-webhook'
-          method: 'POST'
-  
-  second-polygon-event-listener-webhook:
-    handler: src/handlers/second-polygon-event-listener-webhook.handler
-    timeout: 28
-    events:
-      - httpApi:
-          path: '/polygon-event-listener/second-webhook'
-          method: 'POST'
-
-  first-sui-onchain-events-read:
-    handler: src/handlers/first-sui-onchain-events-read.handler
+  edgeware-onchain-events-read:
+    handler: src/handlers/edgeware-onchain-events-read.handler
     timeout: 300
     events:
       - schedule:
-          name: first-sui-read-onchain-events-${self:custom.stage}
+          name: edgeware-read-onchain-events-${self:custom.stage}
+          rate: rate(1 minute)
+  
+  sui-onchain-events-read:
+    handler: src/handlers/sui-onchain-events-read.handler
+    timeout: 300
+    events:
+      - schedule:
+          name: sui-read-onchain-events-${self:custom.stage}
           rate: rate(1 minute)
 
-  first-indexing-queue:
-    handler: src/handlers/first-indexing-queue.handler
+  polygon-indexing-queue:
+    handler: src/handlers/polygon-indexing-queue.handler
     timeout: 50
     events:
       - sqs:
           arn:
             Fn::GetAtt:
-              - firstQueue
+              - polygonQueue
               - Arn
 
-  second-indexing-queue:
-    handler: src/handlers/second-indexing-queue.handler
+  edgeware-indexing-queue:
+    handler: src/handlers/edgeware-indexing-queue.handler
     timeout: 50
     events:
       - sqs:
           arn:
             Fn::GetAtt:
-              - secondQueue
+              - edgewareQueue
               - Arn
       
-  first-sui-indexing-queue:
-    handler: src/handlers/sui-first-indexing-queue.handler
+  sui-indexing-queue:
+    handler: src/handlers/sui-indexing-queue.handler
     timeout: 50
     events:
       - sqs:
           arn:
             Fn::GetAtt:
-              - firstSuiQueue
+              - suiQueue
               - Arn
 
-  first-sui-content-queue:
-    handler: src/handlers/sui-first-content-queue.handler
+  sui-content-queue:
+    handler: src/handlers/sui-content-queue.handler
     timeout: 50
     events:
       - sqs:
           arn:
             Fn::GetAtt:
-              - firstSuiContentQueue
+              - suiContentQueue
               - Arn
 
 resources:
@@ -198,40 +236,40 @@ resources:
             KeyType: HASH
         BillingMode: PAY_PER_REQUEST
 
-    firstQueue:
+    polygonQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: ${self:custom.stage}-firstQueue.fifo
+        QueueName: ${self:custom.stage}-polygonQueue.fifo
         VisibilityTimeout: 50
         FifoQueue: true
         ContentBasedDeduplication: true
         DeduplicationScope: messageGroup
         FifoThroughputLimit: perMessageGroupId
 
-    secondQueue:
+    edgewareQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: ${self:custom.stage}-secondQueue.fifo
+        QueueName: ${self:custom.stage}-edgewareQueue.fifo
         VisibilityTimeout: 50
         FifoQueue: true
         ContentBasedDeduplication: true
         DeduplicationScope: messageGroup
         FifoThroughputLimit: perMessageGroupId
 
-    firstSuiQueue:
+    suiQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: ${self:custom.stage}-firstSuiQueue.fifo
+        QueueName: ${self:custom.stage}-suiQueue.fifo
         VisibilityTimeout: 50
         FifoQueue: true
         ContentBasedDeduplication: true
         DeduplicationScope: messageGroup
         FifoThroughputLimit: perMessageGroupId
 
-    firstSuiContentQueue:
+    suiContentQueue:
       Type: AWS::SQS::Queue
       Properties:
-        QueueName: ${self:custom.stage}-firstSuiContentQueue.fifo
+        QueueName: ${self:custom.stage}-suiContentQueue.fifo
         VisibilityTimeout: 50
         FifoQueue: true
         ContentBasedDeduplication: true

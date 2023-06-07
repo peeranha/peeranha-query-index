@@ -1,8 +1,8 @@
-import { Blockchain } from 'src/core/blockchain/constants';
+import { Network } from 'src/models/event-models';
 
 export interface IBaseEvent {
   transaction: string;
-  blockchain: Blockchain;
+  network: Network;
 }
 
 export interface IUserCreatedEvent extends IBaseEvent {

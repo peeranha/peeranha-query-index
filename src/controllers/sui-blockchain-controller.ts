@@ -2,7 +2,7 @@
 import { PaginatedEvents } from '@mysten/sui.js';
 import {
   SUI_EVENTS_MAPPING_SNS_TOPIC_NAME,
-  SUI_INDEXING_FIRST_QUEUE,
+  SUI_INDEXING_QUEUE,
 } from 'src/core/constants';
 import { DynamoDBConnector } from 'src/core/dynamodb/DynamoDbConnector';
 import { Config } from 'src/core/dynamodb/entities/Config';
@@ -40,6 +40,7 @@ import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import { log } from 'src/core/utils/logger';
 import { pushToSNS } from 'src/core/utils/sns';
 import { pushToSQS } from 'src/core/utils/sqs';
+import { Network } from 'src/models/event-models';
 import {
   Event,
   BaseSuiEventModel,
@@ -151,7 +152,10 @@ export async function readSuiEvents(
     .map((item) => item.data)
     .forEach((evs) => {
       evs.forEach((ev) => {
-        eventObjects.push(ev);
+        eventObjects.push({
+          ...ev,
+          network: Network.Sui,
+        });
       });
     });
 
@@ -185,7 +189,7 @@ export async function readSuiEvents(
     });
 
   for (let i = 0; i < eventModels.length; i++) {
-    await pushToSQS(SUI_INDEXING_FIRST_QUEUE, eventModels[i]);
+    await pushToSQS(SUI_INDEXING_QUEUE, eventModels[i]);
     await pushToSNS(SUI_EVENTS_MAPPING_SNS_TOPIC_NAME, exportEventModels[i]);
   }
 
