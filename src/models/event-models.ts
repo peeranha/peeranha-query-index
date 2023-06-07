@@ -177,7 +177,7 @@ export class RoleGrantedEventModel extends BaseEventModel {
     super(event);
     const args = event.args ?? event;
     this.account = args.account;
-    this.role = args.role;
+    this.role = `${event.network}-${String(args.role)}`;
   }
 }
 
@@ -190,7 +190,7 @@ export class RoleRevokedEventModel extends BaseEventModel {
     super(event);
     const args = event.args ?? event;
     this.account = args.account;
-    this.role = args.role;
+    this.role = `${event.network}-${String(args.role)}`;
   }
 }
 
