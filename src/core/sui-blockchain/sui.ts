@@ -1,8 +1,9 @@
 import { JsonRpcProvider, Connection } from '@mysten/sui.js';
 import { ConfigurationError } from 'src/core/errors';
+import { getSecretValue } from 'src/core/utils/secrets';
 
 export async function createSuiProvider() {
-  const endpoint = process.env.SUI_RPC_ENDPOINT;
+  const endpoint = await getSecretValue('RPC_SUI_ENDPOINT');
   if (!endpoint) {
     throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
@@ -18,7 +19,7 @@ export async function queryEvents(
   cursor: string | undefined | null,
   maxTxNumber: number
 ) {
-  const endpoint = process.env.SUI_RPC_ENDPOINT;
+  const endpoint = await getSecretValue('RPC_SUI_ENDPOINT');
   if (!endpoint) {
     throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
@@ -50,7 +51,7 @@ export async function queryEvents(
 }
 
 export async function getObject(objectId: string) {
-  const endpoint = process.env.SUI_RPC_ENDPOINT;
+  const endpoint = await getSecretValue('RPC_SUI_ENDPOINT');
   if (!endpoint) {
     throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
@@ -89,7 +90,7 @@ export async function getDynamicFieldObject(
   type: string,
   index: string
 ) {
-  const endpoint = process.env.SUI_RPC_ENDPOINT;
+  const endpoint = await getSecretValue('RPC_SUI_ENDPOINT');
   if (!endpoint) {
     throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
