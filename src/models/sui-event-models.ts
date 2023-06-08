@@ -379,3 +379,5 @@ export class SetDocumentationTreeSuiEventModel extends BaseSuiEventModel {
     this.communityId = `${event.network}-${event.parsedJson?.communityId}`;
   }
 }
+
+export type SuiExportEventModel = Event & { name: string };

@@ -8,6 +8,8 @@ custom:
     includeModules: true
   serverless-offline:
     httpPort: 5000
+    websocketPort: 5001
+    lambdaPort: 5002
     noPrependStageInUrl: true
     ignoreJWTSignature: true
   dynamodb:
@@ -130,6 +132,7 @@ fargate:
         DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
         SUI_PACKAGE_ADDRESS: ${self:provider.environment.SUI_PACKAGE_ADDRESS}
         SUI_USERS_RATING_COLLECTION: ${self:provider.environment.SUI_USERS_RATING_COLLECTION}
+        SUI_RPC_ENDPOINT: ${self:provider.environment.SUI_RPC_ENDPOINT}
 
 functions:
   graphql:
@@ -171,13 +174,13 @@ functions:
           name: edgeware-read-onchain-events-${self:custom.stage}
           rate: rate(1 minute)
   
-  # sui-onchain-events-read:
-  #   handler: src/handlers/sui-onchain-events-read.handler
-  #   timeout: 300
-  #   events:
-  #     - schedule:
-  #         name: sui-read-onchain-events-${self:custom.stage}
-  #         rate: rate(1 minute)
+  sui-onchain-events-read:
+    handler: src/handlers/sui-onchain-events-read.handler
+    timeout: 300
+    events:
+      - schedule:
+          name: sui-read-onchain-events-${self:custom.stage}
+          rate: rate(1 minute)
 
   polygon-indexing-queue:
     handler: src/handlers/polygon-indexing-queue.handler
@@ -217,26 +220,6 @@ functions:
           arn:
             Fn::GetAtt:
               - suiContentQueue
-              - Arn
-      
-  first-sui-indexing-queue:
-    handler: src/handlers/sui-first-indexing-queue.handler
-    timeout: 50
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - firstSuiQueue
-              - Arn
-
-  first-sui-content-queue:
-    handler: src/handlers/sui-first-content-queue.handler
-    timeout: 50
-    events:
-      - sqs:
-          arn:
-            Fn::GetAtt:
-              - firstSuiContentQueue
               - Arn
 
 resources:
@@ -287,26 +270,6 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: ${self:custom.stage}-suiContentQueue.fifo
-        VisibilityTimeout: 50
-        FifoQueue: true
-        ContentBasedDeduplication: true
-        DeduplicationScope: messageGroup
-        FifoThroughputLimit: perMessageGroupId
-
-    firstSuiQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: ${self:custom.stage}-firstSuiQueue.fifo
-        VisibilityTimeout: 50
-        FifoQueue: true
-        ContentBasedDeduplication: true
-        DeduplicationScope: messageGroup
-        FifoThroughputLimit: perMessageGroupId
-
-    firstSuiContentQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: ${self:custom.stage}-firstSuiContentQueue.fifo
         VisibilityTimeout: 50
         FifoQueue: true
         ContentBasedDeduplication: true

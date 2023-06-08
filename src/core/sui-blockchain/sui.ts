@@ -5,7 +5,7 @@ import { getSecretValue } from 'src/core/utils/secrets';
 export async function createSuiProvider() {
   const endpoint = await getSecretValue('RPC_SUI_ENDPOINT');
   if (!endpoint) {
-    throw new ConfigurationError('RPC_SUI_ENDPOINT is not configured');
+    throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
 
   const connection = new Connection({ fullnode: endpoint });
@@ -21,7 +21,7 @@ export async function queryEvents(
 ) {
   const endpoint = await getSecretValue('RPC_SUI_ENDPOINT');
   if (!endpoint) {
-    throw new ConfigurationError('RPC_SUI_ENDPOINT is not configured');
+    throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
 
   const response = await fetch(endpoint, {
@@ -53,7 +53,7 @@ export async function queryEvents(
 export async function getObject(objectId: string) {
   const endpoint = await getSecretValue('RPC_SUI_ENDPOINT');
   if (!endpoint) {
-    throw new ConfigurationError('RPC_SUI_ENDPOINT is not configured');
+    throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
 
   const response = await fetch(endpoint, {
@@ -92,7 +92,7 @@ export async function getDynamicFieldObject(
 ) {
   const endpoint = await getSecretValue('RPC_SUI_ENDPOINT');
   if (!endpoint) {
-    throw new ConfigurationError('RPC_SUI_ENDPOINT is not configured');
+    throw new ConfigurationError('SUI_RPC_ENDPOINT is not configured');
   }
 
   const response = await fetch(endpoint, {

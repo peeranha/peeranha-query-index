@@ -27,3 +27,8 @@ export const CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME =
 export const TRANSFER_EVENT_NAME = 'Transfer';
 export const GET_REWARD_EVENT_NAME = 'GetReward';
 export const SET_DOCUMENTATION_TREE_EVENT_NAME = 'SetDocumentationTree';
+
+export enum Blockchain {
+  SUI,
+  Polygon,
+}

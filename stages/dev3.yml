@@ -20,6 +20,7 @@ environment:
   SUBNET_ID_2: 'subnet-0b05f160'
 
   IPFS_CDN_URL: 'https://ipfs-cdn.testpeeranha.io/'
+
   RPC_POLYGON_ENDPOINT: 'https://rpc.ankr.com/polygon_mumbai'
   POLYGON_START_BLOCK_NUMBER: 32093558
   
