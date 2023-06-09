@@ -3,9 +3,5 @@ import { SUI_CONTENT_QUEUE } from 'src/core/constants';
 import { handleSqsEvent } from 'src/core/utils/sqs';
 
 export const handler = async (event: any) => {
-  await handleSqsEvent(
-    processSuiContentIndexing,
-    event,
-    SUI_CONTENT_QUEUE
-  );
+  await handleSqsEvent(processSuiContentIndexing, event, SUI_CONTENT_QUEUE);
 };

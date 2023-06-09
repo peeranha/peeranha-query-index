@@ -8,6 +8,8 @@ custom:
     includeModules: true
   serverless-offline:
     httpPort: 5000
+    websocketPort: 5001
+    lambdaPort: 5002
     noPrependStageInUrl: true
     ignoreJWTSignature: true
   dynamodb:
@@ -117,19 +119,20 @@ fargate:
         START_BLOCK_NUMBER: ${self:provider.environment.EDGEWARE_START_BLOCK_NUMBER}
         RPC_EDGEWARE_ENDPOINT: ${self:provider.environment.RPC_EDGEWARE_ENDPOINT}
 
-    # sui-events-listener:
-    #   name: ${self:custom.stage}-sui-events-listener
-    #   image: peeranha-ecs-nodejs
-    #   command:
-    #     - "./dist/sui-events-listener.mjs"
-    #   environment:
-    #     ENV: ${self:provider.environment.ENV}
-    #     REGION: ${self:provider.environment.REGION}
-    #     SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
-    #     AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
-    #     DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
-    #     SUI_PACKAGE_ADDRESS: ${self:provider.environment.SUI_PACKAGE_ADDRESS}
-    #     SUI_USERS_RATING_COLLECTION: ${self:provider.environment.SUI_USERS_RATING_COLLECTION}
+    sui-events-listener:
+      name: ${self:custom.stage}-sui-events-listener
+      image: peeranha-ecs-nodejs
+      command:
+        - "./dist/sui-events-listener.mjs"
+      environment:
+        ENV: ${self:provider.environment.ENV}
+        REGION: ${self:provider.environment.REGION}
+        SQS_ENDPOINT: ${self:provider.environment.SQS_ENDPOINT}
+        AWS_ACCOUNT_ID: ${self:provider.environment.AWS_ACCOUNT_ID}
+        DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
+        SUI_PACKAGE_ADDRESS: ${self:provider.environment.SUI_PACKAGE_ADDRESS}
+        SUI_USERS_RATING_COLLECTION: ${self:provider.environment.SUI_USERS_RATING_COLLECTION}
+        SUI_RPC_ENDPOINT: ${self:provider.environment.SUI_RPC_ENDPOINT}
 
 functions:
   graphql:
@@ -171,13 +174,13 @@ functions:
   #         name: edgeware-read-onchain-events-${self:custom.stage}
   #         rate: rate(1 minute)
   
-  # sui-onchain-events-read:
-  #   handler: src/handlers/sui-onchain-events-read.handler
-  #   timeout: 300
-  #   events:
-  #     - schedule:
-  #         name: sui-read-onchain-events-${self:custom.stage}
-  #         rate: rate(1 minute)
+  sui-onchain-events-read:
+    handler: src/handlers/sui-onchain-events-read.handler
+    timeout: 300
+    events:
+      - schedule:
+          name: sui-read-onchain-events-${self:custom.stage}
+          rate: rate(1 minute)
 
   polygon-indexing-queue:
     handler: src/handlers/polygon-indexing-queue.handler
@@ -218,7 +221,6 @@ functions:
             Fn::GetAtt:
               - suiContentQueue
               - Arn
-      
 resources:
   Resources:
     queryIndexConfigTable:
@@ -267,26 +269,6 @@ resources:
       Type: AWS::SQS::Queue
       Properties:
         QueueName: ${self:custom.stage}-suiContentQueue.fifo
-        VisibilityTimeout: 50
-        FifoQueue: true
-        ContentBasedDeduplication: true
-        DeduplicationScope: messageGroup
-        FifoThroughputLimit: perMessageGroupId
-
-    firstSuiQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: ${self:custom.stage}-firstSuiQueue.fifo
-        VisibilityTimeout: 50
-        FifoQueue: true
-        ContentBasedDeduplication: true
-        DeduplicationScope: messageGroup
-        FifoThroughputLimit: perMessageGroupId
-
-    firstSuiContentQueue:
-      Type: AWS::SQS::Queue
-      Properties:
-        QueueName: ${self:custom.stage}-firstSuiContentQueue.fifo
         VisibilityTimeout: 50
         FifoQueue: true
         ContentBasedDeduplication: true

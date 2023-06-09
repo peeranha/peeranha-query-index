@@ -19,6 +19,7 @@ environment:
   SUBNET_ID_2: 'subnet-cb7d53a3'
 
   IPFS_CDN_URL: 'https://ipfs-cdn.testpeeranha.io/'
+
   RPC_POLYGON_ENDPOINT: 'https://rpc.ankr.com/polygon_mumbai'
   POLYGON_START_BLOCK_NUMBER: 32093558
   
@@ -27,5 +28,5 @@ environment:
 
   SUI_PACKAGE_ADDRESS: '0x83f909002b471f7e1dbec27c837ff143189f51dff9faf42697542df82113b2ec'
   SUI_USERS_RATING_COLLECTION: '0x16e3c9f176effde60b1e258afbb9ceb6b2b7eecb2152a836c6ab633f16fc5056'
-  RPC_SUI_ENDPOINT: 'https://fullnode.testnet.sui.io'
+  SUI_RPC_ENDPOINT: 'https://fullnode.testnet.sui.io'
 
