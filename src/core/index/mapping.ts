@@ -137,7 +137,11 @@ export async function handleConfigureNewAchievement(
 export async function handleTransfer(eventModel: TransferEventModel) {
   const { timestamp, to: user } = eventModel;
   const achievementId = `${eventModel.network}-${Math.floor(
-    eventModel.tokenId / POOL_NFT + 1
+    (eventModel.tokenId?.hex
+      ? Number(eventModel.tokenId?.hex)
+      : eventModel.tokenId) /
+      POOL_NFT +
+      1
   )}`;
   const achievement = await achievementRepository.get(achievementId);
 
@@ -201,7 +205,7 @@ export async function handleUpdatedUser(eventModel: UserUpdatedEventModel) {
       avatar: user.avatar,
       ipfsHash: user.ipfsDoc[0],
       ipfsHash2: user.ipfsDoc[1],
-      network: eventModel.network,
+      networkId: eventModel.network,
     };
     await userRepository.update(userAddress, userForSave);
   }
@@ -210,7 +214,8 @@ export async function handleUpdatedUser(eventModel: UserUpdatedEventModel) {
 export async function handlerGrantedRole(eventModel: RoleGrantedEventModel) {
   const { role, timestamp, account } = eventModel;
   if (!(await userRepository.get(account))) {
-    await createUser(account, timestamp, eventModel.network);
+    const user = await createUser(account, timestamp, eventModel.network);
+    if (!user) return;
   }
   const userPermission = new UserPermissionEntity({
     id: `${account}-${role}`,
@@ -475,7 +480,7 @@ export async function handleDeletedPost(eventModel: PostDeletedEventModel) {
     'postId',
     post.id
   );
-  const postTags = tagsResponse.map((tag) => tag.tagId);
+  const postTags = tagsResponse.map((tag) => tag.tagId?.toString());
 
   postTags.forEach(async (tag) => {
     const id = tag;
@@ -601,12 +606,8 @@ export async function handleDeletedReply(eventModel: ReplyDeletedEventModel) {
       }),
 
       postRepository.update(postId, {
-        bestReply: reply.isBestReply
-          ? `${eventModel.network}-0`
-          : post.bestReply,
-        officialReply: reply.isOfficialReply
-          ? `${eventModel.network}-0`
-          : post.officialReply,
+        bestReply: reply.isBestReply ? '' : post.bestReply,
+        officialReply: reply.isOfficialReply ? '' : post.officialReply,
       })
     );
   }
@@ -842,7 +843,7 @@ export async function handlerChangedStatusBestReply(
   const postId = String(eventModel.postId);
 
   let post = await postRepository.get(postId);
-  let previousBestReply = `${eventModel.network}-0`;
+  let previousBestReply = '';
   if (!post) {
     post = await createPost(postId, timestamp, eventModel.network);
   } else {

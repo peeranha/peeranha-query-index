@@ -388,7 +388,7 @@ export async function createSuiPost(
     commentCount: 0,
     replyCount: 0,
     rating: 0,
-    officialReply: '0',
+    officialReply: '',
     bestReply: `${network}-${peeranhaPost.bestReply}`,
     ipfsHash: peeranhaPost.ipfsDoc[0],
     ipfsHash2: peeranhaPost.ipfsDoc[1],

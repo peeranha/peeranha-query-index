@@ -351,7 +351,7 @@ export class RoleGrantedSuiEventModel extends BaseSuiEventModel {
 
   constructor(event: Event) {
     super(event);
-    this.role = toHexString(event.parsedJson?.role);
+    this.role = `${event.network}-${toHexString(event.parsedJson?.role)}`;
     this.userId = event.parsedJson?.userId;
   }
 }
@@ -363,7 +363,7 @@ export class RoleRevokedSuiEventModel extends BaseSuiEventModel {
 
   constructor(event: Event) {
     super(event);
-    this.role = toHexString(event.parsedJson?.role);
+    this.role = `${event.network}-${toHexString(event.parsedJson?.role)}`;
     this.userId = event.parsedJson?.userId;
   }
 }

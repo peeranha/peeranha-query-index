@@ -84,7 +84,7 @@ async function changedStatusOfficialReply(
   network: Network
 ) {
   let { officialReply } = post;
-  let previousOfficialReplyId = `${network}-0`;
+  let previousOfficialReplyId = '';
   if (
     `${network}-${peeranhaPost.officialReply}` === replyId &&
     post.officialReply !== replyId
@@ -92,13 +92,13 @@ async function changedStatusOfficialReply(
     previousOfficialReplyId = post.officialReply;
     officialReply = replyId;
   } else if (
-    peeranhaPost.officialReply === '0' &&
+    Number(peeranhaPost.officialReply) === 0 &&
     post.officialReply === replyId
   ) {
-    officialReply = `${network}-${0}`;
+    officialReply = '';
   }
 
-  if (previousOfficialReplyId !== `${network}-0`) {
+  if (previousOfficialReplyId !== '') {
     const previousOfficialReply = await replyRepository.get(
       `${post.id}-${previousOfficialReplyId}`
     );
@@ -138,8 +138,11 @@ export async function createPost(
     commentCount: 0,
     replyCount: 0,
     rating: 0,
-    officialReply: `${network}-0`,
-    bestReply: `${network}-${peeranhaPost.bestReply}`,
+    officialReply: '',
+    bestReply:
+      Number(peeranhaPost.bestReply) === 0
+        ? ''
+        : `${network}-${peeranhaPost.bestReply}`,
     ipfsHash: peeranhaPost.ipfsDoc[0],
     ipfsHash2: peeranhaPost.ipfsDoc[1],
     language: 0,
@@ -153,7 +156,10 @@ export async function createPost(
   }
 
   const tagIds = peeranhaPost.tags.map(
-    (tag) => `${post.communityId}-${network}-${tag}`
+    (tag) =>
+      `${post.communityId}-${network}-${
+        tag?.id?.split('-')[1] || tag?.toString()
+      }`
   );
   post.postContent += await updateTagsPostCount(tagIds, []);
 
@@ -387,7 +393,10 @@ export async function updatePostContent(
   }
 
   const newTags = peeranhaPost.tags.map(
-    (tag) => `${network}-${peeranhaPost.communityId}-${network}-${tag}`
+    (tag) =>
+      `${network}-${peeranhaPost.communityId}-${network}-${
+        tag?.id?.split('-')[1] || tag?.toString()
+      }`
   );
   const oldTagsResponse = await postTagRepository.getListOfProperties(
     'tagId',
@@ -395,7 +404,7 @@ export async function updatePostContent(
     post.id
   );
 
-  const oldTags = oldTagsResponse.map((tag) => tag.tagId);
+  const oldTags = oldTagsResponse.map((tag) => tag.tagId?.toString());
 
   const uniqueNewTags = newTags.filter((newTag) => !oldTags.includes(newTag)); // ???
   const uniqueOldTags = oldTags.filter((oldTag) => !newTags.includes(oldTag));
@@ -619,8 +628,8 @@ export async function setCommunityDocumentation(
       lastMod: timestamp,
       commentCount: 0,
       replyCount: 0,
-      officialReply: '1-0',
-      bestReply: '1-0',
+      officialReply: '',
+      bestReply: '',
       ipfsHash: post,
       ipfsHash2: '',
       language: 0,

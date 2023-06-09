@@ -158,21 +158,21 @@ functions:
   #         path: '/polygon-event-listener/polygon-webhook'
   #         method: 'POST'
   
-  polygon-onchain-events-read:
-    handler: src/handlers/polygon-onchain-events-read.handler
-    timeout: 300
-    events:
-      - schedule:
-          name: polygon-read-onchain-events-${self:custom.stage}
-          rate: rate(1 minute)
+  # polygon-onchain-events-read:
+  #   handler: src/handlers/polygon-onchain-events-read.handler
+  #   timeout: 300
+  #   events:
+  #     - schedule:
+  #         name: polygon-read-onchain-events-${self:custom.stage}
+  #         rate: rate(1 minute)
   
-  edgeware-onchain-events-read:
-    handler: src/handlers/edgeware-onchain-events-read.handler
-    timeout: 300
-    events:
-      - schedule:
-          name: edgeware-read-onchain-events-${self:custom.stage}
-          rate: rate(1 minute)
+  # edgeware-onchain-events-read:
+  #   handler: src/handlers/edgeware-onchain-events-read.handler
+  #   timeout: 300
+  #   events:
+  #     - schedule:
+  #         name: edgeware-read-onchain-events-${self:custom.stage}
+  #         rate: rate(1 minute)
   
   sui-onchain-events-read:
     handler: src/handlers/sui-onchain-events-read.handler
@@ -221,7 +221,6 @@ functions:
             Fn::GetAtt:
               - suiContentQueue
               - Arn
-
 resources:
   Resources:
     queryIndexConfigTable:

@@ -163,6 +163,11 @@ export async function readEvents(
       (await provider.getBlockNumber()) - 2
     ); // go 2 blocks back to account for forks
 
+    if (endBlock <= startBlock) {
+      log(`Not enough new blocks. Skipping.`);
+      return new ReadNotificationsResponseModel();
+    }
+
     const allEventsPromises: Record<string, Array<Promise<Event[]>>> = {};
     allEventsPromises[ITEM_VOTED_EVENT_NAME] = new Array<Promise<Event[]>>();
     allEventsPromises[REPLY_MARKED_THE_BEST_EVENT_NAME] = new Array<

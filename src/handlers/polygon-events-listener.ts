@@ -14,7 +14,7 @@ const DELAY_MS = 1000;
 async function readEdgewareEventsLoop() {
   log('Start Edgeware listener.');
   while (true) {
-    const request = new ReadNotificationsRequestModel(Network.Edgeware);
+    const request = new ReadNotificationsRequestModel(Network.Polygon);
     await handleScheduleRequest(request, readEvents);
     await sleep(DELAY_MS);
   }

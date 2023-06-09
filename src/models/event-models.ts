@@ -177,7 +177,7 @@ export class RoleGrantedEventModel extends BaseEventModel {
     super(event);
     const args = event.args ?? event;
     this.account = args.account;
-    this.role = args.role;
+    this.role = `${event.network}-${String(args.role)}`;
   }
 }
 
@@ -190,7 +190,7 @@ export class RoleRevokedEventModel extends BaseEventModel {
     super(event);
     const args = event.args ?? event;
     this.account = args.account;
-    this.role = args.role;
+    this.role = `${event.network}-${String(args.role)}`;
   }
 }
 
@@ -357,14 +357,16 @@ export class TransferEventModel extends BaseEventModel {
 
   public to: string;
 
-  public tokenId: number;
+  public tokenId: any;
 
   constructor(event: any) {
     super(event);
     const args = event.args ?? event;
     this.from = args.from;
     this.to = args.to;
-    this.tokenId = args.tokenId;
+    this.tokenId = args.tokenId?.hex
+      ? Number(args.tokenId.hex)
+      : args.tokenId?.toNumber();
   }
 }
 

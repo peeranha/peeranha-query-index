@@ -22,3 +22,4 @@ DROP TABLE contractinfo;
 DROP TABLE post;
 DROP TABLE community;
 DROP TABLE user;
+DROP TABLE network;
