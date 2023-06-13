@@ -20,7 +20,7 @@ environment:
 
   SUI_PACKAGE_ADDRESS: '0xbde01689197bbfe9c02541417058ee9dda5dbd05d0ae4628d15017d49e24a36d'
   SUI_USERS_RATING_COLLECTION: '0x01e528e665fd69b2cf857f5535fc82b8282c9e77062f4824f4550852151fbe30'
-  SUI_RPC_ENDPOINT: "https://fullnode.testnet.sui.io/"
+  RPC_SUI_ENDPOINT: "https://fullnode.testnet.sui.io/"
 
   DYNAMODB_ENDPOINT: 'http://127.0.0.1:4659'
   SQS_ENDPOINT: 'http://0.0.0.0:9324'

@@ -11,8 +11,8 @@ import {
 
 const DELAY_MS = 1000;
 
-async function readEdgewareEventsLoop() {
-  log('Start Edgeware listener.');
+async function readPolygonEventsLoop() {
+  log('Start Polygon listener.');
   while (true) {
     const request = new ReadNotificationsRequestModel(Network.Polygon);
     await handleScheduleRequest(request, readEvents);
@@ -20,5 +20,5 @@ async function readEdgewareEventsLoop() {
   }
 }
 
-const handler = async () => runTask(readEdgewareEventsLoop);
+const handler = async () => runTask(readPolygonEventsLoop);
 handler();
