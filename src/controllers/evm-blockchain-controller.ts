@@ -2,6 +2,8 @@
 import { Event, providers } from 'ethers';
 import {
   CHANGE_POST_TYPE_EVENT_NAME,
+  POST_TYPE_CHANGED_EVENT_NAME,
+  POST_COMMUNITY_CHANGED_EVENT_NAME,
   COMMENT_DELETED_EVENT_NAME,
   COMMENT_EDITED_EVENT_NAME,
   COMMUNITY_CREATED_EVENT_NAME,
@@ -48,11 +50,11 @@ import {
 } from 'src/core/dynamodb/repositories/ConfigRepository';
 import { ConfigurationError } from 'src/core/errors';
 import { log, LogLevel } from 'src/core/utils/logger';
+import { pushToSNS } from 'src/core/utils/sns';
 import { pushToSQS } from 'src/core/utils/sqs';
 import {
   BaseEventModel,
   ChangePostTypeEventModel,
-  CommentCreatedEventModel,
   CommentDeletedEventModel,
   CommentEditedEventModel,
   CommunityCreatedEventModel,
@@ -62,14 +64,11 @@ import {
   ConfigureNewAchievementNFTEventModel,
   FollowedCommunityEventModel,
   GetRewardEventModel,
-  ItemVotedEventModel,
   PostCreatedEventModel,
   PostDeletedEventModel,
   PostEditedEventModel,
-  ReplyCreatedEventModel,
   ReplyDeletedEventModel,
   ReplyEditedEventModel,
-  ReplyMarkedTheBestEventModel,
   RoleGrantedEventModel,
   RoleRevokedEventModel,
   SetDocumentationTreeEventModel,
@@ -83,6 +82,14 @@ import {
   ReadNotificationsResponseModel,
   Network,
 } from 'src/models/event-models';
+import {
+  ItemVotedEventModel,
+  ReplyMarkedTheBestEventModel,
+  ReplyCreatedEventModel,
+  CommentCreatedEventModel,
+  PostTypeChangedEventModel,
+  ChangePostCommunityEventModel,
+} from 'src/models/notifications-events-models';
 
 import { contractEvents } from './event-listener-controller';
 
@@ -111,6 +118,9 @@ eventToModelType[TAG_CREATED_EVENT_NAME] = TagCreatedEventModel;
 eventToModelType[TAG_UPDATED_EVENT_NAME] = TagUpdatedEventModel;
 eventToModelType[POST_DELETED_EVENT_NAME] = PostDeletedEventModel;
 eventToModelType[CHANGE_POST_TYPE_EVENT_NAME] = ChangePostTypeEventModel;
+eventToModelType[POST_COMMUNITY_CHANGED_EVENT_NAME] =
+  ChangePostCommunityEventModel;
+eventToModelType[POST_TYPE_CHANGED_EVENT_NAME] = PostTypeChangedEventModel;
 eventToModelType[REPLY_DELETED_EVENT_NAME] = ReplyDeletedEventModel;
 eventToModelType[COMMENT_DELETED_EVENT_NAME] = CommentDeletedEventModel;
 eventToModelType[CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME] =
@@ -119,6 +129,13 @@ eventToModelType[TRANSFER_EVENT_NAME] = TransferEventModel;
 eventToModelType[GET_REWARD_EVENT_NAME] = GetRewardEventModel;
 eventToModelType[SET_DOCUMENTATION_TREE_EVENT_NAME] =
   SetDocumentationTreeEventModel;
+
+const ITEM_VOTED_SNS_TOPIC_NAME = 'item-voted';
+const REPLY_MARKED_THE_BEST_SNS_TOPIC_NAME = 'reply-marked-the-best';
+const POST_ANSWERED_SNS_TOPIC_NAME = 'post-answered';
+const ITEM_COMMENTED_SNS_TOPIC_NAME = 'item-commented';
+const POST_TYPE_CHANGED_SNS_TOPIC_NAME = 'post-type-changed';
+const POST_COMMUNITY_CHANGED_SNS_TOPIC_NAME = 'post-community-changed';
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);
@@ -224,6 +241,19 @@ export async function readEvents(
       Promise<Event[]>
     >();
 
+    const eventToSnsTopicName: Record<string, string> = {};
+    eventToSnsTopicName[ITEM_VOTED_EVENT_NAME] = ITEM_VOTED_SNS_TOPIC_NAME;
+    eventToSnsTopicName[REPLY_MARKED_THE_BEST_EVENT_NAME] =
+      REPLY_MARKED_THE_BEST_SNS_TOPIC_NAME;
+    eventToSnsTopicName[REPLY_CREATED_EVENT_NAME] =
+      POST_ANSWERED_SNS_TOPIC_NAME;
+    eventToSnsTopicName[COMMENT_CREATED_EVENT_NAME] =
+      ITEM_COMMENTED_SNS_TOPIC_NAME;
+    eventToSnsTopicName[CHANGE_POST_TYPE_EVENT_NAME] =
+      POST_TYPE_CHANGED_SNS_TOPIC_NAME;
+    eventToSnsTopicName[POST_COMMUNITY_CHANGED_EVENT_NAME] =
+      POST_COMMUNITY_CHANGED_SNS_TOPIC_NAME;
+
     log(`Creating promise to read events from chain.`, LogLevel.INFO);
     const peeranhaContracts = {
       [readEventsRequest.network === Network.Edgeware
@@ -302,6 +332,7 @@ export async function readEvents(
     }
 
     const configuratedEvents: any[] = [];
+    const pushToSnsPromises: any[] = [];
 
     Object.keys(eventsResults).forEach((eventName) => {
       const results = eventsResults[eventName];
@@ -318,6 +349,10 @@ export async function readEvents(
               ...ev,
               network: readEventsRequest.network,
             });
+            const snsTopicName = eventToSnsTopicName[eventName];
+            if (snsTopicName) {
+              pushToSnsPromises.push(pushToSNS(snsTopicName, model));
+            }
             configuratedEvents.push(model);
           });
         });
@@ -350,6 +385,9 @@ export async function readEvents(
       // eslint-disable-next-line no-await-in-loop
       await pushToSQS(Queue, configuratedEvents[i]);
     }
+
+    log('Pushing events to SNS.', LogLevel.INFO);
+    await Promise.allSettled(pushToSnsPromises);
 
     log('DONE!', LogLevel.INFO);
     return new ReadNotificationsResponseModel();
