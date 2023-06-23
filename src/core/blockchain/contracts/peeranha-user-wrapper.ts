@@ -20,12 +20,12 @@ export class PeeranhaUserWrapper extends BaseContractWrapper {
     return this.contract.getActiveUsersInPeriod(period);
   }
 
-  public async getAchievementConfig(achievementId: string) {
-    return this.contract.getAchievementConfig(achievementId.split('-')[1]);
+  public async getAchievementConfig(achievementId: number) {
+    return this.contract.getAchievementConfig(achievementId);
   }
 
-  public async getAchievementCommunity(achievementId: string): Promise<number> {
-    return this.contract.getAchievementCommunity(achievementId.split('-')[1]);
+  public async getAchievementCommunity(achievementId: number): Promise<number> {
+    return this.contract.getAchievementCommunity(achievementId);
   }
 
   public async getUserRatingCollection(address: string, communityId: string) {

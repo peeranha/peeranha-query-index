@@ -343,12 +343,12 @@ export class CommentDeletedEventModel extends BaseEventModel {
 }
 
 export class ConfigureNewAchievementNFTEventModel extends BaseEventModel {
-  public achievementId: string;
+  public achievementId: number;
 
   constructor(event: any) {
     super(event);
     const args = event.args ?? event;
-    this.achievementId = `${event.network}-${args.achievementId}`;
+    this.achievementId = args.achievementId;
   }
 }
 

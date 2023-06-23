@@ -167,7 +167,7 @@ export async function getTag(
 }
 
 export async function getAchievementsNFTConfig(
-  achievementId: string,
+  achievementId: number,
   network: Network
 ): Promise<AchievementData> {
   const provider = await createRpcProvider(network);
@@ -218,7 +218,7 @@ export async function getItemProperty(
 }
 
 export async function getAchievementConfig(
-  achievementId: string,
+  achievementId: number,
   network: Network
 ) {
   try {
@@ -237,7 +237,7 @@ export async function getAchievementConfig(
 }
 
 export async function getAchievementCommunity(
-  achievementId: string,
+  achievementId: number,
   network: Network
 ) {
   try {

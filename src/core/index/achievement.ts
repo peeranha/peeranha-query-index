@@ -9,7 +9,7 @@ import { Network } from 'src/models/event-models';
 
 export async function createAchievement(
   achievementRepository: AchievementRepository,
-  achievementId: string,
+  achievementId: number,
   network: Network
 ) {
   const [achievementData, peeranhaAchievementConfig, achievementCommunity] =
@@ -38,7 +38,7 @@ export async function createAchievement(
   }
 
   const achievement = new AchievementEntity({
-    id: achievementId,
+    id: `${network}-${achievementId}`,
     factCount: achievementData.factCount,
     maxCount: achievementData.maxCount,
     achievementURI: achievementData.achievementURI,
