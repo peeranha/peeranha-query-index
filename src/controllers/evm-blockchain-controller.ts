@@ -80,15 +80,19 @@ import {
   UserUpdatedEventModel,
   ReadNotificationsRequestModel,
   ReadNotificationsResponseModel,
-  Network,
-} from 'src/models/event-models';
-import {
   ItemVotedEventModel,
   ReplyMarkedTheBestEventModel,
   ReplyCreatedEventModel,
   CommentCreatedEventModel,
-  PostTypeChangedEventModel,
-  ChangePostCommunityEventModel,
+  Network,
+} from 'src/models/event-models';
+import {
+  ItemVotedSnsEventModel,
+  ReplyMarkedTheBestSnsEventModel,
+  ReplyCreatedSnsEventModel,
+  CommentCreatedSnsEventModel,
+  PostTypeChangedSnsEventModel,
+  ChangePostCommunitySnsEventModel,
 } from 'src/models/notifications-events-models';
 
 import { contractEvents } from './event-listener-controller';
@@ -119,8 +123,8 @@ eventToModelType[TAG_UPDATED_EVENT_NAME] = TagUpdatedEventModel;
 eventToModelType[POST_DELETED_EVENT_NAME] = PostDeletedEventModel;
 eventToModelType[CHANGE_POST_TYPE_EVENT_NAME] = ChangePostTypeEventModel;
 eventToModelType[POST_COMMUNITY_CHANGED_EVENT_NAME] =
-  ChangePostCommunityEventModel;
-eventToModelType[POST_TYPE_CHANGED_EVENT_NAME] = PostTypeChangedEventModel;
+  ChangePostCommunitySnsEventModel;
+eventToModelType[POST_TYPE_CHANGED_EVENT_NAME] = ChangePostTypeEventModel;
 eventToModelType[REPLY_DELETED_EVENT_NAME] = ReplyDeletedEventModel;
 eventToModelType[COMMENT_DELETED_EVENT_NAME] = CommentDeletedEventModel;
 eventToModelType[CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME] =
@@ -136,6 +140,18 @@ const POST_ANSWERED_SNS_TOPIC_NAME = 'post-answered';
 const ITEM_COMMENTED_SNS_TOPIC_NAME = 'item-commented';
 const POST_TYPE_CHANGED_SNS_TOPIC_NAME = 'post-type-changed';
 const POST_COMMUNITY_CHANGED_SNS_TOPIC_NAME = 'post-community-changed';
+
+const eventToSnsModelType: Record<string, typeof BaseEventModel> = {};
+eventToSnsModelType[ITEM_VOTED_SNS_TOPIC_NAME] = ItemVotedSnsEventModel;
+eventToSnsModelType[REPLY_MARKED_THE_BEST_SNS_TOPIC_NAME] =
+  ReplyMarkedTheBestSnsEventModel;
+eventToSnsModelType[POST_ANSWERED_SNS_TOPIC_NAME] = ReplyCreatedSnsEventModel;
+eventToSnsModelType[ITEM_COMMENTED_SNS_TOPIC_NAME] =
+  CommentCreatedSnsEventModel;
+eventToSnsModelType[POST_TYPE_CHANGED_SNS_TOPIC_NAME] =
+  PostTypeChangedSnsEventModel;
+eventToSnsModelType[POST_COMMUNITY_CHANGED_SNS_TOPIC_NAME] =
+  ChangePostCommunitySnsEventModel;
 
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);
@@ -349,11 +365,18 @@ export async function readEvents(
               ...ev,
               network: readEventsRequest.network,
             });
+            configuratedEvents.push(model);
             const snsTopicName = eventToSnsTopicName[eventName];
             if (snsTopicName) {
-              pushToSnsPromises.push(pushToSNS(snsTopicName, model));
+              const SnsEventModelType = eventToSnsModelType[snsTopicName];
+              if (SnsEventModelType) {
+                const snsModel = new SnsEventModelType({
+                  ...ev,
+                  network: readEventsRequest.network,
+                });
+                pushToSnsPromises.push(pushToSNS(snsTopicName, snsModel));
+              }
             }
-            configuratedEvents.push(model);
           });
         });
       }

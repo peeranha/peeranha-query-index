@@ -25,46 +25,49 @@ export abstract class BaseNotificationEventModel extends BaseEventModel {
   protected abstract getType(network: Network): NotificationsTypes;
 }
 
-export class ItemVotedEventModel extends BaseNotificationEventModel {
+export class ItemVotedSnsEventModel extends BaseNotificationEventModel {
   user: string;
 
   postId: string;
 
-  replyId: string;
+  replyId: number;
 
-  commentId: string;
+  commentId: number;
 
   voteDirection: number;
+
+  network: Network;
 
   constructor(event: any) {
     super(event);
     const args = event.args ?? event;
     this.user = args.user;
-    this.postId = `${event.network}-${args.postId?.toNumber()}`;
-    this.replyId = `${event.network}-${args.replyId}`;
-    this.commentId = `${event.network}-${args.commentId}`;
+    this.postId = args.postId;
+    this.replyId = Number(args.replyId);
+    this.commentId = Number(args.commentId);
     this.voteDirection = args?.voteDirection;
-    this.notificationType = this.getType(event.network);
+    this.notificationType = this.getType();
+    this.network = event.network;
   }
 
-  protected getType(network: Network): NotificationsTypes {
+  protected getType(): NotificationsTypes {
     if (this.voteDirection === 1) {
-      return this.replyId === `${network}-0`
+      return this.replyId === 0
         ? NotificationsTypes.QuestionUpVoted
         : NotificationsTypes.AnswerUpVoted;
     }
     if (this.voteDirection === -1) {
-      return this.replyId === `${network}-0`
+      return this.replyId === 0
         ? NotificationsTypes.QuestionUpVoteCanceled
         : NotificationsTypes.AnswerUpVoteCanceled;
     }
     if (this.voteDirection === 2) {
-      return this.replyId === `${network}-0`
+      return this.replyId === 0
         ? NotificationsTypes.QuestionDownVoted
         : NotificationsTypes.AnswerDownVoted;
     }
     if (this.voteDirection === -2) {
-      return this.replyId === `${network}-0`
+      return this.replyId === 0
         ? NotificationsTypes.QuestionDownVoteCanceled
         : NotificationsTypes.AnswerDownVoteCanceled;
     }
@@ -72,115 +75,130 @@ export class ItemVotedEventModel extends BaseNotificationEventModel {
   }
 }
 
-export class ReplyMarkedTheBestEventModel extends BaseNotificationEventModel {
+export class ReplyMarkedTheBestSnsEventModel extends BaseNotificationEventModel {
   user: string;
 
   postId: string;
 
-  replyId: string;
+  replyId: number;
+
+  network: Network;
 
   constructor(event: any) {
     super(event);
     const args = event.args ?? event;
     this.user = args.user;
-    this.postId = `${event.network}-${args.postId?.toNumber()}`;
-    this.replyId = `${event.network}-${args.replyId}`;
-    this.notificationType = this.getType(event.network);
+    this.postId = args.postId;
+    this.replyId = Number(args.replyId);
+    this.notificationType = this.getType();
+    this.network = event.network;
   }
 
-  protected getType(_network: Network): NotificationsTypes {
+  protected getType(): NotificationsTypes {
     return NotificationsTypes.AnswerMarkedTheBest;
   }
 }
 
-export class ReplyCreatedEventModel extends BaseNotificationEventModel {
+export class ReplyCreatedSnsEventModel extends BaseNotificationEventModel {
   user: string;
 
   postId: string;
 
   parentReplyId: string;
 
-  replyId: string;
+  replyId: number;
+
+  network: Network;
 
   constructor(event: any) {
     super(event);
     const args = event.args ?? event;
     this.user = args.user;
-    this.parentReplyId = `${event.network}-${args.parentReplyId}`;
-    this.postId = `${event.network}-${args.postId?.toNumber()}`;
-    this.replyId = `${event.network}-${args.replyId}`;
-    this.notificationType = this.getType(event.network);
+    this.parentReplyId = args.parentReplyId;
+    this.postId = args.postId;
+    this.replyId = Number(args.replyId);
+    this.notificationType = this.getType();
+    this.network = event.network;
   }
 
-  protected getType(_network: Network): NotificationsTypes {
+  protected getType(): NotificationsTypes {
     return NotificationsTypes.QuestionAnswered;
   }
 }
 
-export class CommentCreatedEventModel extends BaseNotificationEventModel {
+export class CommentCreatedSnsEventModel extends BaseNotificationEventModel {
   user: string;
 
   postId: string;
 
-  replyId: string;
+  replyId: number;
 
-  commentId: string;
+  commentId: number;
+
+  network: Network;
 
   constructor(event: any) {
     super(event);
     const args = event.args ?? event;
     this.user = args.user;
-    this.postId = `${event.network}-${args.postId?.toNumber()}`;
-    this.replyId = `${event.network}-${args.parentReplyId}`; // ~parentReplyId
-    this.commentId = `${event.network}-${args.commentId}`;
-    this.notificationType = this.getType(event.network);
+    this.postId = args.postId;
+    this.replyId = Number(args.parentReplyId); // ~parentReplyId
+    this.commentId = Number(args.commentId);
+    this.notificationType = this.getType();
+    this.network = event.network;
   }
 
-  protected getType(network: Network): NotificationsTypes {
-    return this.replyId === `${network}-0`
+  protected getType(): NotificationsTypes {
+    return this.replyId === 0
       ? NotificationsTypes.QuestionCommented
       : NotificationsTypes.AnswerCommented;
   }
 }
 
-export class PostTypeChangedEventModel extends BaseNotificationEventModel {
+export class PostTypeChangedSnsEventModel extends BaseNotificationEventModel {
   public user: string;
 
   public newPostType: number;
 
   public postId: string;
 
+  public network: Network;
+
   constructor(event: any) {
     super(event);
     const args = event.args ?? event;
     this.user = args.user;
     this.newPostType = args.newPostType;
-    this.postId = `${event.network}-${args.postId?.toNumber()}`;
-    this.notificationType = this.getType(event.network);
+    this.postId = args.postId;
+    this.notificationType = this.getType();
+    this.network = event.network;
   }
 
-  protected getType(_network: Network): NotificationsTypes {
+  protected getType(): NotificationsTypes {
     return NotificationsTypes.PostTypeChanged;
   }
 }
 
-export class ChangePostCommunityEventModel extends BaseNotificationEventModel {
+export class ChangePostCommunitySnsEventModel extends BaseNotificationEventModel {
   user: string;
 
   postId: string;
 
   oldCommunityId: string;
 
+  network: Network;
+
   constructor(event: any) {
     super(event);
     const args = event.args ?? event;
     this.user = args.user;
-    this.postId = `${event.network}-${args.postId?.toNumber()}`;
-    this.oldCommunityId = `${event.network}-${String(args.oldCommunityId)}`;
-    this.notificationType = this.getType(event.network);
+    this.postId = args.postId;
+    this.oldCommunityId = args.oldCommunityId;
+    this.notificationType = this.getType();
+    this.network = event.network;
   }
 
-  protected getType(_network: Network): NotificationsTypes {
+  protected getType(): NotificationsTypes {
     return NotificationsTypes.PostCommunityChanged;
   }
 }

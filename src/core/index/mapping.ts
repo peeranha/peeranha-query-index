@@ -74,13 +74,11 @@ import {
   CommentDeletedEventModel,
   GetRewardEventModel,
   SetDocumentationTreeEventModel,
-} from 'src/models/event-models';
-import {
   ItemVotedEventModel,
   ReplyMarkedTheBestEventModel,
   ReplyCreatedEventModel,
   CommentCreatedEventModel,
-} from 'src/models/notifications-events-models';
+} from 'src/models/event-models';
 
 import { RuntimeError } from '../errors';
 

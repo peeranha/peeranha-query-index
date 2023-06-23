@@ -61,13 +61,11 @@ import {
   UnfollowedCommunityEventModel,
   UserCreatedEventModel,
   UserUpdatedEventModel,
-} from 'src/models/event-models';
-import {
   ItemVotedEventModel,
   ReplyMarkedTheBestEventModel,
   ReplyCreatedEventModel,
   CommentCreatedEventModel,
-} from 'src/models/notifications-events-models';
+} from 'src/models/event-models';
 
 export const contractEvents = (network: Network) => {
   return {

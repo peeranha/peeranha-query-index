@@ -383,6 +383,79 @@ export class GetRewardEventModel extends BaseEventModel {
   }
 }
 
+export class ItemVotedEventModel extends BaseEventModel {
+  user: string;
+
+  postId: string;
+
+  replyId: string;
+
+  commentId: string;
+
+  constructor(event: any) {
+    super(event);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.replyId}`;
+    this.commentId = `${event.network}-${args.commentId}`;
+  }
+}
+
+export class ReplyMarkedTheBestEventModel extends BaseEventModel {
+  user: string;
+
+  postId: string;
+
+  replyId: string;
+
+  constructor(event: any) {
+    super(event);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.replyId}`;
+  }
+}
+
+export class ReplyCreatedEventModel extends BaseEventModel {
+  user: string;
+
+  postId: string;
+
+  parentReplyId: string;
+
+  replyId: string;
+
+  constructor(event: any) {
+    super(event);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.parentReplyId = `${event.network}-${args.parentReplyId}`; // ???
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.replyId}`;
+  }
+}
+
+export class CommentCreatedEventModel extends BaseEventModel {
+  user: string;
+
+  postId: string;
+
+  replyId: string;
+
+  commentId: string;
+
+  constructor(event: any) {
+    super(event);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${args.postId?.toNumber()}`;
+    this.replyId = `${event.network}-${args.parentReplyId}`; // ~parentReplyId
+    this.commentId = `${event.network}-${args.commentId}`;
+  }
+}
+
 export class SetDocumentationTreeEventModel extends BaseEventModel {
   public userAddr: string;
 
