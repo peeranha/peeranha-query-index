@@ -174,7 +174,7 @@ export async function handleTransfer(eventModel: TransferEventModel) {
     return;
   }
   const userAchievement = new UserAchievementEntity({
-    id: `${user}-${`${eventModel.network}-${achievementId}`}`,
+    id: `${user}-${eventModel.network}-${achievementId}`,
     userId: user,
     achievementId: `${eventModel.network}-${achievementId}`,
   });
