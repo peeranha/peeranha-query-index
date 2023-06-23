@@ -396,7 +396,7 @@ export async function createSuiPost(
   });
 
   const tagIds = peeranhaPost.tags.map(
-    (tag) => `${network}-${post.communityId}-${network}-${tag}`
+    (tag) => `${post.communityId}-${network}-${tag}`
   );
 
   const community = await getSuiCommunity(post.communityId, network);
