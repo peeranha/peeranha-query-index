@@ -639,7 +639,7 @@ export async function setCommunityDocumentation(
   });
 
   postsForDeleting.forEach((post) =>
-    postPromises.push(postRepository.delete(post))
+    postPromises.push(postRepository.delete(`${network}-${post}`))
   );
 
   await Promise.all(postPromises);
