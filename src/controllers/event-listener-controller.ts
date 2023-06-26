@@ -37,7 +37,6 @@ import {
   Network,
   BaseEventModel,
   ChangePostTypeEventModel,
-  CommentCreatedEventModel,
   CommentDeletedEventModel,
   CommentEditedEventModel,
   CommunityCreatedEventModel,
@@ -48,14 +47,11 @@ import {
   EventListenerRequest,
   FollowedCommunityEventModel,
   GetRewardEventModel,
-  ItemVotedEventModel,
   PostCreatedEventModel,
   PostDeletedEventModel,
   PostEditedEventModel,
-  ReplyCreatedEventModel,
   ReplyDeletedEventModel,
   ReplyEditedEventModel,
-  ReplyMarkedTheBestEventModel,
   RoleGrantedEventModel,
   RoleRevokedEventModel,
   SetDocumentationTreeEventModel,
@@ -65,6 +61,10 @@ import {
   UnfollowedCommunityEventModel,
   UserCreatedEventModel,
   UserUpdatedEventModel,
+  ItemVotedEventModel,
+  ReplyMarkedTheBestEventModel,
+  ReplyCreatedEventModel,
+  CommentCreatedEventModel,
 } from 'src/models/event-models';
 
 export const contractEvents = (network: Network) => {
