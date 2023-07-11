@@ -26,6 +26,9 @@ import {
   MODERATOR_POST_EDITED_SUI_EVENT_NAME,
   MODERATOR_REPLY_EDITED_SUI_EVENT_NAME,
   SET_DOCUMENTATION_TREE_SUI_EVENT_NAME,
+  CONFIGURE_ACHIEVEMENT_SUI_EVENT_NAME,
+  UNLOCK_ACHIEVEMENT_SUI_EVENT_NAME,
+  // NFT_TRANSFER_SUI_EVENT_NAME,
 } from 'src/core/sui-blockchain/constants';
 import { cleanEventType } from 'src/core/sui-blockchain/utils';
 import {
@@ -51,6 +54,8 @@ import {
   handlerGrantedSuiRole,
   handlerRevokedSuiRole,
   handleSetDocumentationTree,
+  handleConfigureSuiAchievement,
+  handleUnlockAchievement,
 } from 'src/core/sui-index/mapping';
 import { log } from 'src/core/utils/logger';
 import { pushToSQS } from 'src/core/utils/sqs';
@@ -101,6 +106,10 @@ eventToHandler[COMMENT_DELETED_SUI_EVENT_NAME] = handleDeletedSuiComment;
 
 eventToHandler[ROLE_GRANTED_SUI_EVENT_NAME] = handlerGrantedSuiRole;
 eventToHandler[ROLE_REVOKED_SUI_EVENT_NAME] = handlerRevokedSuiRole;
+
+eventToHandler[CONFIGURE_ACHIEVEMENT_SUI_EVENT_NAME] = handleConfigureSuiAchievement;
+eventToHandler[UNLOCK_ACHIEVEMENT_SUI_EVENT_NAME] = handleUnlockAchievement;
+// eventToHandler[NFT_TRANSFER_SUI_EVENT_NAME] = handlerGrantedSuiRole;
 
 export async function processSuiIndexing(eventModel: BaseSuiEventModel) {
   log(`Starting indexing event ${JSON.stringify(eventModel, null, 2)}`);

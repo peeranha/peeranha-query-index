@@ -11,9 +11,13 @@ export function parseIntFromSuiBits(bits: string) {
   return parseInt(bits, 10);
 }
 
+export const vectorU8ToIpfsHash = (byteArray: any[]) => {
+  return `0x${vectorU8ToString(byteArray)}`;
+};
+
 export const vectorU8ToString = (byteArray: any[]) => {
   const uint8Array = new Uint8Array(byteArray);
-  return `0x${new TextDecoder('utf-8').decode(uint8Array)}`;
+  return new TextDecoder('utf-8').decode(uint8Array);
 };
 
 export enum VoteDirection {

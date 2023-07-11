@@ -7,7 +7,7 @@ import { UserData } from 'src/core/blockchain/entities/user';
 import { UserRating } from 'src/core/blockchain/entities/user-rating';
 import { ConfigurationError, RuntimeError } from 'src/core/errors';
 import { getObject, getDynamicFieldObject } from 'src/core/sui-blockchain/sui';
-import { vectorU8ToString } from 'src/core/sui-blockchain/utils';
+import { vectorU8ToIpfsHash } from 'src/core/sui-blockchain/utils';
 import { AddIpfsData } from 'src/core/utils/ipfs';
 import { log, LogLevel } from 'src/core/utils/logger';
 import { parseIntArray } from 'src/core/utils/parser';
@@ -17,7 +17,7 @@ import { parseIntFromSuiBits } from './utils';
 const TAG_DYNAMIC_FIELD_TYPE = 'u64';
 const REPLY_DYNAMIC_FIELD_TYPE = 'u64';
 const COMMETN_DYNAMIC_FIELD_TYPE = 'u64';
-const USER_RATING_DYNAMIC_FIELD_TYPE = '0x2::object::ID';
+const DYNAMIC_FIELD_TYPE = '0x2::object::ID';
 
 export async function getSuiUserById(
   userId: string
@@ -35,8 +35,8 @@ export async function getSuiUserById(
       );
     }
 
-    const ipfsHash1 = vectorU8ToString(fields.ipfsDoc.fields.hash);
-    const ipfsHash2 = vectorU8ToString(fields.ipfsDoc.fields.hash2);
+    const ipfsHash1 = vectorU8ToIpfsHash(fields.ipfsDoc.fields.hash);
+    const ipfsHash2 = vectorU8ToIpfsHash(fields.ipfsDoc.fields.hash2);
 
     const user = new UserData([
       [ipfsHash1, ipfsHash2],
@@ -72,13 +72,13 @@ export async function getSuiCommunityById(
     );
   }
 
-  const ipfsHash1 = vectorU8ToString(fields.ipfsDoc.fields.hash);
-  const ipfsHash2 = vectorU8ToString(fields.ipfsDoc.fields.hash2);
+  const ipfsHash1 = vectorU8ToIpfsHash(fields.ipfsDoc.fields.hash);
+  const ipfsHash2 = vectorU8ToIpfsHash(fields.ipfsDoc.fields.hash2);
 
   const documentation = fields.documentation
     ? [
-        vectorU8ToString(fields.documentation.fields.hash),
-        vectorU8ToString(fields.documentation.fields.hash2),
+        vectorU8ToIpfsHash(fields.documentation.fields.hash),
+        vectorU8ToIpfsHash(fields.documentation.fields.hash2),
       ]
     : ['0x', '0x'];
 
@@ -113,7 +113,7 @@ export async function getSuiTagById(
 ): Promise<TagData> {
   const communityObject = await getObject(communityId);
 
-  log(`Community object: ${JSON.stringify(communityObject)}`);
+  log(`Community object for tag: ${JSON.stringify(communityObject)}`);
 
   const communityFields = communityObject.data?.content?.fields;
   if (!communityFields) {
@@ -136,8 +136,8 @@ export async function getSuiTagById(
     throw new RuntimeError(`Missing 'fields' in response for tag ${tagId}.`);
   }
 
-  const ipfsHash1 = vectorU8ToString(fields.value.fields.ipfsDoc.fields.hash);
-  const ipfsHash2 = vectorU8ToString(fields.value.fields.ipfsDoc.fields.hash2);
+  const ipfsHash1 = vectorU8ToIpfsHash(fields.value.fields.ipfsDoc.fields.hash);
+  const ipfsHash2 = vectorU8ToIpfsHash(fields.value.fields.ipfsDoc.fields.hash2);
 
   const tag = new TagData({
     ipfsDoc: [ipfsHash1, ipfsHash2],
@@ -163,8 +163,8 @@ export async function getItemIpfsDoc(itemId: string) {
     );
   }
 
-  const ipfsHash1 = vectorU8ToString(fields.ipfsDoc.fields.hash);
-  const ipfsHash2 = vectorU8ToString(fields.ipfsDoc.fields.hash2);
+  const ipfsHash1 = vectorU8ToIpfsHash(fields.ipfsDoc.fields.hash);
+  const ipfsHash2 = vectorU8ToIpfsHash(fields.ipfsDoc.fields.hash2);
 
   return [ipfsHash1, ipfsHash2];
 }
@@ -403,16 +403,16 @@ export async function getSuiUserRating(userId: string, communityId: string) {
   }
 
   log(
-    `Loading user rating obj - ${tableId} ${USER_RATING_DYNAMIC_FIELD_TYPE} ${userId}`
+    `Loading user rating obj - ${tableId} ${DYNAMIC_FIELD_TYPE} ${userId}`
   );
   const userRatingObject = await getDynamicFieldObject(
     tableId,
-    USER_RATING_DYNAMIC_FIELD_TYPE,
+    DYNAMIC_FIELD_TYPE,
     userId
   );
   if (!userRatingObject) {
     throw new RuntimeError(
-      `User rating object is missing. Table id: ${tableId}. Type: ${USER_RATING_DYNAMIC_FIELD_TYPE}. User id: ${userId}`
+      `User rating object is missing. Table id: ${tableId}. Type: ${DYNAMIC_FIELD_TYPE}. User id: ${userId}`
     );
   }
 
@@ -447,4 +447,46 @@ export async function getSuiUserRating(userId: string, communityId: string) {
     rating,
     isActive: active,
   });
+}
+
+export async function getSuiAchievementById(achievementId: string) {
+  log(`Getting achievement ${achievementId}`);
+
+  if (!process.env.SUI_ACHIEVEMENT_COLLECTION) {
+    throw new ConfigurationError(
+      'SUI_ACHIEVEMENT_COLLECTION is not configured'
+    );
+  }
+
+  const collectionObject = await getObject(
+    process.env.SUI_ACHIEVEMENT_COLLECTION
+  );
+
+  const fields = collectionObject.data?.content?.fields;
+
+  if (!fields) {
+    throw new RuntimeError(
+      `Missing 'fields' in response for achievement collection ${process.env.SUI_ACHIEVEMENT_COLLECTION}.`
+    );
+  }
+
+  const achievementContent: any[] = fields?.achievements?.fields?.contents;
+  if (!achievementContent) {
+    throw new RuntimeError(
+      `Missing achievements content in the response for achievement collection ${process.env.SUI_ACHIEVEMENT_COLLECTION}.`
+    );
+  }
+
+  const achievementFilter = achievementContent.filter(
+    (achievement) => achievement?.fields?.key === achievementId
+  );
+
+  if (achievementFilter.length == 0) {
+    throw new RuntimeError(
+      `Achievement object is missing. Achievement collection ${process.env.SUI_ACHIEVEMENT_COLLECTION}. Achievement id: ${achievementId}`
+    );
+  }
+
+  let achievement = achievementFilter[0]?.fields?.value?.fields;
+  return achievement;
 }

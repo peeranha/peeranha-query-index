@@ -657,14 +657,18 @@ export class UserAchievementEntity {
 
   public achievementId: string;
 
+  public isMinted: boolean;
+
   constructor(userAchievement: {
     id: string;
     userId: string;
     achievementId: string;
+    isMinted: boolean;
   }) {
     this.id = userAchievement.id;
     this.userId = userAchievement.userId;
     this.achievementId = userAchievement.achievementId;
+    this.isMinted = userAchievement.isMinted;
   }
 }
 

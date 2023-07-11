@@ -31,6 +31,10 @@ custom:
     start:
       port: 9324
       noStart: false
+  serverless-offline-sns:
+    port: 4002
+    debug: true
+    accountId: 123456789012
 
 provider:
   name: aws
@@ -132,7 +136,8 @@ fargate:
         DYNAMODB_ENDPOINT: ${self:provider.environment.DYNAMODB_ENDPOINT}
         SUI_PACKAGE_ADDRESS: ${self:provider.environment.SUI_PACKAGE_ADDRESS}
         SUI_USERS_RATING_COLLECTION: ${self:provider.environment.SUI_USERS_RATING_COLLECTION}
-        SUI_RPC_ENDPOINT: ${self:provider.environment.SUI_RPC_ENDPOINT}
+        SUI_ACHIEVEMENT_COLLECTION: ${self:provider.environment.SUI_ACHIEVEMENT_COLLECTION}
+        RPC_SUI_ENDPOINT: ${self:provider.environment.RPC_SUI_ENDPOINT}
 
 functions:
   graphql:
@@ -286,3 +291,4 @@ plugins:
   - serverless-offline-sqs
   - serverless-offline-elasticmq
   - serverless-fargate
+  - serverless-offline-sns

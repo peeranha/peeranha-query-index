@@ -3,6 +3,7 @@ const SUI_USER_LIB = 'userLib';
 const SUI_COMMUNITY_LIB = 'communityLib';
 const SUI_ACCESS_CONTROL_LIB = 'accessControlLib';
 const SUI_FOLLOW_COMMUNITY_LIB = 'followCommunityLib';
+const SUI_ACHIEVEMENT_LIB = 'achievementLib';
 
 export const suiModules = [
   SUI_POST_LIB,
@@ -10,6 +11,7 @@ export const suiModules = [
   SUI_COMMUNITY_LIB,
   SUI_ACCESS_CONTROL_LIB,
   SUI_FOLLOW_COMMUNITY_LIB,
+  SUI_ACHIEVEMENT_LIB,
 ];
 
 export const USER_CREATED_SUI_EVENT_NAME = 'userLib::CreateUserEvent';
@@ -48,3 +50,7 @@ export const COMMENT_DELETED_SUI_EVENT_NAME = 'postLib::DeleteCommentEvent';
 
 export const ROLE_GRANTED_SUI_EVENT_NAME = 'accessControlLib::RoleGranted';
 export const ROLE_REVOKED_SUI_EVENT_NAME = 'accessControlLib::RoleRevoked';
+
+export const CONFIGURE_ACHIEVEMENT_SUI_EVENT_NAME = 'nftLib::ConfigureAchievementEvent';
+export const UNLOCK_ACHIEVEMENT_SUI_EVENT_NAME = 'nftLib::UnlockAchievementEvent';
+export const NFT_TRANSFER_SUI_EVENT_NAME = 'nftLib::NFTTransferEvent';

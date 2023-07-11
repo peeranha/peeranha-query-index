@@ -29,6 +29,10 @@ import {
   grantSuiRole,
 } from 'src/core/sui-index/user';
 import {
+  configureSuiAchievement,
+  unlockSuiAchievement,
+} from 'src/core/sui-index/achievement';
+import {
   UserCreatedSuiEventModel,
   UserUpdatedSuiEventModel,
   CommunityCreatedSuiEventModel,
@@ -51,6 +55,8 @@ import {
   RoleGrantedSuiEventModel,
   RoleRevokedSuiEventModel,
   SetDocumentationTreeSuiEventModel,
+  ConfigureAchievementEventModel,
+  UnlockAchievementEventModel,
 } from 'src/models/sui-event-models';
 
 export async function handleCreateSuiUser(
@@ -292,5 +298,23 @@ export async function handleSetDocumentationTree(
     eventModel.timestamp,
     eventModel.userId,
     eventModel.network
+  );
+}
+
+export async function handleConfigureSuiAchievement(
+  eventModel: ConfigureAchievementEventModel
+) {
+  await configureSuiAchievement(
+    eventModel.achievementId,
+    eventModel.network
+  );
+}
+
+export async function handleUnlockAchievement(
+  eventModel: UnlockAchievementEventModel
+) {
+  await unlockSuiAchievement(
+    eventModel.userObjectId,
+    eventModel.achievementId
   );
 }

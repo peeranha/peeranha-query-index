@@ -380,4 +380,40 @@ export class SetDocumentationTreeSuiEventModel extends BaseSuiEventModel {
   }
 }
 
+export class ConfigureAchievementEventModel extends BaseSuiEventModel {
+  public achievementId: string;
+
+  constructor(event: Event) {
+    super(event);
+    this.achievementId = event.parsedJson?.achievementId;
+  }
+}
+
+export class UnlockAchievementEventModel extends BaseSuiEventModel {
+  public userObjectId: string;
+  
+  public achievementId: string;
+
+  constructor(event: Event) {
+    super(event);
+    this.userObjectId = event.parsedJson?.userObjectId;
+    this.achievementId = event.parsedJson?.achievementId;
+  }
+}
+
+export class NFTTransferEvent extends BaseSuiEventModel {
+  public nftObjectId: string;
+  
+  public from: string;
+  
+  public to: string;
+
+  constructor(event: Event) {
+    super(event);
+    this.nftObjectId = event.parsedJson?.nftObjectId;
+    this.from = event.parsedJson?.from;
+    this.to = event.parsedJson?.to;
+  }
+}
+
 export type SuiExportEventModel = Event & { name: string };

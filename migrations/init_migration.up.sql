@@ -187,6 +187,7 @@ CREATE TABLE IF NOT EXISTS userachievement (
   id VARCHAR(74) PRIMARY KEY,
   userId VARCHAR(100) NOT NULL,
   achievementId INT NOT NULL,
+  isMinted BOOLEAN DEFAULT 0,
 
   FOREIGN KEY (userId) REFERENCES user (id),
   FOREIGN KEY (achievementId) REFERENCES achievement (id)

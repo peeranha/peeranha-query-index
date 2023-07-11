@@ -172,6 +172,7 @@ export async function handleTransfer(eventModel: TransferEventModel) {
     id: `${user}-${achievementId}`,
     userId: user,
     achievementId,
+    isMinted: true,
   });
 
   await userAchievementRepository.create(userAchievement);

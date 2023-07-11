@@ -33,6 +33,9 @@ import {
   MODERATOR_POST_EDITED_SUI_EVENT_NAME,
   MODERATOR_REPLY_EDITED_SUI_EVENT_NAME,
   SET_DOCUMENTATION_TREE_SUI_EVENT_NAME,
+  CONFIGURE_ACHIEVEMENT_SUI_EVENT_NAME,
+  UNLOCK_ACHIEVEMENT_SUI_EVENT_NAME,
+  // NFT_TRANSFER_SUI_EVENT_NAME,
   suiModules,
 } from 'src/core/sui-blockchain/constants';
 import { queryEvents } from 'src/core/sui-blockchain/sui';
@@ -67,6 +70,9 @@ import {
   RoleRevokedSuiEventModel,
   SetDocumentationTreeSuiEventModel,
   SuiExportEventModel,
+  ConfigureAchievementEventModel,
+  UnlockAchievementEventModel,
+  // NFTTransferEvent,
 } from 'src/models/sui-event-models';
 import {
   ReadSuiEventsRequestModel,
@@ -110,6 +116,10 @@ eventToModelType[COMMENT_DELETED_SUI_EVENT_NAME] = CommentDeletedSuiEventModel;
 eventToModelType[ROLE_GRANTED_SUI_EVENT_NAME] = RoleGrantedSuiEventModel;
 eventToModelType[ROLE_REVOKED_SUI_EVENT_NAME] = RoleRevokedSuiEventModel;
 
+eventToModelType[CONFIGURE_ACHIEVEMENT_SUI_EVENT_NAME] = ConfigureAchievementEventModel;
+eventToModelType[UNLOCK_ACHIEVEMENT_SUI_EVENT_NAME] = UnlockAchievementEventModel;
+// eventToModelType[NFT_TRANSFER_SUI_EVENT_NAME] = NFTTransferEvent;
+
 const connDynamoDB = new DynamoDBConnector(process.env);
 const configRepository = new ConfigRepository(connDynamoDB);
 
@@ -120,6 +130,7 @@ export async function readSuiEvents(
     throw new ConfigurationError('SUI_PACKAGE_ADDRESS is not configured');
   }
   const { SUI_PACKAGE_ADDRESS } = process.env;
+  log(`SUI_PACKAGE_ADDRESS ${SUI_PACKAGE_ADDRESS}`);
 
   log('Reading cursors from db.');
   const moduleConfigPromises: Promise<Config | null>[] = [];
