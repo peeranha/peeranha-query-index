@@ -16,7 +16,7 @@ export class Community {
 }
 
 export type CommunityTranslation = {
-  communityId: number;
+  communityId: string;
   id: string;
   description: string;
   enableAutotranslation: boolean;

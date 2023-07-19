@@ -23,6 +23,9 @@ import {
   COMMENT_DELETED_EVENT_NAME,
   CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME,
   TRANSFER_EVENT_NAME,
+  TRANSLATION_CREATED_EVENT_NAME,
+  TRANSLATION_EDITED_EVENT_NAME,
+  TRANSLATION_DELETED_EVENT_NAME,
   GET_REWARD_EVENT_NAME,
   SET_DOCUMENTATION_TREE_EVENT_NAME,
   REPLY_CREATED_EVENT_NAME,
@@ -59,6 +62,9 @@ import {
   handleUnfrozenCommunity,
   handleUpdatedCommunity,
   handlerSetDocumentationTree,
+  handlerTranslationCreated,
+  handlerTranslationEdited,
+  handlerTranslationDeleted,
 } from 'src/core/index/mapping';
 import { log } from 'src/core/utils/logger';
 
@@ -93,6 +99,9 @@ eventToHandler[CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME] =
 eventToHandler[TRANSFER_EVENT_NAME] = handleTransfer;
 eventToHandler[ITEM_VOTED_EVENT_NAME] = handlerForumItemVoted;
 eventToHandler[SET_DOCUMENTATION_TREE_EVENT_NAME] = handlerSetDocumentationTree;
+eventToHandler[TRANSLATION_CREATED_EVENT_NAME] = handlerTranslationCreated;
+eventToHandler[TRANSLATION_EDITED_EVENT_NAME] = handlerTranslationEdited;
+eventToHandler[TRANSLATION_DELETED_EVENT_NAME] = handlerTranslationDeleted;
 
 export async function processIndexing(eventModel: any) {
   log(`Starting indexing event ${JSON.stringify(eventModel, null, 2)}`);

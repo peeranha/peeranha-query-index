@@ -31,6 +31,9 @@ import {
   UNFOLLOWED_COMMUNITY_EVENT_NAME,
   USER_CREATED_EVENT_NAME,
   USER_UPDATED_EVENT_NAME,
+  TRANSLATION_CREATED_EVENT_NAME,
+  TRANSLATION_EDITED_EVENT_NAME,
+  TRANSLATION_DELETED_EVENT_NAME,
 } from 'src/core/blockchain/constants';
 import { PeeranhaCommunityWrapper } from 'src/core/blockchain/contracts/peeranha-community-wrapper';
 import { PeeranhaContentWrapper } from 'src/core/blockchain/contracts/peeranha-content-wrapper';
@@ -75,6 +78,9 @@ import {
   TagCreatedEventModel,
   TagUpdatedEventModel,
   TransferEventModel,
+  TranslationCreatedEventModel,
+  TranslationDeletedEventModel,
+  TranslationEditedEventModel,
   UnfollowedCommunityEventModel,
   UserCreatedEventModel,
   UserUpdatedEventModel,
@@ -133,6 +139,9 @@ eventToModelType[TRANSFER_EVENT_NAME] = TransferEventModel;
 eventToModelType[GET_REWARD_EVENT_NAME] = GetRewardEventModel;
 eventToModelType[SET_DOCUMENTATION_TREE_EVENT_NAME] =
   SetDocumentationTreeEventModel;
+eventToModelType[TRANSLATION_CREATED_EVENT_NAME] = TranslationCreatedEventModel;
+eventToModelType[TRANSLATION_EDITED_EVENT_NAME] = TranslationEditedEventModel;
+eventToModelType[TRANSLATION_DELETED_EVENT_NAME] = TranslationDeletedEventModel;
 
 const ITEM_VOTED_SNS_TOPIC_NAME = 'item-voted';
 const REPLY_MARKED_THE_BEST_SNS_TOPIC_NAME = 'reply-marked-the-best';
@@ -254,6 +263,15 @@ export async function readEvents(
     allEventsPromises[TRANSFER_EVENT_NAME] = new Array<Promise<Event[]>>();
     allEventsPromises[GET_REWARD_EVENT_NAME] = new Array<Promise<Event[]>>();
     allEventsPromises[SET_DOCUMENTATION_TREE_EVENT_NAME] = new Array<
+      Promise<Event[]>
+    >();
+    allEventsPromises[TRANSLATION_CREATED_EVENT_NAME] = new Array<
+      Promise<Event[]>
+    >();
+    allEventsPromises[TRANSLATION_EDITED_EVENT_NAME] = new Array<
+      Promise<Event[]>
+    >();
+    allEventsPromises[TRANSLATION_DELETED_EVENT_NAME] = new Array<
       Promise<Event[]>
     >();
 

@@ -28,6 +28,9 @@ import {
   UNFOLLOWED_COMMUNITY_EVENT_NAME,
   USER_CREATED_EVENT_NAME,
   USER_UPDATED_EVENT_NAME,
+  TRANSLATION_CREATED_EVENT_NAME,
+  TRANSLATION_EDITED_EVENT_NAME,
+  TRANSLATION_DELETED_EVENT_NAME,
 } from 'src/core/blockchain/constants';
 import { createRpcProvider } from 'src/core/blockchain/rpc';
 import { POLYGON_INDEXING_QUEUE } from 'src/core/constants';
@@ -58,6 +61,9 @@ import {
   TagCreatedEventModel,
   TagUpdatedEventModel,
   TransferEventModel,
+  TranslationCreatedEventModel,
+  TranslationDeletedEventModel,
+  TranslationEditedEventModel,
   UnfollowedCommunityEventModel,
   UserCreatedEventModel,
   UserUpdatedEventModel,
@@ -105,6 +111,9 @@ export const contractEvents = (network: Network) => {
       REPLY_MARKED_THE_BEST_EVENT_NAME,
       CHANGE_POST_TYPE_EVENT_NAME,
       SET_DOCUMENTATION_TREE_EVENT_NAME,
+      TRANSLATION_CREATED_EVENT_NAME,
+      TRANSLATION_EDITED_EVENT_NAME,
+      TRANSLATION_DELETED_EVENT_NAME,
     ],
     [network === Network.Edgeware
       ? process.env.EDGEWARE_TOKEN_ADDRESS!.toLowerCase()
@@ -153,6 +162,9 @@ eventToModelType[TRANSFER_EVENT_NAME] = TransferEventModel;
 eventToModelType[GET_REWARD_EVENT_NAME] = GetRewardEventModel;
 eventToModelType[SET_DOCUMENTATION_TREE_EVENT_NAME] =
   SetDocumentationTreeEventModel;
+eventToModelType[TRANSLATION_CREATED_EVENT_NAME] = TranslationCreatedEventModel;
+eventToModelType[TRANSLATION_EDITED_EVENT_NAME] = TranslationEditedEventModel;
+eventToModelType[TRANSLATION_DELETED_EVENT_NAME] = TranslationDeletedEventModel;
 
 const getEventModels = (transactions: any[], network: Network) =>
   transactions

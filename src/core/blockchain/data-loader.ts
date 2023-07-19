@@ -13,6 +13,7 @@ import { Documentation } from 'src/core/blockchain/entities/documentation';
 import { PostData } from 'src/core/blockchain/entities/post';
 import { ReplyData } from 'src/core/blockchain/entities/reply';
 import { TagData } from 'src/core/blockchain/entities/tag';
+import { TranslationData } from 'src/core/blockchain/entities/translation';
 import { UserData } from 'src/core/blockchain/entities/user';
 import { UserRating } from 'src/core/blockchain/entities/user-rating';
 import { createRpcProvider } from 'src/core/blockchain/rpc';
@@ -189,6 +190,25 @@ export async function getDocumentationTree(
   const provider = await createRpcProvider(network);
   const contract = new PeeranhaContentWrapper(provider, network);
   return contract.getDocumentationTree(communityId);
+}
+
+export async function getTranslation(
+  postId: string,
+  replyId: string,
+  commentId: string,
+  language: number,
+  network: Network
+) {
+  const provider = await createRpcProvider(network);
+  const contract = new PeeranhaContentWrapper(provider, network);
+  const translation = new TranslationData(
+    await contract.getTranslation(postId, replyId, commentId, language)
+  );
+  const translationData = await AddIpfsData(
+    translation,
+    translation.ipfsDoc[0]
+  );
+  return translationData;
 }
 
 export async function getItemProperty(
