@@ -2,7 +2,7 @@
 import {
   getAchievementsNFTConfig,
   getComment,
-  getCommunity,
+  getTranslation,
   getUserByAddress,
   getPost,
   getReply,
@@ -13,16 +13,22 @@ import {
   UserPermissionEntity,
   UserCommunityEntity,
   UserAchievementEntity,
+  CommentTranslationEntity,
+  ReplyTranslationEntity,
+  PostTranslationEntity,
   HistoryEntity,
 } from 'src/core/db/entities';
 import { AchievementRepository } from 'src/core/db/repositories/AchievementRepository';
 import { CommentRepository } from 'src/core/db/repositories/CommentRepository';
+import { CommentTranslationRepository } from 'src/core/db/repositories/CommentTranslationRepository';
 import { CommunityDocumentationRepository } from 'src/core/db/repositories/CommunityDocumentationRepository';
 import { CommunityRepository } from 'src/core/db/repositories/CommunityRepository';
 import { HistoryRepository } from 'src/core/db/repositories/HistoryRepository';
 import { PostRepository } from 'src/core/db/repositories/PostRepository';
 import { PostTagRepository } from 'src/core/db/repositories/PostTagRepository';
+import { PostTranslationRepository } from 'src/core/db/repositories/PostTranslationRepository';
 import { ReplyRepository } from 'src/core/db/repositories/ReplyRepository';
+import { ReplyTranslationRepository } from 'src/core/db/repositories/ReplyTranslationRepository';
 import { TagRepository } from 'src/core/db/repositories/TagRepository';
 import { UserAchievementRepository } from 'src/core/db/repositories/UserAchievementRepository';
 import { UserCommunityRepository } from 'src/core/db/repositories/UserCommunityRepository';
@@ -34,6 +40,8 @@ import {
   getCommunityById,
   createCommunity,
   createTag,
+  updateTag,
+  updateCommunity,
 } from 'src/core/index/community';
 import {
   createComment,
@@ -78,6 +86,9 @@ import {
   ReplyMarkedTheBestEventModel,
   ReplyCreatedEventModel,
   CommentCreatedEventModel,
+  TranslationCreatedEventModel,
+  TranslationEditedEventModel,
+  TranslationDeletedEventModel,
 } from 'src/models/event-models';
 
 import { RuntimeError } from '../errors';
@@ -96,6 +107,9 @@ const userRewardRepository = new UserRewardRepository();
 const userCommunityRepository = new UserCommunityRepository();
 const postTagRepository = new PostTagRepository();
 const communityDocumentationRepository = new CommunityDocumentationRepository();
+const postTranslationRepository = new PostTranslationRepository();
+const replyTranslationRepository = new ReplyTranslationRepository();
+const commentTranslationRepository = new CommentTranslationRepository();
 
 const POOL_NFT = 1_000_000;
 
@@ -288,17 +302,7 @@ export async function handleUpdatedCommunity(
   if (!community) {
     await createCommunity(id, eventModel.network);
   } else {
-    const peeranhaCommunity = await getCommunity(id, eventModel.network);
-    await communityRepository.update(id, {
-      ipfsHash: peeranhaCommunity.ipfsDoc[0],
-      ipfshash2: peeranhaCommunity.ipfsDoc[1],
-      name: peeranhaCommunity.name,
-      description: peeranhaCommunity.description,
-      website: peeranhaCommunity.website,
-      communitySite: peeranhaCommunity.communitySite,
-      language: peeranhaCommunity.language,
-      avatar: peeranhaCommunity.avatar,
-    });
+    await updateCommunity(id, eventModel.network);
   }
 }
 
@@ -348,12 +352,7 @@ export async function handleEditedTag(eventModel: TagUpdatedEventModel) {
   if (!tagEntity) {
     await createTag(tag, eventModel.network);
   } else {
-    await tagRepository.update(tag.tagId, {
-      ipfsHash: tag.ipfsDoc[0],
-      ipfsHash2: tag.ipfsDoc[1],
-      name: tag.name,
-      description: tag.description,
-    });
+    await updateTag(tag, eventModel.network);
   }
 }
 
@@ -944,4 +943,148 @@ export async function handlerSetDocumentationTree(
     eventModel.network,
     oldDocumentation?.ipfsHash
   );
+}
+
+export async function handlerTranslationCreated(
+  eventModel: TranslationCreatedEventModel
+) {
+  const { postId, replyId, commentId, language, network } = eventModel;
+
+  const translation = await getTranslation(
+    postId,
+    replyId,
+    commentId,
+    language,
+    network
+  );
+
+  if (Number(commentId?.split('-')[1]) !== 0) {
+    const entityId = `${postId}-${replyId}-${commentId}`;
+
+    const commentTranslation = new CommentTranslationEntity({
+      id: `${entityId}-${language}`,
+      commentId: entityId,
+      author: translation.author,
+      content: translation.content,
+      ipfsHash: translation.ipfsDoc[0],
+      language,
+    });
+
+    await commentTranslationRepository.create(commentTranslation);
+  } else if (Number(replyId?.split('-')[1]) !== 0) {
+    const entityId = `${postId}-${replyId}`;
+
+    const replyTranslation = new ReplyTranslationEntity({
+      id: `${entityId}-${language}`,
+      replyId: entityId,
+      author: translation.author,
+      content: translation.content,
+      ipfsHash: translation.ipfsDoc[0],
+      language,
+    });
+
+    await replyTranslationRepository.create(replyTranslation);
+  } else {
+    const postTranslation = new PostTranslationEntity({
+      id: `${postId}-${language}`,
+      postId: String(postId),
+      author: translation.author,
+      title: translation.title!,
+      content: translation.content,
+      ipfsHash: translation.ipfsDoc[0],
+      language,
+    });
+
+    await postTranslationRepository.create(postTranslation);
+  }
+
+  const post = await postRepository.get(String(postId));
+  if (post) {
+    await postRepository.update(String(postId), {
+      postContent: `${post.postContent}${
+        translation.title ? ` ${translation.title}` : ''
+      } ${translation.content}`,
+    });
+  }
+}
+
+export async function handlerTranslationEdited(
+  eventModel: TranslationEditedEventModel
+) {
+  const { postId, replyId, commentId, language, timestamp, network } =
+    eventModel;
+
+  const translation = await getTranslation(
+    postId,
+    replyId,
+    commentId,
+    language,
+    network
+  );
+
+  if (Number(commentId?.split('-')[1]) !== 0) {
+    const entityId = `${postId}-${replyId}-${commentId}`;
+
+    const translationEntity = await commentTranslationRepository.get(
+      `${entityId}-${language}`
+    );
+
+    if (translationEntity) {
+      await commentTranslationRepository.update(`${entityId}-${language}`, {
+        author: translation.author,
+        content: translation.content,
+        ipfsHash: translation.ipfsDoc[0],
+      });
+    }
+  } else if (Number(replyId?.split('-')[1]) !== 0) {
+    const entityId = `${postId}-${replyId}`;
+
+    const translationEntity = await replyTranslationRepository.get(
+      `${entityId}-${language}`
+    );
+
+    if (translationEntity) {
+      await replyTranslationRepository.update(`${entityId}-${language}`, {
+        author: translation.author,
+        content: translation.content,
+        ipfsHash: translation.ipfsDoc[0],
+      });
+    }
+  } else {
+    const translationEntity = await postTranslationRepository.get(
+      `${postId}-${language}`
+    );
+
+    if (translationEntity) {
+      await postTranslationRepository.update(`${postId}-${language}`, {
+        author: translation.author,
+        title: translation.title,
+        content: translation.content,
+        ipfsHash: translation.ipfsDoc[0],
+      });
+    }
+  }
+
+  await updatePostContent(String(postId), timestamp, network);
+}
+
+export async function handlerTranslationDeleted(
+  eventModel: TranslationDeletedEventModel
+) {
+  const { postId, replyId, commentId, language, timestamp, network } =
+    eventModel;
+
+  if (Number(commentId?.split('-')[1]) !== 0) {
+    const entityId = `${postId}-${replyId}-${commentId}`;
+
+    await commentTranslationRepository.delete(`${entityId}-${language}`);
+  } else if (Number(replyId?.split('-')[1]) !== 0) {
+    const entityId = `${postId}-${replyId}`;
+
+    await replyTranslationRepository.delete(`${entityId}-${language}`);
+  } else {
+    await postTranslationRepository.delete(`${postId}-${language}`);
+  }
+
+  await updatePostContent(String(postId), timestamp, network);
 }

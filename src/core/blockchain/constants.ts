@@ -29,6 +29,9 @@ export const CONFIGURE_NEW_ACHIEVEMENT_EVENT_NAME =
 export const TRANSFER_EVENT_NAME = 'Transfer';
 export const GET_REWARD_EVENT_NAME = 'GetReward';
 export const SET_DOCUMENTATION_TREE_EVENT_NAME = 'SetDocumentationTree';
+export const TRANSLATION_CREATED_EVENT_NAME = 'TranslationCreated';
+export const TRANSLATION_EDITED_EVENT_NAME = 'TranslationEdited';
+export const TRANSLATION_DELETED_EVENT_NAME = 'TranslationDeleted';
 
 export enum Blockchain {
   SUI,

@@ -1,6 +1,7 @@
 import peeranhaContentInterface from 'src/core/blockchain/contracts/abi/PeeranhaContent.json';
 import { BaseContractWrapper } from 'src/core/blockchain/contracts/base-contract-wrapper';
 import { Documentation } from 'src/core/blockchain/entities/documentation';
+import { Translation } from 'src/core/blockchain/entities/translation';
 import { ConfigurationError } from 'src/core/errors';
 import { Network } from 'src/models/event-models';
 
@@ -29,6 +30,20 @@ export class PeeranhaContentWrapper extends BaseContractWrapper {
     communityId: string
   ): Promise<Documentation> {
     return this.contract.getDocumentationTree(communityId.split('-')[1]);
+  }
+
+  public async getTranslation(
+    postId: string,
+    replyId: string,
+    commentId: string,
+    language: number
+  ): Promise<Translation> {
+    return this.contract.getTranslation(
+      postId?.split('-')[1],
+      replyId?.split('-')[1],
+      commentId?.split('-')[1],
+      language
+    );
   }
 
   public async getItemProperty(

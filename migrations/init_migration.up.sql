@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS community (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS usercommunity (
-  id VARCHAR(133) PRIMARY KEY,
+  id VARCHAR(150) PRIMARY KEY,
   userId VARCHAR(100) NOT NULL,
   communityId VARCHAR(100) NOT NULL,
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS usercommunity (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS userpermission (
-  id VARCHAR(133) PRIMARY KEY,
+  id VARCHAR(150) PRIMARY KEY,
   userId VARCHAR(100) NOT NULL,
   permission VARCHAR(100) NOT NULL,
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS userpermission (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS usercommunityrating (
-  id VARCHAR(133) PRIMARY KEY,
+  id VARCHAR(150) PRIMARY KEY,
   communityId VARCHAR(100) NOT NULL,
   rating INT,
   userId VARCHAR(100) NOT NULL,
@@ -168,7 +168,7 @@ CREATE TABLE IF NOT EXISTS comment (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS achievement (
-  id INT PRIMARY KEY,
+  id VARCHAR(100) PRIMARY KEY,
   factCount INT,
   maxCount INT,
   achievementURI VARCHAR(100),
@@ -186,7 +186,7 @@ CREATE TABLE IF NOT EXISTS achievement (
 CREATE TABLE IF NOT EXISTS userachievement (
   id VARCHAR(74) PRIMARY KEY,
   userId VARCHAR(100) NOT NULL,
-  achievementId INT NOT NULL,
+  achievementId VARCHAR(100) NOT NULL,
 
   FOREIGN KEY (userId) REFERENCES user (id),
   FOREIGN KEY (achievementId) REFERENCES achievement (id)
@@ -221,7 +221,7 @@ CREATE TABLE IF NOT EXISTS history (
   id VARCHAR(100) PRIMARY KEY,
   transactionHash VARCHAR(100) NOT NULL,
   postId VARCHAR(100) NOT NULL,
-  replyId VARCHAR(133),
+  replyId VARCHAR(150),
   commentId VARCHAR(200),
   eventEntity VARCHAR(15),
   eventName VARCHAR(15),
@@ -301,7 +301,7 @@ CREATE TABLE IF NOT EXISTS commenttranslation (
 ) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 CREATE TABLE IF NOT EXISTS postvotehistory (
-  id VARCHAR(133) PRIMARY KEY,
+  id VARCHAR(150) PRIMARY KEY,
   postId VARCHAR(100) NOT NULL,
   direction INT,
   userId VARCHAR(100) NOT NULL,

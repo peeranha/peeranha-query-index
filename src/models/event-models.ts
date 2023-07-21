@@ -348,7 +348,9 @@ export class ConfigureNewAchievementNFTEventModel extends BaseEventModel {
   constructor(event: any) {
     super(event);
     const args = event.args ?? event;
-    this.achievementId = args.achievementId;
+    this.achievementId = args.achievementId?.hex
+      ? Number(args.achievementId.hex)
+      : args.achievementId?.toNumber() || args.achievementId;
   }
 }
 
@@ -466,5 +468,71 @@ export class SetDocumentationTreeEventModel extends BaseEventModel {
     const args = event.args ?? event;
     this.userAddr = args.userAddr;
     this.communityId = `${event.network}-${String(args.communityId)}`;
+  }
+}
+
+export class TranslationCreatedEventModel extends BaseEventModel {
+  public user: string;
+
+  public postId: string;
+
+  public replyId: string;
+
+  public commentId: string;
+
+  public language: number;
+
+  constructor(event: any) {
+    super(event);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${String(args.postId)}`;
+    this.replyId = `${event.network}-${String(args.replyId)}`;
+    this.commentId = `${event.network}-${String(args.commentId)}`;
+    this.language = args.language;
+  }
+}
+
+export class TranslationEditedEventModel extends BaseEventModel {
+  public user: string;
+
+  public postId: string;
+
+  public replyId: string;
+
+  public commentId: string;
+
+  public language: number;
+
+  constructor(event: any) {
+    super(event);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${String(args.postId)}`;
+    this.replyId = `${event.network}-${String(args.replyId)}`;
+    this.commentId = `${event.network}-${String(args.commentId)}`;
+    this.language = args.language;
+  }
+}
+
+export class TranslationDeletedEventModel extends BaseEventModel {
+  public user: string;
+
+  public postId: string;
+
+  public replyId: string;
+
+  public commentId: string;
+
+  public language: number;
+
+  constructor(event: any) {
+    super(event);
+    const args = event.args ?? event;
+    this.user = args.user;
+    this.postId = `${event.network}-${String(args.postId)}`;
+    this.replyId = `${event.network}-${String(args.replyId)}`;
+    this.commentId = `${event.network}-${String(args.commentId)}`;
+    this.language = args.language;
   }
 }
